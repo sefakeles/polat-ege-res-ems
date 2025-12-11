@@ -2,7 +2,6 @@ package bms
 
 import (
 	"fmt"
-	"math"
 	"time"
 
 	"powerkonnekt/ems/pkg/logger"
@@ -33,11 +32,11 @@ func (s *Service) heartbeatLoop() {
 // updateHeartbeat updates the heartbeat register in the BMS
 func (s *Service) updateHeartbeat() error {
 	s.mutex.Lock()
-	if s.heartbeatCount == math.MaxUint16 {
+	if s.heartbeatCount == 16 {
 		s.heartbeatCount = 0
 	}
-	s.heartbeatCount++
 	heartbeatValue := s.heartbeatCount
+	s.heartbeatCount++
 	s.mutex.Unlock()
 
 	err := s.baseClient.WriteSingleRegister(s.ctx, HeartbeatRegister, heartbeatValue)
