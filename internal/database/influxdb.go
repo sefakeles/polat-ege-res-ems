@@ -1,0 +1,401 @@
+package database
+
+import (
+	"context"
+	"fmt"
+	"time"
+
+	"powerkonnekt/ems/internal/config"
+	"powerkonnekt/ems/pkg/logger"
+
+	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
+	"github.com/influxdata/influxdb-client-go/v2/api"
+)
+
+// InfluxDB represents the InfluxDB connection
+type InfluxDB struct {
+	client   influxdb2.Client
+	writeAPI api.WriteAPI
+	queryAPI api.QueryAPI
+	config   config.InfluxDBConfig
+	log      logger.Logger
+}
+
+// InitializeInfluxDB initializes the InfluxDB connection
+func InitializeInfluxDB(cfg config.InfluxDBConfig) (*InfluxDB, error) {
+	// Create database-specific logger
+	dbLogger := logger.With(
+		logger.String("database", "influxdb"),
+		logger.String("url", cfg.URL),
+		logger.String("organization", cfg.Organization),
+		logger.String("bucket", cfg.Bucket),
+	)
+
+	dbLogger.Info("Initializing InfluxDB connection")
+
+	// Create client with options
+	options := influxdb2.DefaultOptions()
+	options.SetBatchSize(cfg.BatchSize)
+	options.SetFlushInterval(uint(cfg.FlushInterval.Milliseconds()))
+
+	client := influxdb2.NewClientWithOptions(cfg.URL, cfg.Token, options)
+
+	// Test connection
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	health, err := client.Health(ctx)
+	if err != nil {
+		dbLogger.Error("Failed to connect to InfluxDB", logger.Err(err))
+		return nil, fmt.Errorf("failed to connect to InfluxDB: %w", err)
+	}
+
+	if health.Status != "pass" {
+		dbLogger.Error("InfluxDB health check failed", logger.String("status", string(health.Status)))
+		return nil, fmt.Errorf("InfluxDB health check failed: %s", health.Status)
+	}
+
+	writeAPI := client.WriteAPI(cfg.Organization, cfg.Bucket)
+	queryAPI := client.QueryAPI(cfg.Organization)
+
+	db := &InfluxDB{
+		client:   client,
+		writeAPI: writeAPI,
+		queryAPI: queryAPI,
+		config:   cfg,
+		log:      dbLogger,
+	}
+
+	dbLogger.Info("InfluxDB connection established successfully",
+		logger.Uint("batch_size", cfg.BatchSize),
+		logger.Duration("flush_interval", cfg.FlushInterval))
+	return db, nil
+}
+
+// Close closes the InfluxDB connection
+func (db *InfluxDB) Close() error {
+	db.log.Info("Closing InfluxDB connection")
+
+	if db.writeAPI != nil {
+		db.writeAPI.Flush()
+	}
+	if db.client != nil {
+		db.client.Close()
+	}
+
+	db.log.Info("InfluxDB connection closed")
+	return nil
+}
+
+// HealthCheck checks if InfluxDB is accessible
+func (db *InfluxDB) HealthCheck() error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	health, err := db.client.Health(ctx)
+	if err != nil {
+		db.log.Error("InfluxDB health check failed", logger.Err(err))
+		return err
+	}
+
+	if health.Status != "pass" {
+		db.log.Error("InfluxDB health check status failed", logger.String("status", string(health.Status)))
+		return fmt.Errorf("InfluxDB health check failed: %s", health.Status)
+	}
+
+	return nil
+}
+
+// WriteBMSData writes BMS data to InfluxDB
+func (db *InfluxDB) WriteBMSData(data BMSData) error {
+	point := influxdb2.NewPointWithMeasurement("bms").
+		AddTag("id", fmt.Sprintf("%d", data.ID)).
+		AddField("circuit_breaker_status", data.CircuitBreakerStatus).
+		AddField("voltage", data.Voltage).
+		AddField("current", data.Current).
+		AddField("soc", data.SOC).
+		AddField("soh", data.SOH).
+		AddField("max_cell_voltage", data.MaxCellVoltage).
+		AddField("max_voltage_rack_no", data.MaxVoltageRackNo).
+		AddField("max_voltage_cell_no", data.MaxVoltageCellNo).
+		AddField("min_cell_voltage", data.MinCellVoltage).
+		AddField("min_voltage_rack_no", data.MinVoltageRackNo).
+		AddField("min_voltage_cell_no", data.MinVoltageCellNo).
+		AddField("max_cell_temperature", data.MaxCellTemperature).
+		AddField("max_temp_rack_no", data.MaxTempRackNo).
+		AddField("max_temp_cell_no", data.MaxTempCellNo).
+		AddField("min_cell_temperature", data.MinCellTemperature).
+		AddField("min_temp_rack_no", data.MinTempRackNo).
+		AddField("min_temp_cell_no", data.MinTempCellNo).
+		AddField("total_charge_energy", data.TotalChargeEnergy).
+		AddField("total_discharge_energy", data.TotalDischargeEnergy).
+		AddField("charge_capacity", data.ChargeCapacity).
+		AddField("discharge_capacity", data.DischargeCapacity).
+		AddField("available_discharge_time", data.AvailableDischargeTime).
+		AddField("available_charge_time", data.AvailableChargeTime).
+		AddField("max_discharge_power", data.MaxDischargePower).
+		AddField("max_charge_power", data.MaxChargePower).
+		AddField("max_discharge_current", data.MaxDischargeCurrent).
+		AddField("max_charge_current", data.MaxChargeCurrent).
+		AddField("discharge_times_today", data.DischargeTimesToday).
+		AddField("charge_times_today", data.ChargeTimesToday).
+		AddField("discharge_energy_today", data.DischargeEnergyToday).
+		AddField("charge_energy_today", data.ChargeEnergyToday).
+		AddField("temperature", data.Temperature).
+		AddField("state", data.State).
+		AddField("charge_discharge_state", data.ChargeDischargeState).
+		AddField("insulation_resistance", data.InsulationResistance).
+		SetTime(data.Timestamp)
+
+	db.writeAPI.WritePoint(point)
+
+	return nil
+}
+
+// WriteBMSRackData writes BMS rack data to InfluxDB
+func (db *InfluxDB) WriteBMSRackData(data BMSRackData) error {
+	point := influxdb2.NewPointWithMeasurement("bms_rack").
+		AddTag("id", fmt.Sprintf("%d", data.ID)).
+		AddTag("number", fmt.Sprintf("%d", data.Number)).
+		AddField("state", data.State).
+		AddField("max_charge_power", data.MaxChargePower).
+		AddField("max_discharge_power", data.MaxDischargePower).
+		AddField("max_charge_voltage", data.MaxChargeVoltage).
+		AddField("max_discharge_voltage", data.MaxDischargeVoltage).
+		AddField("max_charge_current", data.MaxChargeCurrent).
+		AddField("max_discharge_current", data.MaxDischargeCurrent).
+		AddField("voltage", data.Voltage).
+		AddField("current", data.Current).
+		AddField("temperature", data.Temperature).
+		AddField("soc", data.SOC).
+		AddField("soh", data.SOH).
+		AddField("insulation_resistance", data.InsulationResistance).
+		AddField("avg_cell_voltage", data.AvgCellVoltage).
+		AddField("avg_cell_temperature", data.AvgCellTemperature).
+		AddField("max_cell_voltage", data.MaxCellVoltage).
+		AddField("max_voltage_cell_no", data.MaxVoltageCellNo).
+		AddField("min_cell_voltage", data.MinCellVoltage).
+		AddField("min_voltage_cell_no", data.MinVoltageCellNo).
+		AddField("max_cell_temperature", data.MaxCellTemperature).
+		AddField("max_temp_cell_no", data.MaxTempCellNo).
+		AddField("min_cell_temperature", data.MinCellTemperature).
+		AddField("min_temp_cell_no", data.MinTempCellNo).
+		AddField("total_charge_energy", data.TotalChargeEnergy).
+		AddField("total_discharge_energy", data.TotalDischargeEnergy).
+		AddField("charge_capacity", data.ChargeCapacity).
+		AddField("discharge_capacity", data.DischargeCapacity).
+		SetTime(data.Timestamp)
+
+	db.writeAPI.WritePoint(point)
+
+	return nil
+}
+
+// WriteBMSCellVoltageData writes BMS cell voltage data to InfluxDB
+func (db *InfluxDB) WriteBMSCellVoltageData(cells []BMSCellVoltageData) error {
+	if len(cells) == 0 {
+		return nil
+	}
+
+	for _, cell := range cells {
+		point := influxdb2.NewPointWithMeasurement("bms_cell").
+			AddTag("id", fmt.Sprintf("%d", cell.ID)).
+			AddTag("rack_number", fmt.Sprintf("%d", cell.RackNo)).
+			AddTag("module_number", fmt.Sprintf("%d", cell.ModuleNo)).
+			AddTag("cell_number", fmt.Sprintf("%d", cell.CellNo)).
+			AddField("voltage", cell.Voltage).
+			SetTime(cell.Timestamp)
+		db.writeAPI.WritePoint(point)
+	}
+
+	return nil
+}
+
+// WriteBMSCellTemperatureData writes BMS cell temperature data to InfluxDB
+func (db *InfluxDB) WriteBMSCellTemperatureData(cells []BMSCellTemperatureData) error {
+	if len(cells) == 0 {
+		return nil
+	}
+
+	for _, cell := range cells {
+		point := influxdb2.NewPointWithMeasurement("bms_cell").
+			AddTag("id", fmt.Sprintf("%d", cell.ID)).
+			AddTag("rack_number", fmt.Sprintf("%d", cell.RackNo)).
+			AddTag("module_number", fmt.Sprintf("%d", cell.ModuleNo)).
+			AddTag("sensor_number", fmt.Sprintf("%d", cell.SensorNo)).
+			AddField("temperature", cell.Temperature).
+			SetTime(cell.Timestamp)
+		db.writeAPI.WritePoint(point)
+	}
+
+	return nil
+}
+
+// WritePCSStatusData writes PCS status data to InfluxDB
+func (db *InfluxDB) WritePCSStatusData(data PCSStatusData) error {
+	point := influxdb2.NewPointWithMeasurement("pcs").
+		AddTag("id", fmt.Sprintf("%d", data.ID)).
+		AddField("status", data.Status).
+		SetTime(data.Timestamp)
+
+	db.writeAPI.WritePoint(point)
+
+	return nil
+}
+
+// WritePCSEquipmentData writes PCS equipment data to InfluxDB
+func (db *InfluxDB) WritePCSEquipmentData(data PCSEquipmentData) error {
+	point := influxdb2.NewPointWithMeasurement("pcs").
+		AddTag("id", fmt.Sprintf("%d", data.ID)).
+		AddField("lv_switch_status", data.LVSwitchStatus).
+		AddField("mv_switch_status", data.MVSwitchStatus).
+		AddField("mv_disconnector_status", data.MVDisconnectorStatus).
+		AddField("mv_earthing_switch_status", data.MVEarthingSwitchStatus).
+		AddField("dc1_switch_status", data.DC1SwitchStatus).
+		AddField("dc2_switch_status", data.DC2SwitchStatus).
+		AddField("dc3_switch_status", data.DC3SwitchStatus).
+		AddField("dc4_switch_status", data.DC4SwitchStatus).
+		SetTime(data.Timestamp)
+
+	db.writeAPI.WritePoint(point)
+
+	return nil
+}
+
+// WritePCSEnvironmentData writes PCS environment data to InfluxDB
+func (db *InfluxDB) WritePCSEnvironmentData(data PCSEnvironmentData) error {
+	point := influxdb2.NewPointWithMeasurement("pcs").
+		AddTag("id", fmt.Sprintf("%d", data.ID)).
+		AddField("air_inlet_temperature", data.AirInletTemperature).
+		SetTime(data.Timestamp)
+
+	db.writeAPI.WritePoint(point)
+
+	return nil
+}
+
+// WritePCSDCSourceData writes PCS DC source data to InfluxDB
+func (db *InfluxDB) WritePCSDCSourceData(data PCSDCSourceData) error {
+	point := influxdb2.NewPointWithMeasurement("pcs").
+		AddTag("id", fmt.Sprintf("%d", data.ID)).
+		AddField("dc1_power", data.DC1Power).
+		AddField("dc2_power", data.DC2Power).
+		AddField("dc3_power", data.DC3Power).
+		AddField("dc4_power", data.DC4Power).
+		AddField("dc1_current", data.DC1Current).
+		AddField("dc2_current", data.DC2Current).
+		AddField("dc3_current", data.DC3Current).
+		AddField("dc4_current", data.DC4Current).
+		AddField("dc1_voltage_external", data.DC1VoltageExternal).
+		AddField("dc2_voltage_external", data.DC2VoltageExternal).
+		AddField("dc3_voltage_external", data.DC3VoltageExternal).
+		AddField("dc4_voltage_external", data.DC4VoltageExternal).
+		SetTime(data.Timestamp)
+
+	db.writeAPI.WritePoint(point)
+
+	return nil
+}
+
+// WritePCSGridData writes PCS grid data to InfluxDB
+func (db *InfluxDB) WritePCSGridData(data PCSGridData) error {
+	point := influxdb2.NewPointWithMeasurement("pcs").
+		AddTag("id", fmt.Sprintf("%d", data.ID)).
+		AddField("mv_grid_voltage_ab", data.MVGridVoltageAB).
+		AddField("mv_grid_voltage_bc", data.MVGridVoltageBC).
+		AddField("mv_grid_voltage_ca", data.MVGridVoltageCA).
+		AddField("mv_grid_current_a", data.MVGridCurrentA).
+		AddField("mv_grid_current_b", data.MVGridCurrentB).
+		AddField("mv_grid_current_c", data.MVGridCurrentC).
+		AddField("mv_grid_active_power", data.MVGridActivePower).
+		AddField("mv_grid_reactive_power", data.MVGridReactivePower).
+		AddField("mv_grid_apparent_power", data.MVGridApparentPower).
+		AddField("mv_grid_cos_phi", data.MVGridCosPhi).
+		AddField("lv_grid_voltage_ab", data.LVGridVoltageAB).
+		AddField("lv_grid_voltage_bc", data.LVGridVoltageBC).
+		AddField("lv_grid_voltage_ca", data.LVGridVoltageCA).
+		AddField("lv_grid_current_a", data.LVGridCurrentA).
+		AddField("lv_grid_current_b", data.LVGridCurrentB).
+		AddField("lv_grid_current_c", data.LVGridCurrentC).
+		AddField("lv_grid_active_power", data.LVGridActivePower).
+		AddField("lv_grid_reactive_power", data.LVGridReactivePower).
+		AddField("lv_grid_apparent_power", data.LVGridApparentPower).
+		AddField("lv_grid_cos_phi", data.LVGridCosPhi).
+		AddField("grid_frequency", data.GridFrequency).
+		SetTime(data.Timestamp)
+
+	db.writeAPI.WritePoint(point)
+
+	return nil
+}
+
+// WritePCSCounterData writes PCS counter data to InfluxDB
+func (db *InfluxDB) WritePCSCounterData(data PCSCounterData) error {
+	point := influxdb2.NewPointWithMeasurement("pcs").
+		AddTag("id", fmt.Sprintf("%d", data.ID)).
+		AddField("active_energy_today", data.ActiveEnergyToday).
+		AddField("active_energy_yesterday", data.ActiveEnergyYesterday).
+		AddField("active_energy_this_month", data.ActiveEnergyThisMonth).
+		AddField("active_energy_last_month", data.ActiveEnergyLastMonth).
+		AddField("active_energy_total", data.ActiveEnergyTotal).
+		AddField("consumed_energy_today", data.ConsumedEnergyToday).
+		AddField("consumed_energy_total", data.ConsumedEnergyTotal).
+		AddField("reactive_energy_today", data.ReactiveEnergyToday).
+		AddField("reactive_energy_yesterday", data.ReactiveEnergyYesterday).
+		AddField("reactive_energy_this_month", data.ReactiveEnergyThisMonth).
+		AddField("reactive_energy_last_month", data.ReactiveEnergyLastMonth).
+		AddField("reactive_energy_total", data.ReactiveEnergyTotal).
+		SetTime(data.Timestamp)
+
+	db.writeAPI.WritePoint(point)
+
+	return nil
+}
+
+// WriteSystemMetrics writes system metrics to InfluxDB
+func (db *InfluxDB) WriteSystemMetrics(data SystemMetrics) error {
+	point := influxdb2.NewPointWithMeasurement("system_metrics").
+		AddField("cpu_usage", data.CPUUsage).
+		AddField("memory_usage", data.MemoryUsage).
+		AddField("disk_usage", data.DiskUsage).
+		AddField("network_rx", data.NetworkRx).
+		AddField("network_tx", data.NetworkTx).
+		SetTime(data.Timestamp)
+
+	db.writeAPI.WritePoint(point)
+
+	return nil
+}
+
+// WriteRuntimeMetrics writes runtime metrics to InfluxDB
+func (db *InfluxDB) WriteRuntimeMetrics(data RuntimeMetrics) error {
+	point := influxdb2.NewPointWithMeasurement("runtime_metrics").
+		AddField("uptime_seconds", data.UptimeSeconds).
+		AddField("goroutines", data.Goroutines).
+		AddField("heap_alloc_mb", data.HeapAllocMB).
+		AddField("heap_sys_mb", data.HeapSysMB).
+		AddField("heap_idle_mb", data.HeapIdleMB).
+		AddField("heap_in_use_mb", data.HeapInUseMB).
+		AddField("heap_released_mb", data.HeapReleasedMB).
+		AddField("stack_in_use_mb", data.StackInUseMB).
+		AddField("stack_sys_mb", data.StackSysMB).
+		AddField("gc_runs", data.GCRuns).
+		AddField("gc_pause_total_ns", data.GCPauseTotalNs).
+		AddField("gc_cpu_fraction", data.GCCPUFraction).
+		AddField("next_gc_mb", data.NextGCMB).
+		AddField("last_gc_time", data.LastGCTime).
+		AddField("mallocs_total", data.MallocsTotal).
+		AddField("frees_total", data.FreesTotal).
+		AddField("total_alloc_mb", data.TotalAllocMB).
+		AddField("lookups_total", data.LookupsTotal).
+		SetTime(data.Timestamp)
+
+	db.writeAPI.WritePoint(point)
+
+	return nil
+}
+
+// Flush forces writing of any buffered data
+func (db *InfluxDB) Flush() {
+	db.writeAPI.Flush()
+}

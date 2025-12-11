@@ -1,0 +1,85 @@
+{
+  "pcs": [
+    {
+      "id": 1,
+      "host": "10.4.31.199",
+      "port": 5021,
+      "slave_id": 1,
+      "timeout": "1s",
+      "reconnect_delay": "5s",
+      "poll_interval": "1s",
+      "heartbeat_interval": "1s",
+      "persist_interval": "5s"
+    },
+    {
+      "id": 2,
+      "host": "10.4.31.199",
+      "port": 5022,
+      "slave_id": 1,
+      "timeout": "1s",
+      "reconnect_delay": "5s",
+      "poll_interval": "1s",
+      "heartbeat_interval": "1s",
+      "persist_interval": "5s"
+    }
+  ],
+  "bms": [
+    {
+      "id": 1,
+      "host": "10.4.31.199",
+      "port": 5023,
+      "slave_id": 1,
+      "timeout": "1s",
+      "reconnect_delay": "5s",
+      "poll_interval": "1s",
+      "cell_data_interval": "1s",
+      "heartbeat_interval": "1s",
+      "persist_interval": "5s",
+      "rack_count": 10,
+      "modules_per_rack": 8,
+      "enable_cell_data": false
+    },
+    {
+      "id": 2,
+      "host": "10.4.31.199",
+      "port": 5024,
+      "slave_id": 1,
+      "timeout": "1s",
+      "reconnect_delay": "5s",
+      "poll_interval": "1s",
+      "cell_data_interval": "1s",
+      "heartbeat_interval": "1s",
+      "persist_interval": "5s",
+      "rack_count": 10,
+      "modules_per_rack": 8,
+      "enable_cell_data": false
+    },
+    {
+      "id": 3,
+      "host": "10.4.31.199",
+      "port": 5025,
+      "slave_id": 1,
+      "timeout": "1s",
+      "reconnect_delay": "5s",
+      "poll_interval": "1s",
+      "cell_data_interval": "1s",
+      "heartbeat_interval": "1s",
+      "persist_interval": "5s",
+      "rack_count": 10,
+      "modules_per_rack": 8,
+      "enable_cell_data": false
+    }
+  ],
+  "influxdb": {
+    "url": "http://localhost:8086",
+    "token": "ABhXgnjXAMc12uB9l8SeOuebNEJV5c4aEZGm8oF3zOdjg-M28IFHhGmLMa_H72Z1X-4hqOFWY7xDO51hVNSbEA==",
+    "organization": "inovat",
+    "bucket": "powerkonnekt"
+  },
+  "postgresql": {
+    "host": "localhost",
+    "database": "postgres",
+    "username": "postgres",
+    "password": "postgres"
+  }
+}

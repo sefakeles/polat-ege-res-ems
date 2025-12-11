@@ -1,0 +1,87 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: bess-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=bess_alarms
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+    networks:
+      - ems-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: bess-pgadmin
+    restart: unless-stopped
+    ports:
+      - "5050:80"
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@example.com
+      - PGADMIN_DEFAULT_PASSWORD=admin
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - postgres
+    networks:
+      - ems-network
+
+  influxdb:
+    image: influxdb:2.7
+    container_name: bess-influxdb
+    restart: unless-stopped
+    ports:
+      - "8086:8086"
+    volumes:
+      - influxdb_data:/var/lib/influxdb2
+      - influxdb_config:/etc/influxdb2
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=admin
+      - DOCKER_INFLUXDB_INIT_PASSWORD=adminpassword
+      - DOCKER_INFLUXDB_INIT_ORG=bess-org
+      - DOCKER_INFLUXDB_INIT_BUCKET=bess-data
+      - DOCKER_INFLUXDB_INIT_RETENTION=30d
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=your-super-secret-auth-token
+    networks:
+      - ems-network
+
+  ems:
+    build:
+      context: ..
+      dockerfile: build/Dockerfile
+    container_name: solservices-gyongyoshalasz-ems
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - ../logs:/app/logs
+      - ../configs/config.json:/app/configs/config.json:ro
+    environment:
+      - EMS_LOG_LEVEL=INFO
+    depends_on:
+      postgres:
+        condition: service_healthy
+      influxdb:
+        condition: service_started
+    networks:
+      - ems-network
+
+volumes:
+  postgres_data:
+  pgadmin_data:
+  influxdb_data:
+  influxdb_config:
+
+networks:
+  ems-network:
+    driver: bridge

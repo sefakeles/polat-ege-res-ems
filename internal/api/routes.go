@@ -1,0 +1,59 @@
+package api
+
+import (
+	"github.com/gin-gonic/gin"
+)
+
+// SetupRoutes configures all API routes
+func SetupRoutes(handlers *Handlers) *gin.Engine {
+	gin.SetMode(gin.ReleaseMode)
+	router := gin.New()
+
+	// Middleware
+	router.Use(LoggerMiddleware())
+	router.Use(CORSMiddleware())
+	router.Use(ErrorHandlerMiddleware())
+	router.Use(gin.Recovery())
+
+	// Health check
+	router.GET("/health", handlers.HealthCheck)
+
+	// API routes
+	api := router.Group("/api/v1")
+	{
+		// System status
+		api.GET("/status", handlers.GetStatus)
+
+		// Data endpoints
+		api.GET("/alarms", handlers.GetAlarms)
+
+		// Control endpoints
+		api.POST("/control/mode", handlers.SetControlMode)
+		api.POST("/control/active-power", handlers.SetPowerCommand)
+		api.POST("/control/reactive-power", handlers.SetReactivePowerCommand)
+
+		// BMS endpoints
+		bmsGroup := api.Group("/bms")
+		{
+			// Data endpoints
+			bmsGroup.GET("/data/:id", handlers.GetBMSData)
+			bmsGroup.GET("/racks/:id", handlers.GetBMSRacks)
+			bmsGroup.GET("/racks/:id/:rack_no", handlers.GetBMSRackData)
+			bmsGroup.GET("/command-state/:id", handlers.GetBMSCommandState)
+
+			// Control endpoints
+			bmsGroup.POST("/reset", handlers.BMSReset)
+			bmsGroup.POST("/breaker", handlers.BMSBreakerControl)
+		}
+
+		// PCS endpoints
+		pcsGroup := api.Group("/pcs")
+		{
+			pcsGroup.GET("/data/:id", handlers.GetPCSData)
+			pcsGroup.GET("/command-state/:id", handlers.GetPCSCommandState)
+			pcsGroup.POST("/start", handlers.SetPCSStartStop)
+		}
+	}
+
+	return router
+}
