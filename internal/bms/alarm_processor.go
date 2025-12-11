@@ -17,7 +17,6 @@ func (s *Service) processAlarms(data []byte) {
 			isActive := (b & (1 << bitIdx)) != 0
 
 			alarmCode := relativeCode + 1
-
 			message := GetAlarmMessage(alarmCode)
 			severity := GetAlarmSeverity(alarmCode)
 
