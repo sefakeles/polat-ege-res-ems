@@ -26,6 +26,7 @@ func (s *Service) persistenceLoop() {
 func (s *Service) persistLatestData() {
 	s.mutex.RLock()
 	bmsData := s.lastBMSData
+	bmsStatusData := s.lastBMSStatusData
 	bmsRackData := make([]database.BMSRackData, len(s.lastBMSRackData))
 	copy(bmsRackData, s.lastBMSRackData)
 
@@ -46,6 +47,13 @@ func (s *Service) persistLatestData() {
 	if !bmsData.Timestamp.IsZero() {
 		if err := s.influxDB.WriteBMSData(bmsData); err != nil {
 			s.log.Error("Failed to save BMS data to InfluxDB", logger.Err(err))
+		}
+	}
+
+	// Save BMS status data to InfluxDB
+	if !bmsStatusData.Timestamp.IsZero() {
+		if err := s.influxDB.WriteBMSStatusData(bmsStatusData); err != nil {
+			s.log.Error("Failed to save BMS status data to InfluxDB", logger.Err(err))
 		}
 	}
 

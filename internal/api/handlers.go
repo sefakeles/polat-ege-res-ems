@@ -85,6 +85,7 @@ func (h *Handlers) GetStatus(c *gin.Context) {
 	}
 
 	bmsData := service.GetLatestBMSData()
+	bmsStatusData := service.GetLatestBMSStatusData()
 	bmsRackData := service.GetLatestBMSRackData()
 	activeAlarms := h.alarmManager.GetActiveAlarms()
 
@@ -96,7 +97,7 @@ func (h *Handlers) GetStatus(c *gin.Context) {
 		"bms_soh":              bmsData.SOH,
 		"bms_voltage":          bmsData.Voltage,
 		"bms_current":          bmsData.Current,
-		"bms_state":            bms.GetStateDescription(bmsData.State),
+		"bms_state":            bms.GetStateDescription(bmsStatusData.SystemStatus),
 		"active_alarms":        len(activeAlarms),
 		"rack_count":           len(bmsRackData),
 		"critical_alarms":      h.alarmManager.HasCriticalAlarms(),
@@ -121,6 +122,7 @@ func (h *Handlers) GetBMSData(c *gin.Context) {
 	}
 
 	bmsData := service.GetLatestBMSData()
+	bmsStatusData := service.GetLatestBMSStatusData()
 	bmsRackData := service.GetLatestBMSRackData()
 
 	// Create BMS data response with state description instead of numeric value
@@ -131,7 +133,7 @@ func (h *Handlers) GetBMSData(c *gin.Context) {
 
 	bmsDataResponse := BMSDataResponse{
 		BMSData: bmsData,
-		State:   bms.GetStateDescription(bmsData.State),
+		State:   bms.GetStateDescription(bmsStatusData.SystemStatus),
 	}
 
 	// Create BMS rack data response with state description instead of numeric value

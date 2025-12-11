@@ -34,6 +34,13 @@ func (s *Service) GetLatestBMSData() database.BMSData {
 	return s.lastBMSData
 }
 
+// GetLatestBMSStatusData returns the latest BMS status data
+func (s *Service) GetLatestBMSStatusData() database.BMSStatusData {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
+	return s.lastBMSStatusData
+}
+
 // GetLatestBMSRackData returns the latest BMS rack data
 func (s *Service) GetLatestBMSRackData() []database.BMSRackData {
 	s.mutex.RLock()

@@ -93,12 +93,13 @@ func (l *Logic) ExecuteControl() {
 	pcs1Service, _ := l.pcsManager.GetService(1)
 
 	bmsData := bms1Service.GetLatestBMSData()
+	bmsStatusData := bms1Service.GetLatestBMSStatusData()
 
 	// Safety checks
-	if bms.IsFaultState(bmsData.State) {
+	if bms.IsFaultState(bmsStatusData.SystemStatus) {
 		l.log.Warn("BMS in fault state, stopping PCS",
-			logger.Uint16("state", bmsData.State),
-			logger.String("state_description", bms.GetStateDescription(bmsData.State)))
+			logger.Uint16("state", bmsStatusData.SystemStatus),
+			logger.String("state_description", bms.GetStateDescription(bmsStatusData.SystemStatus)))
 
 		if err := pcs1Service.SetActivePowerCommand(0); err != nil {
 			l.log.Error("Failed to set active power to zero during fault state", logger.Err(err))
@@ -107,7 +108,7 @@ func (l *Logic) ExecuteControl() {
 	}
 
 	// Prevent charging if SOC too high
-	if bms.IsChargingState(bmsData.State) && float32(bmsData.SOC) >= l.config.MaxSOC {
+	if bms.IsChargingState(bmsStatusData.SystemStatus) && float32(bmsData.SOC) >= l.config.MaxSOC {
 		l.log.Warn("BMS SOC too high for charging, stopping charge",
 			logger.Float32("soc", float32(bmsData.SOC)),
 			logger.Float32("max_soc", l.config.MaxSOC))
@@ -118,7 +119,7 @@ func (l *Logic) ExecuteControl() {
 	}
 
 	// Prevent discharging if SOC too low
-	if bms.IsDischargingState(bmsData.State) && float32(bmsData.SOC) <= l.config.MinSOC {
+	if bms.IsDischargingState(bmsStatusData.SystemStatus) && float32(bmsData.SOC) <= l.config.MinSOC {
 		l.log.Warn("BMS SOC too low for discharging, stopping discharge",
 			logger.Float32("soc", float32(bmsData.SOC)),
 			logger.Float32("max_soc", l.config.MaxSOC))
@@ -190,11 +191,12 @@ func (l *Logic) ManualPowerCommand(power float32) error {
 	pcs1Service, _ := l.pcsManager.GetService(1)
 
 	bmsData := bms1Service.GetLatestBMSData()
+	bmsStatusData := bms1Service.GetLatestBMSStatusData()
 
 	// Safety checks even in manual mode
-	if bms.IsFaultState(bmsData.State) {
+	if bms.IsFaultState(bmsStatusData.SystemStatus) {
 		l.log.Error("Manual power command rejected - BMS in fault state",
-			logger.Uint16("bms_state", bmsData.State),
+			logger.Uint16("bms_state", bmsStatusData.SystemStatus),
 			logger.Float32("requested_power", power))
 		return fmt.Errorf("BMS in fault state, command rejected")
 	}
@@ -255,11 +257,12 @@ func (l *Logic) ManualReactivePowerCommand(power float32) error {
 	pcs1Service, _ := l.pcsManager.GetService(1)
 
 	bmsData := bms1Service.GetLatestBMSData()
+	bmsStatusData := bms1Service.GetLatestBMSStatusData()
 
 	// Safety checks even in manual mode
-	if bms.IsFaultState(bmsData.State) {
+	if bms.IsFaultState(bmsStatusData.SystemStatus) {
 		l.log.Error("Manual reactive power command rejected - BMS in fault state",
-			logger.Uint16("bms_state", bmsData.State),
+			logger.Uint16("bms_state", bmsStatusData.SystemStatus),
 			logger.Float32("requested_power", power))
 		return fmt.Errorf("BMS in fault state, command rejected")
 	}

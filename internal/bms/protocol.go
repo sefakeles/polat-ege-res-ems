@@ -3,8 +3,12 @@ package bms
 // MODBUS Register addresses for Jinko
 const (
 	// BMS Data
-	BMSDataStartAddr = 1
-	BMSDataLength    = 45
+	BMSDataStartAddr = 32
+	BMSDataLength    = 24
+
+	// BMS Status Data
+	BMSStatusDataStartAddr = 768
+	BMSStatusDataLength    = 7
 
 	// Rack Data
 	BMSRackDataStartAddr = 100
@@ -23,9 +27,9 @@ const (
 	CellTempBaseAddr    = 891
 
 	// Control
-	SystemResetRegister    = 501
-	BreakerControlRegister = 502
-	HeartbeatRegister      = 530
+	HeartbeatRegister      = 896
+	BreakerControlRegister = 897
+	SystemResetRegister    = 908
 
 	// Cell organization constants
 	CellsPerModule       = 48
@@ -48,21 +52,14 @@ const (
 	ControlOff         = 2
 )
 
-// State Codes (not bit flags)
+// State Codes
 const (
-	StateInitial                   = 0x00
-	StateCharging                  = 0x01
-	StateDischarging               = 0x02
-	StateReady                     = 0x03
-	StateRackMaintenance           = 0x04
-	StateChargeProhibited          = 0x05
-	StateDischargeProhibited       = 0x06
-	StateChargeDischargeProhibited = 0x07
-	StateFault                     = 0x08
-	StateFaultRecovery             = 0x09
-	StateTestMode                  = 0x0A
-	StatePowerOff                  = 0x0B
-	StatePowerOffComplete          = 0x0C
+	StateInitial     = 0
+	StateNormal      = 1
+	StateCharging    = 2
+	StateDischarging = 3
+	StateWarning     = 4
+	StateFault       = 5
 )
 
 // AlarmDefinition defines the properties of an alarm
@@ -272,43 +269,24 @@ func GetStateDescription(state uint16) string {
 	switch state {
 	case StateInitial:
 		return "Initial"
+	case StateNormal:
+		return "Normal"
 	case StateCharging:
 		return "Charging"
 	case StateDischarging:
 		return "Discharging"
-	case StateReady:
-		return "Ready"
-	case StateRackMaintenance:
-		return "Rack Maintenance"
-	case StateChargeProhibited:
-		return "Charge Prohibited"
-	case StateDischargeProhibited:
-		return "Discharge Prohibited"
-	case StateChargeDischargeProhibited:
-		return "Charge/Discharge Prohibited"
+	case StateWarning:
+		return "Warning"
 	case StateFault:
 		return "Fault"
-	case StateFaultRecovery:
-		return "Fault Recovery"
-	case StateTestMode:
-		return "Test Mode"
-	case StatePowerOff:
-		return "Power-Off"
-	case StatePowerOffComplete:
-		return "Power-Off Complete"
 	default:
 		return "Unknown"
 	}
 }
 
-// IsReadyState checks if the state is ready
-func IsReadyState(state uint16) bool {
-	return state == StateReady
-}
-
-// IsDischargingState checks if the state is discharging
-func IsDischargingState(state uint16) bool {
-	return state == StateDischarging
+// IsNormalState checks if the state is normal
+func IsNormalState(state uint16) bool {
+	return state == StateNormal
 }
 
 // IsChargingState checks if the state is charging
@@ -316,12 +294,14 @@ func IsChargingState(state uint16) bool {
 	return state == StateCharging
 }
 
-// IsAlarmState checks if the state indicates an alarm condition
-func IsAlarmState(state uint16) bool {
-	return state == StateChargeProhibited ||
-		state == StateDischargeProhibited ||
-		state == StateChargeDischargeProhibited ||
-		state == StateFaultRecovery
+// IsDischargingState checks if the state is discharging
+func IsDischargingState(state uint16) bool {
+	return state == StateDischarging
+}
+
+// IsWarningState checks if the state is warning
+func IsWarningState(state uint16) bool {
+	return state == StateWarning
 }
 
 // IsFaultState checks if the state is fault

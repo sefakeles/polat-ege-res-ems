@@ -110,41 +110,42 @@ func (db *InfluxDB) HealthCheck() error {
 func (db *InfluxDB) WriteBMSData(data BMSData) error {
 	point := influxdb2.NewPointWithMeasurement("bms").
 		AddTag("id", fmt.Sprintf("%d", data.ID)).
-		AddField("circuit_breaker_status", data.CircuitBreakerStatus).
 		AddField("voltage", data.Voltage).
 		AddField("current", data.Current).
 		AddField("soc", data.SOC).
 		AddField("soh", data.SOH).
 		AddField("max_cell_voltage", data.MaxCellVoltage).
-		AddField("max_voltage_rack_no", data.MaxVoltageRackNo).
-		AddField("max_voltage_cell_no", data.MaxVoltageCellNo).
 		AddField("min_cell_voltage", data.MinCellVoltage).
-		AddField("min_voltage_rack_no", data.MinVoltageRackNo).
-		AddField("min_voltage_cell_no", data.MinVoltageCellNo).
+		AddField("avg_cell_voltage", data.AvgCellVoltage).
 		AddField("max_cell_temperature", data.MaxCellTemperature).
-		AddField("max_temp_rack_no", data.MaxTempRackNo).
-		AddField("max_temp_cell_no", data.MaxTempCellNo).
 		AddField("min_cell_temperature", data.MinCellTemperature).
-		AddField("min_temp_rack_no", data.MinTempRackNo).
-		AddField("min_temp_cell_no", data.MinTempCellNo).
-		AddField("total_charge_energy", data.TotalChargeEnergy).
-		AddField("total_discharge_energy", data.TotalDischargeEnergy).
+		AddField("avg_cell_temperature", data.AvgCellTemperature).
+		AddField("max_charge_current", data.MaxChargeCurrent).
+		AddField("max_discharge_current", data.MaxDischargeCurrent).
+		AddField("max_charge_power", data.MaxChargePower).
+		AddField("max_discharge_power", data.MaxDischargePower).
+		AddField("power", data.Power).
 		AddField("charge_capacity", data.ChargeCapacity).
 		AddField("discharge_capacity", data.DischargeCapacity).
-		AddField("available_discharge_time", data.AvailableDischargeTime).
-		AddField("available_charge_time", data.AvailableChargeTime).
-		AddField("max_discharge_power", data.MaxDischargePower).
-		AddField("max_charge_power", data.MaxChargePower).
-		AddField("max_discharge_current", data.MaxDischargeCurrent).
-		AddField("max_charge_current", data.MaxChargeCurrent).
-		AddField("discharge_times_today", data.DischargeTimesToday).
-		AddField("charge_times_today", data.ChargeTimesToday).
-		AddField("discharge_energy_today", data.DischargeEnergyToday).
-		AddField("charge_energy_today", data.ChargeEnergyToday).
-		AddField("temperature", data.Temperature).
-		AddField("state", data.State).
-		AddField("charge_discharge_state", data.ChargeDischargeState).
-		AddField("insulation_resistance", data.InsulationResistance).
+		AddField("max_charge_voltage", data.MaxChargeVoltage).
+		AddField("max_discharge_voltage", data.MaxDischargeVoltage).
+		AddField("insulation_resistance_pos", data.InsulationResistancePos).
+		AddField("insulation_resistance_neg", data.InsulationResistanceNeg).
+		SetTime(data.Timestamp)
+
+	db.writeAPI.WritePoint(point)
+
+	return nil
+}
+
+// WriteBMSStatusData writes BMS status data to InfluxDB
+func (db *InfluxDB) WriteBMSStatusData(data BMSStatusData) error {
+	point := influxdb2.NewPointWithMeasurement("bms").
+		AddTag("id", fmt.Sprintf("%d", data.ID)).
+		AddField("hv_status", data.HVStatus).
+		AddField("system_status", data.SystemStatus).
+		AddField("connected_racks", data.ConnectedRacks).
+		AddField("total_racks", data.TotalRacks).
 		SetTime(data.Timestamp)
 
 	db.writeAPI.WritePoint(point)

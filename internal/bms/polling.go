@@ -130,6 +130,11 @@ func (s *Service) readBaseData() error {
 		return fmt.Errorf("failed to read BMS data: %w", err)
 	}
 
+	// Read BMS status data
+	if err := s.readBMSStatusData(); err != nil {
+		return fmt.Errorf("failed to read BMS status data: %w", err)
+	}
+
 	// Read alarms
 	if err := s.readAlarms(); err != nil {
 		return fmt.Errorf("failed to read alarms: %w", err)

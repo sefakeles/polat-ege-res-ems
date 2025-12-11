@@ -30,6 +30,7 @@ type Service struct {
 
 	// Data storage
 	lastBMSData          database.BMSData
+	lastBMSStatusData    database.BMSStatusData
 	lastBMSRackData      []database.BMSRackData
 	lastCellVoltages     [][]database.BMSCellVoltageData
 	lastCellTemperatures [][]database.BMSCellTemperatureData

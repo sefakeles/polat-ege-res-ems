@@ -6,43 +6,40 @@ import (
 
 // BMSData represents BMS data
 type BMSData struct {
-	Timestamp              time.Time `json:"timestamp"`
-	ID                     int       `json:"id"`
-	CircuitBreakerStatus   uint16    `json:"circuit_breaker_status"`
-	Voltage                float32   `json:"voltage"`
-	Current                float32   `json:"current"`
-	SOC                    uint16    `json:"soc"`
-	SOH                    uint16    `json:"soh"`
-	MaxCellVoltage         float32   `json:"max_cell_voltage"`
-	MaxVoltageRackNo       uint16    `json:"max_voltage_rack_no"`
-	MaxVoltageCellNo       uint16    `json:"max_voltage_cell_no"`
-	MinCellVoltage         float32   `json:"min_cell_voltage"`
-	MinVoltageRackNo       uint16    `json:"min_voltage_rack_no"`
-	MinVoltageCellNo       uint16    `json:"min_voltage_cell_no"`
-	MaxCellTemperature     int16     `json:"max_cell_temperature"`
-	MaxTempRackNo          uint16    `json:"max_temp_rack_no"`
-	MaxTempCellNo          uint16    `json:"max_temp_cell_no"`
-	MinCellTemperature     int16     `json:"min_cell_temperature"`
-	MinTempRackNo          uint16    `json:"min_temp_rack_no"`
-	MinTempCellNo          uint16    `json:"min_temp_cell_no"`
-	TotalChargeEnergy      float32   `json:"total_charge_energy"`
-	TotalDischargeEnergy   float32   `json:"total_discharge_energy"`
-	ChargeCapacity         float32   `json:"charge_capacity"`
-	DischargeCapacity      float32   `json:"discharge_capacity"`
-	AvailableDischargeTime uint16    `json:"available_discharge_time"`
-	AvailableChargeTime    uint16    `json:"available_charge_time"`
-	MaxDischargePower      float32   `json:"max_discharge_power"`
-	MaxChargePower         float32   `json:"max_charge_power"`
-	MaxDischargeCurrent    float32   `json:"max_discharge_current"`
-	MaxChargeCurrent       float32   `json:"max_charge_current"`
-	DischargeTimesToday    uint16    `json:"discharge_times_today"`
-	ChargeTimesToday       uint16    `json:"charge_times_today"`
-	DischargeEnergyToday   float32   `json:"discharge_energy_today"`
-	ChargeEnergyToday      float32   `json:"charge_energy_today"`
-	Temperature            int16     `json:"temperature"`
-	State                  uint16    `json:"state"`
-	ChargeDischargeState   uint16    `json:"charge_discharge_state"`
-	InsulationResistance   uint16    `json:"insulation_resistance"`
+	Timestamp               time.Time `json:"timestamp"`
+	ID                      int       `json:"id"`
+	Voltage                 float32   `json:"voltage"`
+	Current                 int16     `json:"current"`
+	SOC                     float32   `json:"soc"`
+	SOH                     float32   `json:"soh"`
+	MaxCellVoltage          float32   `json:"max_cell_voltage"`
+	MinCellVoltage          float32   `json:"min_cell_voltage"`
+	AvgCellVoltage          float32   `json:"avg_cell_voltage"`
+	MaxCellTemperature      int16     `json:"max_cell_temperature"`
+	MinCellTemperature      int16     `json:"min_cell_temperature"`
+	AvgCellTemperature      int16     `json:"avg_cell_temperature"`
+	MaxChargeCurrent        int16     `json:"max_charge_current"`
+	MaxDischargeCurrent     int16     `json:"max_discharge_current"`
+	MaxChargePower          int16     `json:"max_charge_power"`
+	MaxDischargePower       int16     `json:"max_discharge_power"`
+	Power                   int16     `json:"power"`
+	ChargeCapacity          uint16    `json:"charge_capacity"`
+	DischargeCapacity       uint16    `json:"discharge_capacity"`
+	MaxChargeVoltage        float32   `json:"max_charge_voltage"`
+	MaxDischargeVoltage     float32   `json:"max_discharge_voltage"`
+	InsulationResistancePos uint16    `json:"insulation_resistance_pos"`
+	InsulationResistanceNeg uint16    `json:"insulation_resistance_neg"`
+}
+
+// BMSStatusData represents BMS status data
+type BMSStatusData struct {
+	Timestamp      time.Time `json:"timestamp"`
+	ID             int       `json:"id"`
+	Heartbeat      uint16    `json:"heartbeat"`
+	HVStatus       uint16    `json:"hv_status"`
+	SystemStatus   uint16    `json:"system_status"`
+	ConnectedRacks uint16    `json:"connected_racks"`
+	TotalRacks     uint16    `json:"total_racks"`
 }
 
 // BMSRackData represents BMS rack-level data
