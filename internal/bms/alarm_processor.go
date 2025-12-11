@@ -16,8 +16,7 @@ func (s *Service) processAlarms(data []byte) {
 			relativeCode := uint16(byteIdx*8 + bitIdx)
 			isActive := (b & (1 << bitIdx)) != 0
 
-			// Calculate alarm code: base code (200) + relative bit position
-			alarmCode := BMSAlarmBaseCode + relativeCode
+			alarmCode := relativeCode + 1
 
 			message := GetAlarmMessage(alarmCode)
 			severity := GetAlarmSeverity(alarmCode)

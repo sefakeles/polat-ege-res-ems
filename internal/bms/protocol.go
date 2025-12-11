@@ -16,9 +16,8 @@ const (
 	BMSRackDataLength    = 51
 
 	// Alarms
-	BMSAlarmStartAddr     = 16
-	BMSAlarmLength        = 16
-	BMSAlarmBaseCode      = 200
+	BMSAlarmStartAddr     = 0
+	BMSAlarmLength        = 32
 	BMSRackAlarmStartAddr = 1024
 	BMSRackAlarmOffset    = 1024
 	BMSRackAlarmLength    = 16
@@ -71,6 +70,69 @@ type AlarmDefinition struct {
 
 // alarmDefinitions contains all alarm definitions
 var alarmDefinitions = map[uint16]AlarmDefinition{
+	1:   {"Single cell over-voltage warning level 1", "LOW"},
+	2:   {"Single cell over-voltage warning level 2", "LOW"},
+	3:   {"Single cell over-voltage warning level 3", "MEDIUM"},
+	4:   {"Single cell under-voltage warning level 1", "LOW"},
+	5:   {"Single cell under-voltage warning level 2", "LOW"},
+	6:   {"Single cell under-voltage warning level 3", "MEDIUM"},
+	7:   {"Single cell extreme over-voltage warning", "MEDIUM"},
+	8:   {"Single cell extreme under-voltage warning", "MEDIUM"},
+	9:   {"Single rack over-voltage warning level 1", "LOW"},
+	10:  {"Single rack over-voltage warning level 2", "MEDIUM"},
+	11:  {"Single rack under-voltage warning level 1", "LOW"},
+	12:  {"Single rack under-voltage warning level 2", "MEDIUM"},
+	13:  {"Big voltage difference between cells warning", "LOW"},
+	14:  {"Invalid cell voltage warning", "MEDIUM"},
+	15:  {"Replacement required due to single cell over discharge", "MEDIUM"},
+	16:  {"Replacement required due to single cell over charge", "MEDIUM"},
+	17:  {"Low SOC over discharge warning", "LOW"},
+	18:  {"Low SOC over discharge warning", "MEDIUM"},
+	19:  {"Discharge over-current warning level 1", "LOW"},
+	20:  {"Discharge over-current warning level 2", "LOW"},
+	21:  {"Discharge over-current warning level 3", "MEDIUM"},
+	22:  {"Discharge over-current warning level 4", "MEDIUM"},
+	23:  {"Charge over-current warning level 1", "LOW"},
+	24:  {"Charge over-current warning level 2", "LOW"},
+	25:  {"Charge over-current warning level 3", "MEDIUM"},
+	26:  {"Charge over-current warning level 4", "MEDIUM"},
+	27:  {"Current sensor failed warning", "MEDIUM"},
+	31:  {"Single cell over-temperature warning level 1", "LOW"},
+	32:  {"Single cell over-temperature warning level 2", "LOW"},
+	33:  {"Single cell over-temperature warning level 3", "MEDIUM"},
+	34:  {"Single cell over-temperature warning level 4", "MEDIUM"},
+	35:  {"Single cell under-temperature warning level 1", "LOW"},
+	36:  {"Single cell under-temperature warning level 2", "LOW"},
+	37:  {"Single cell under-temperature warning level 3", "MEDIUM"},
+	38:  {"Big temperature difference between cells warning level 1", "LOW"},
+	39:  {"Big temperature difference between cells warning level 2", "LOW"},
+	40:  {"Big temperature difference between cells warning level 3", "MEDIUM"},
+	48:  {"Single temperature sampling abnormal warning", "MEDIUM"},
+	49:  {"Multiple temperature sampling abnormal warning", "MEDIUM"},
+	74:  {"CSC 24V power supply abnormal warning", "MEDIUM"},
+	75:  {"SBMU 24V power supply abnormal warning", "MEDIUM"},
+	79:  {"MSD warning", "MEDIUM"},
+	80:  {"Rack fuse warning", "MEDIUM"},
+	81:  {"Rack isolate switch warning", "MEDIUM"},
+	82:  {"Main positive relay sticking warning", "MEDIUM"},
+	83:  {"Main negative relay sticking warning", "MEDIUM"},
+	84:  {"Both main positive relay and main negative relay sticking fault", "HIGH"},
+	85:  {"Main positive relay open circuit warning", "MEDIUM"},
+	86:  {"Main negative open circuit warning", "MEDIUM"},
+	87:  {"Battery rack door (travel switch) fault", "HIGH"},
+	88:  {"Main control box fan warning", "MEDIUM"},
+	102: {"Inner communication warning (CCAN)", "MEDIUM"},
+	103: {"Inner communication warning (SCAN)", "MEDIUM"},
+	104: {"Inner communication warning (MCAN)", "MEDIUM"},
+	108: {"Balancing circuit warning", "MEDIUM"},
+	110: {"SOC low warning level 1", "LOW"},
+	111: {"SOC low warning level 2", "LOW"},
+	112: {"HV circuit open circuit warning", "MEDIUM"},
+	116: {"Pre-charging failed twice warning", "MEDIUM"},
+	122: {"HV+&HV- reversed connection fault", "HIGH"},
+	129: {"Thermal runaway caused fire fault", "HIGH"},
+	134: {"HV circuit (Fuse) open circuit warning", "MEDIUM"},
+	153: {"Big temperature difference between racks", "LOW"},
 	200: {"Insulation warning", "LOW"},
 	201: {"Insulation fault", "HIGH"},
 	202: {"Invalid insulation fault", "HIGH"},
