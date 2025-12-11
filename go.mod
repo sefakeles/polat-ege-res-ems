@@ -1,16 +1,16 @@
 module powerkonnekt/ems
 
-go 1.25.4
+go 1.25.5
 
 require (
 	github.com/gin-gonic/gin v1.11.0
 	github.com/go-playground/validator/v10 v10.28.0
-	github.com/grid-x/modbus v0.0.0-20251101080009-99e372e638c1
+	github.com/grid-x/modbus v0.0.0-20251121133955-8a6c959be366
 	github.com/influxdata/influxdb-client-go/v2 v2.14.0
 	github.com/shirou/gopsutil/v3 v3.24.5
 	github.com/simonvetter/modbus v1.6.4
 	github.com/spf13/viper v1.21.0
-	go.uber.org/zap v1.27.0
+	go.uber.org/zap v1.27.1
 	gorm.io/driver/postgres v1.6.0
 	gorm.io/gorm v1.31.1
 )
