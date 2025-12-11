@@ -16,11 +16,12 @@ const (
 	BMSRackDataLength    = 51
 
 	// Alarms
-	BMSAlarmStartAddr     = 1
-	BMSAlarmLength        = 80
-	BMSRackAlarmStartAddr = 200
-	BMSRackAlarmOffset    = 100
-	BMSRackAlarmLength    = 88
+	BMSAlarmStartAddr     = 16
+	BMSAlarmLength        = 16
+	BMSAlarmBaseCode      = 200
+	BMSRackAlarmStartAddr = 0
+	BMSRackAlarmOffset    = 0
+	BMSRackAlarmLength    = 15
 
 	// Cell Data
 	CellVoltageBaseAddr = 191
@@ -70,74 +71,39 @@ type AlarmDefinition struct {
 
 // alarmDefinitions contains all alarm definitions
 var alarmDefinitions = map[uint16]AlarmDefinition{
-	1:  {"Total voltage low", "LOW"},
-	2:  {"Total voltage low", "MEDIUM"},
-	3:  {"Total voltage low", "HIGH"},
-	4:  {"Total voltage high", "LOW"},
-	5:  {"Total voltage high", "MEDIUM"},
-	6:  {"Total voltage high", "HIGH"},
-	7:  {"Current high", "LOW"},
-	8:  {"Current high", "MEDIUM"},
-	9:  {"Current high", "HIGH"},
-	10: {"Insulation resistance low", "LOW"},
-	11: {"Insulation resistance low", "MEDIUM"},
-	12: {"Insulation resistance low", "HIGH"},
-	13: {"Module temperature low", "LOW"},
-	14: {"Module temperature low", "MEDIUM"},
-	15: {"Module temperature low", "HIGH"},
-	16: {"Module temperature high", "LOW"},
-	17: {"Module temperature high", "MEDIUM"},
-	18: {"Module temperature high", "HIGH"},
-	19: {"Cell voltage high", "LOW"},
-	20: {"Cell voltage high", "MEDIUM"},
-	21: {"Cell voltage high", "HIGH"},
-	22: {"Cell voltage low", "LOW"},
-	23: {"Cell voltage low", "MEDIUM"},
-	24: {"Cell voltage low", "HIGH"},
-	25: {"Cell voltage imbalance", "LOW"},
-	26: {"Cell voltage imbalance", "MEDIUM"},
-	27: {"Cell voltage imbalance", "HIGH"},
-	28: {"Cell temperature low", "LOW"},
-	29: {"Cell temperature low", "MEDIUM"},
-	30: {"Cell temperature low", "HIGH"},
-	31: {"Cell temperature high", "LOW"},
-	32: {"Cell temperature high", "MEDIUM"},
-	33: {"Cell temperature high", "HIGH"},
-	34: {"Cell temperature imbalance", "LOW"},
-	35: {"Cell temperature imbalance", "MEDIUM"},
-	36: {"Cell temperature imbalance", "HIGH"},
-	37: {"Cell SOC low", "LOW"},
-	38: {"Cell SOC low", "MEDIUM"},
-	39: {"Cell SOC low", "HIGH"},
-	40: {"Cell SOC high", "LOW"},
-	41: {"Cell SOC high", "MEDIUM"},
-	42: {"Cell SOC high", "HIGH"},
-	43: {"Cell SOH low", "LOW"},
-	44: {"Cell SOH low", "MEDIUM"},
-	45: {"Cell SOH low", "HIGH"},
-	46: {"Cell SOH high", "LOW"},
-	47: {"Cell SOH high", "MEDIUM"},
-	48: {"Cell SOH high", "HIGH"},
-	49: {"BCU communication lost", "HIGH"},
-	50: {"BMU communication lost", "HIGH"},
-	51: {"Rack voltage imbalance", "HIGH"},
-	52: {"Contactor open failed", "HIGH"},
-	53: {"Contactor close failed", "HIGH"},
-	54: {"Charging prohibited", "HIGH"},
-	55: {"Discharging prohibited", "HIGH"},
-	56: {"System warning", "MEDIUM"},
-	57: {"System fault", "HIGH"},
-	70: {"Terminal temperature high", "LOW"},
-	71: {"Terminal temperature high", "MEDIUM"},
-	72: {"Terminal temperature high", "HIGH"},
-	73: {"Module voltage high", "LOW"},
-	74: {"Module voltage high", "MEDIUM"},
-	75: {"Module voltage high", "HIGH"},
-	76: {"Module voltage low", "LOW"},
-	77: {"Module voltage low", "MEDIUM"},
-	78: {"Module voltage low", "HIGH"},
-	79: {"Cell voltage sensor fault", "HIGH"},
-	80: {"Cell temperature sensor fault", "HIGH"},
+	200: {"Insulation warning", "LOW"},
+	201: {"Insulation fault", "HIGH"},
+	202: {"Invalid insulation fault", "HIGH"},
+	203: {"The quantity of HV racks less than setting value fault", "HIGH"},
+	206: {"SBMU communication lost warning", "MEDIUM"},
+	207: {"SBMU communication lost fault", "HIGH"},
+	208: {"EMS communication lost fault", "HIGH"},
+	209: {"IMM communication lost fault", "HIGH"},
+	210: {"Air conditioner communication lost warning", "MEDIUM"},
+	211: {"Centralized TMS communication fault", "HIGH"},
+	212: {"Centralized TMS communication warning", "LOW"},
+	213: {"Centralized TMS fault level 2", "HIGH"},
+	214: {"Centralized TMS mode conflict fault", "HIGH"},
+	215: {"Centralized TMS fault level 1", "HIGH"},
+	216: {"SPD failure warning", "LOW"},
+	217: {"AUX Power DCDC failure warning", "LOW"},
+	218: {"AUX Power ACDC failure warning", "LOW"},
+	219: {"AUX Power failure fault", "HIGH"},
+	220: {"Fire system fault level 1", "HIGH"},
+	221: {"Fire system fault level 2", "HIGH"},
+	222: {"Fire system failure warning", "MEDIUM"},
+	223: {"E-STOP fault", "HIGH"},
+	224: {"Client E-STOP fault", "HIGH"},
+	225: {"Electrical rack door (travel switch) fault", "HIGH"},
+	226: {"Electrical rack fan warning", "LOW"},
+	227: {"Smoke exhaust ventilation body warning", "MEDIUM"},
+	228: {"Smoke exhaust ventilation state fault", "HIGH"},
+	229: {"Humidifier1 failure warning", "LOW"},
+	232: {"Humidifier2 failure warning", "LOW"},
+	251: {"MBMU 24V power supply abnormal fault", "HIGH"},
+	252: {"Slave MBMU communication lost fault", "HIGH"},
+	255: {"Centralized TMS warning level 3", "MEDIUM"},
+	263: {"Step-Charge Mode inconsistency warning", "LOW"},
 }
 
 // rackAlarmDefinitions contains all rack alarm definitions

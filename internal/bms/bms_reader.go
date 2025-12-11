@@ -58,7 +58,7 @@ func (s *Service) readBMSRackData(rackNo uint8) error {
 
 // readAlarms reads alarms
 func (s *Service) readAlarms() error {
-	data, err := s.baseClient.ReadDiscreteInputs(s.ctx, BMSAlarmStartAddr, BMSAlarmLength)
+	data, err := s.baseClient.ReadHoldingRegisters(s.ctx, BMSAlarmStartAddr, BMSAlarmLength)
 	if err != nil {
 		return fmt.Errorf("failed to read registers: %w", err)
 	}
@@ -69,7 +69,7 @@ func (s *Service) readAlarms() error {
 	for rackNo := uint8(1); rackNo <= uint8(s.config.RackCount); rackNo++ {
 		startAddr := GetRackAlarmStartAddr(rackNo)
 
-		rackAlarmData, err := s.baseClient.ReadDiscreteInputs(s.ctx, startAddr, BMSRackAlarmLength)
+		rackAlarmData, err := s.baseClient.ReadHoldingRegisters(s.ctx, startAddr, BMSRackAlarmLength)
 		if err != nil {
 			s.log.Info("Failed to read alarms",
 				logger.Err(err),
