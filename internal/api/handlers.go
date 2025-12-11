@@ -12,6 +12,7 @@ import (
 	"powerkonnekt/ems/internal/database"
 	"powerkonnekt/ems/internal/health"
 	"powerkonnekt/ems/internal/pcs"
+	"powerkonnekt/ems/internal/plc"
 	"powerkonnekt/ems/pkg/logger"
 
 	"github.com/gin-gonic/gin"
@@ -21,6 +22,7 @@ import (
 type Handlers struct {
 	bmsManager    *bms.Manager
 	pcsManager    *pcs.Manager
+	plcManager    *plc.Manager
 	alarmManager  *alarm.Manager
 	controlLogic  *control.Logic
 	healthService *health.HealthService
@@ -31,6 +33,7 @@ type Handlers struct {
 func NewHandlers(
 	bmsManager *bms.Manager,
 	pcsManager *pcs.Manager,
+	plcManager *plc.Manager,
 	alarmManager *alarm.Manager,
 	controlLogic *control.Logic,
 	healthService *health.HealthService,
@@ -43,6 +46,7 @@ func NewHandlers(
 	return &Handlers{
 		bmsManager:    bmsManager,
 		pcsManager:    pcsManager,
+		plcManager:    plcManager,
 		alarmManager:  alarmManager,
 		controlLogic:  controlLogic,
 		healthService: healthService,
@@ -584,5 +588,179 @@ func (h *Handlers) BMSBreakerControl(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Breaker control executed",
 		"action":  request.Action,
+	})
+}
+
+// GetPLCData returns PLC data
+func (h *Handlers) GetPLCData(c *gin.Context) {
+	plcID := c.Param("id")
+	plcIDInt, err := strconv.Atoi(plcID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid PLC ID"})
+		return
+	}
+
+	service, err := h.plcManager.GetService(plcIDInt)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+
+	plcData := service.GetLatestPLCData()
+
+	response := gin.H{
+		"data":           plcData,
+		"connected":      service.IsConnected(),
+		"relay_faults":   service.HasProtectionRelayFaults(),
+		"faulted_relays": service.GetFaultedRelays(),
+	}
+
+	c.JSON(http.StatusOK, response)
+}
+
+// ControlAuxiliaryCB controls the auxiliary circuit breaker
+func (h *Handlers) ControlAuxiliaryCB(c *gin.Context) {
+	var request struct {
+		ID    int   `json:"id" binding:"required"`
+		Close *bool `json:"close" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	service, err := h.plcManager.GetService(request.ID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := service.ControlAuxiliaryCB(*request.Close); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	action := "opened"
+	if *request.Close {
+		action = "closed"
+	}
+
+	h.log.Info("Auxiliary CB control executed",
+		logger.String("action", action),
+		logger.String("client_ip", c.ClientIP()))
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": fmt.Sprintf("Auxiliary CB %s successfully", action),
+		"close":   *request.Close,
+	})
+}
+
+// ControlMVAuxTransformerCB controls the MV auxiliary transformer circuit breaker
+func (h *Handlers) ControlMVAuxTransformerCB(c *gin.Context) {
+	var request struct {
+		ID    int   `json:"id" binding:"required"`
+		Close *bool `json:"close" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	service, err := h.plcManager.GetService(request.ID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := service.ControlMVAuxTransformerCB(*request.Close); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	action := "opened"
+	if *request.Close {
+		action = "closed"
+	}
+
+	h.log.Info("MV Aux Transformer CB control executed",
+		logger.String("action", action),
+		logger.String("client_ip", c.ClientIP()))
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": fmt.Sprintf("MV Aux Transformer CB %s successfully", action),
+		"close":   *request.Close,
+	})
+}
+
+// ControlTransformerCB controls a transformer circuit breaker
+func (h *Handlers) ControlTransformerCB(c *gin.Context) {
+	var request struct {
+		ID            int   `json:"id" binding:"required"`
+		TransformerNo uint8 `json:"transformer_no" binding:"required,min=1,max=4"`
+		Close         *bool `json:"close" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	service, err := h.plcManager.GetService(request.ID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := service.ControlTransformerCB(request.TransformerNo, *request.Close); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	action := "opened"
+	if *request.Close {
+		action = "closed"
+	}
+
+	h.log.Info("Transformer CB control executed",
+		logger.Uint8("transformer_no", request.TransformerNo),
+		logger.String("action", action),
+		logger.String("client_ip", c.ClientIP()))
+
+	c.JSON(http.StatusOK, gin.H{
+		"message":        fmt.Sprintf("Transformer %d CB %s successfully", request.TransformerNo, action),
+		"transformer_no": request.TransformerNo,
+		"close":          *request.Close,
+	})
+}
+
+// ResetAllCircuitBreakers opens all circuit breakers (emergency function)
+func (h *Handlers) ResetAllCircuitBreakers(c *gin.Context) {
+	var request struct {
+		ID int `json:"id" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	service, err := h.plcManager.GetService(request.ID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := service.ResetAllCircuitBreakers(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	h.log.Warn("Emergency: All circuit breakers reset",
+		logger.String("client_ip", c.ClientIP()))
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "All circuit breakers opened successfully",
 	})
 }

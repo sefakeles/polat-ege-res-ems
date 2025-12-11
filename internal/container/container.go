@@ -11,6 +11,7 @@ import (
 	"powerkonnekt/ems/internal/metrics"
 	"powerkonnekt/ems/internal/modbus"
 	"powerkonnekt/ems/internal/pcs"
+	"powerkonnekt/ems/internal/plc"
 	"powerkonnekt/ems/pkg/logger"
 )
 
@@ -20,6 +21,7 @@ type Container struct {
 	PostgresDB     *database.PostgresDB
 	BMSManager     *bms.Manager
 	PCSManager     *pcs.Manager
+	PLCManager     *plc.Manager
 	ControlLogic   *control.Logic
 	AlarmManager   *alarm.Manager
 	MetricsManager *metrics.Manager
@@ -55,6 +57,7 @@ func NewContainer(cfg *config.Config) (*Container, error) {
 	// Initialize BMS and PCS managers
 	bmsManager := bms.NewManager(cfg.BMS, influxDB, alarmManager)
 	pcsManager := pcs.NewManager(cfg.PCS, influxDB, alarmManager)
+	plcManager := plc.NewManager(cfg.PLC, influxDB, alarmManager)
 
 	// Initialize control logic with managers
 	controlLogic := control.NewLogic(bmsManager, pcsManager, cfg.EMS)
@@ -71,6 +74,7 @@ func NewContainer(cfg *config.Config) (*Container, error) {
 		PostgresDB:     postgresDB,
 		BMSManager:     bmsManager,
 		PCSManager:     pcsManager,
+		PLCManager:     plcManager,
 		ControlLogic:   controlLogic,
 		AlarmManager:   alarmManager,
 		MetricsManager: metricsManager,

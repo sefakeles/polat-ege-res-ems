@@ -167,6 +167,18 @@
       "enable_cell_data": false
     }
   ],
+  "plc": [
+    {
+      "id": 1,
+      "host": "192.168.0.12",
+      "port": 502,
+      "slave_id": 1,
+      "timeout": "1s",
+      "reconnect_delay": "5s",
+      "poll_interval": "100ms",
+      "persist_interval": "5s"
+    }
+  ],
   "influxdb": {
     "url": "http://localhost:8086",
     "token": "9tVPkHBGrlkI97E51nE-dzT2Hneatx_EbAiHGE9TM0rgZya5K7b8uhEYOjF12X1yw2D0A5d2OvMbq5w6E0riVw==",

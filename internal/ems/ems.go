@@ -40,13 +40,19 @@ func New(cfg *config.Config) (*EMS, error) {
 	// Register health checkers for all BMS instances
 	bmsServices := cont.BMSManager.GetAllServices()
 	for bmsID, bmsService := range bmsServices {
-		healthService.RegisterChecker(health.NewServiceChecker(fmt.Sprintf("bms_%s", bmsID), bmsService))
+		healthService.RegisterChecker(health.NewServiceChecker(fmt.Sprintf("bms_%d", bmsID), bmsService))
 	}
 
 	// Register health checkers for all PCS instances
 	pcsServices := cont.PCSManager.GetAllServices()
 	for pcsID, pcsService := range pcsServices {
-		healthService.RegisterChecker(health.NewServiceChecker(fmt.Sprintf("pcs_%s", pcsID), pcsService))
+		healthService.RegisterChecker(health.NewServiceChecker(fmt.Sprintf("pcs_%d", pcsID), pcsService))
+	}
+
+	// Register health checkers for all PLC instances
+	plcServices := cont.PLCManager.GetAllServices()
+	for plcID, plcService := range plcServices {
+		healthService.RegisterChecker(health.NewServiceChecker(fmt.Sprintf("plc_%d", plcID), plcService))
 	}
 
 	// Register health checkers for databases
@@ -80,6 +86,10 @@ func (e *EMS) Start() error {
 
 	if err := e.container.PCSManager.Start(); err != nil {
 		return fmt.Errorf("failed to start PCS services: %w", err)
+	}
+
+	if err := e.container.PLCManager.Start(); err != nil {
+		return fmt.Errorf("failed to start PLC services: %w", err)
 	}
 
 	// Start Modbus server
@@ -121,6 +131,7 @@ func (e *EMS) Stop() {
 
 	e.container.BMSManager.Stop()
 	e.container.PCSManager.Stop()
+	e.container.PLCManager.Stop()
 	e.container.MetricsManager.Stop()
 
 	// Close databases
@@ -160,6 +171,7 @@ func (e *EMS) setupHTTPServer() {
 	handlers := api.NewHandlers(
 		e.container.BMSManager,
 		e.container.PCSManager,
+		e.container.PLCManager,
 		e.container.AlarmManager,
 		e.container.ControlLogic,
 		e.healthService,

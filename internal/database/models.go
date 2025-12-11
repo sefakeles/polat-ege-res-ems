@@ -214,6 +214,46 @@ type BMSAlarmData struct {
 	Active    bool      `json:"active"`
 }
 
+// PLCData represents PLC data
+type PLCData struct {
+	Timestamp         time.Time              `json:"timestamp"`
+	ID                int                    `json:"id"`
+	CircuitBreakers   CircuitBreakerStatus   `json:"circuit_breakers"`
+	MVCircuitBreakers MVCircuitBreakerStatus `json:"mv_circuit_breakers"`
+	ProtectionRelays  ProtectionRelayStatus  `json:"protection_relays"`
+}
+
+// CircuitBreakerStatus represents the status of all circuit breakers
+type CircuitBreakerStatus struct {
+	AuxiliaryCB bool `json:"auxiliary_cb"`
+	PCS1CB      bool `json:"pcs1_cb"`
+	PCS2CB      bool `json:"pcs2_cb"`
+	PCS3CB      bool `json:"pcs3_cb"`
+	PCS4CB      bool `json:"pcs4_cb"`
+	BMS1CB      bool `json:"bms1_cb"`
+	BMS2CB      bool `json:"bms2_cb"`
+	BMS3CB      bool `json:"bms3_cb"`
+	BMS4CB      bool `json:"bms4_cb"`
+}
+
+// MVCircuitBreakerStatus represents MV-side circuit breaker status
+type MVCircuitBreakerStatus struct {
+	AuxTransformerCB bool `json:"aux_transformer_cb"`
+	Transformer1CB   bool `json:"transformer1_cb"`
+	Transformer2CB   bool `json:"transformer2_cb"`
+	Transformer3CB   bool `json:"transformer3_cb"`
+	Transformer4CB   bool `json:"transformer4_cb"`
+}
+
+// ProtectionRelayStatus represents protection relay status
+type ProtectionRelayStatus struct {
+	AuxTransformerFault bool `json:"aux_transformer_fault"`
+	Transformer1Fault   bool `json:"transformer1_fault"`
+	Transformer2Fault   bool `json:"transformer2_fault"`
+	Transformer3Fault   bool `json:"transformer3_fault"`
+	Transformer4Fault   bool `json:"transformer4_fault"`
+}
+
 // SystemMetrics represents system performance metrics
 type SystemMetrics struct {
 	Timestamp   time.Time `json:"timestamp"`

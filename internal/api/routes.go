@@ -53,6 +53,19 @@ func SetupRoutes(handlers *Handlers) *gin.Engine {
 			pcsGroup.GET("/command-state/:id", handlers.GetPCSCommandState)
 			pcsGroup.POST("/start", handlers.SetPCSStartStop)
 		}
+
+		// PLC endpoints
+		plcGroup := api.Group("/plc")
+		{
+			// Data endpoints
+			plcGroup.GET("/data/:id", handlers.GetPLCData)
+
+			// Control endpoints
+			plcGroup.POST("/auxiliary-cb", handlers.ControlAuxiliaryCB)
+			plcGroup.POST("/mv-aux-transformer-cb", handlers.ControlMVAuxTransformerCB)
+			plcGroup.POST("/transformer-cb", handlers.ControlTransformerCB)
+			plcGroup.POST("/reset-all", handlers.ResetAllCircuitBreakers)
+		}
 	}
 
 	return router

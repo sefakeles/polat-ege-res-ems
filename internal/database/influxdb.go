@@ -353,6 +353,39 @@ func (db *InfluxDB) WritePCSCounterData(data PCSCounterData) error {
 	return nil
 }
 
+// WritePLCData writes PLC data to InfluxDB
+func (db *InfluxDB) WritePLCData(data PLCData) error {
+	point := influxdb2.NewPointWithMeasurement("plc").
+		AddTag("id", fmt.Sprintf("%d", data.ID)).
+		// Circuit Breakers
+		AddField("auxiliary_cb", data.CircuitBreakers.AuxiliaryCB).
+		AddField("pcs1_cb", data.CircuitBreakers.PCS1CB).
+		AddField("pcs2_cb", data.CircuitBreakers.PCS2CB).
+		AddField("pcs3_cb", data.CircuitBreakers.PCS3CB).
+		AddField("pcs4_cb", data.CircuitBreakers.PCS4CB).
+		AddField("bms1_cb", data.CircuitBreakers.BMS1CB).
+		AddField("bms2_cb", data.CircuitBreakers.BMS2CB).
+		AddField("bms3_cb", data.CircuitBreakers.BMS3CB).
+		AddField("bms4_cb", data.CircuitBreakers.BMS4CB).
+		// MV Circuit Breakers
+		AddField("mv_aux_transformer_cb", data.MVCircuitBreakers.AuxTransformerCB).
+		AddField("mv_transformer1_cb", data.MVCircuitBreakers.Transformer1CB).
+		AddField("mv_transformer2_cb", data.MVCircuitBreakers.Transformer2CB).
+		AddField("mv_transformer3_cb", data.MVCircuitBreakers.Transformer3CB).
+		AddField("mv_transformer4_cb", data.MVCircuitBreakers.Transformer4CB).
+		// Protection Relays
+		AddField("relay_aux_transformer_fault", data.ProtectionRelays.AuxTransformerFault).
+		AddField("relay_transformer1_fault", data.ProtectionRelays.Transformer1Fault).
+		AddField("relay_transformer2_fault", data.ProtectionRelays.Transformer2Fault).
+		AddField("relay_transformer3_fault", data.ProtectionRelays.Transformer3Fault).
+		AddField("relay_transformer4_fault", data.ProtectionRelays.Transformer4Fault).
+		SetTime(data.Timestamp)
+
+	db.writeAPI.WritePoint(point)
+
+	return nil
+}
+
 // WriteSystemMetrics writes system metrics to InfluxDB
 func (db *InfluxDB) WriteSystemMetrics(data SystemMetrics) error {
 	point := influxdb2.NewPointWithMeasurement("system_metrics").
