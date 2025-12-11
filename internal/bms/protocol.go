@@ -19,9 +19,9 @@ const (
 	BMSAlarmStartAddr     = 16
 	BMSAlarmLength        = 16
 	BMSAlarmBaseCode      = 200
-	BMSRackAlarmStartAddr = 0
-	BMSRackAlarmOffset    = 0
-	BMSRackAlarmLength    = 15
+	BMSRackAlarmStartAddr = 1024
+	BMSRackAlarmOffset    = 1024
+	BMSRackAlarmLength    = 16
 
 	// Cell Data
 	CellVoltageBaseAddr = 191
