@@ -101,6 +101,33 @@ func (s *Service) ControlTransformerCB(transformerNo uint8, close bool) error {
 	return nil
 }
 
+func (s *Service) ControlAutoproducerCB(close bool) error {
+	if !s.client.IsConnected() {
+		return fmt.Errorf("PLC not connected")
+	}
+
+	var command uint16
+	var action string
+	if close {
+		command = ControlClose
+		action = "close"
+	} else {
+		command = ControlOpen
+		action = "open"
+	}
+
+	err := s.client.WriteSingleRegister(s.ctx, AutoproducerCBControlAddr, command)
+	if err != nil {
+		return fmt.Errorf("failed to %s autoproducer CB: %w", action, err)
+	}
+
+	s.log.Info("Autoproducer CB command sent successfully",
+		logger.String("action", action),
+		logger.Bool("close", close))
+
+	return nil
+}
+
 // GetCircuitBreakerStatus returns the current status of all circuit breakers
 func (s *Service) GetCircuitBreakerStatus() database.CircuitBreakerStatus {
 	s.mutex.RLock()

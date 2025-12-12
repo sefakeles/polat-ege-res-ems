@@ -243,6 +243,7 @@ type MVCircuitBreakerStatus struct {
 	Transformer2CB   bool `json:"transformer2_cb"`
 	Transformer3CB   bool `json:"transformer3_cb"`
 	Transformer4CB   bool `json:"transformer4_cb"`
+	AutoproducerCB   bool `json:"autoproducer_cb"`
 }
 
 // ProtectionRelayStatus represents protection relay status

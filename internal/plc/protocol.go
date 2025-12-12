@@ -14,6 +14,7 @@ const (
 	Transformer2CBControlAddr = 13 // Transformer 2 CB control
 	Transformer3CBControlAddr = 14 // Transformer 3 CB control
 	Transformer4CBControlAddr = 15 // Transformer 4 CB control
+	AutoproducerCBControlAddr = 16 // Autoproducer CB control
 
 	// Data length for reading
 	StatusDataLength = 3 // Addresses 7, 8, 9
@@ -46,6 +47,7 @@ const (
 	BitTransformer2CB     = 2
 	BitTransformer3CB     = 3
 	BitTransformer4CB     = 4
+	BitAutoproducerCB     = 5
 )
 
 // Protection Relay Bit Positions (Address 9)
@@ -77,6 +79,7 @@ type MVCircuitBreakerStatus struct {
 	Transformer2CB   bool `json:"transformer2_cb"`
 	Transformer3CB   bool `json:"transformer3_cb"`
 	Transformer4CB   bool `json:"transformer4_cb"`
+	AutoproducerCB   bool `json:"autoproducer_cb"`
 }
 
 // ProtectionRelayStatus represents protection relay status
@@ -115,6 +118,7 @@ func GetMVCircuitBreakerName(bit uint8) string {
 		BitTransformer2CB:     "Transformer 2 CB",
 		BitTransformer3CB:     "Transformer 3 CB",
 		BitTransformer4CB:     "Transformer 4 CB",
+		BitAutoproducerCB:     "Autoproducer CB",
 	}
 	if name, exists := names[bit]; exists {
 		return name

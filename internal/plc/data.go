@@ -57,6 +57,7 @@ func parseMVCircuitBreakers(value uint16) database.MVCircuitBreakerStatus {
 		Transformer2CB:   (value & (1 << BitTransformer2CB)) != 0,
 		Transformer3CB:   (value & (1 << BitTransformer3CB)) != 0,
 		Transformer4CB:   (value & (1 << BitTransformer4CB)) != 0,
+		AutoproducerCB:   (value & (1 << BitAutoproducerCB)) != 0,
 	}
 }
 

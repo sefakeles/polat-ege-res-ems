@@ -373,6 +373,7 @@ func (db *InfluxDB) WritePLCData(data PLCData) error {
 		AddField("mv_transformer2_cb", boolToInt(data.MVCircuitBreakers.Transformer2CB)).
 		AddField("mv_transformer3_cb", boolToInt(data.MVCircuitBreakers.Transformer3CB)).
 		AddField("mv_transformer4_cb", boolToInt(data.MVCircuitBreakers.Transformer4CB)).
+		AddField("mv_autoproducer_cb", boolToInt(data.MVCircuitBreakers.AutoproducerCB)).
 		// Protection Relays
 		AddField("relay_aux_transformer_fault", boolToInt(data.ProtectionRelays.AuxTransformerFault)).
 		AddField("relay_transformer1_fault", boolToInt(data.ProtectionRelays.Transformer1Fault)).
