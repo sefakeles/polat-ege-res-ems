@@ -635,12 +635,18 @@ func (h *Handlers) GetPLCData(c *gin.Context) {
 	}
 
 	plcData := service.GetLatestPLCData()
+	cbStatus := service.GetCircuitBreakerStatus()
+	mvCBStatus := service.GetMVCircuitBreakerStatus()
+	protectionRelayStatus := service.GetProtectionRelayStatus()
 
 	response := gin.H{
-		"data":           plcData,
-		"connected":      service.IsConnected(),
-		"relay_faults":   service.HasProtectionRelayFaults(),
-		"faulted_relays": service.GetFaultedRelays(),
+		"data":                    plcData,
+		"circuit_breakers":        cbStatus,
+		"mv_circuit_breakers":     mvCBStatus,
+		"protection_relay_status": protectionRelayStatus,
+		"connected":               service.IsConnected(),
+		"relay_faults":            service.HasProtectionRelayFaults(),
+		"faulted_relays":          service.GetFaultedRelays(),
 	}
 
 	c.JSON(http.StatusOK, response)
