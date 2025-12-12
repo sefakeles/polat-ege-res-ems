@@ -48,8 +48,8 @@ const (
 	ControlReset       = 1
 	ControlClose       = 1
 	ControlOpen        = 2
-	ControlOn          = 1
-	ControlOff         = 2
+	ControlOn          = 2
+	ControlOff         = 3
 )
 
 // State Codes

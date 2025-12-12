@@ -56,7 +56,7 @@ func (s *Service) ResetSystem() error {
 func (s *Service) ControlMainBreaker(action uint16) error {
 	var start bool
 	var logAction string
-	if action == ControlClose {
+	if action == ControlOn {
 		logAction = "close"
 		start = true
 	} else {

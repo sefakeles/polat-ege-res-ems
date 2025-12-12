@@ -568,9 +568,9 @@ func (h *Handlers) BMSBreakerControl(c *gin.Context) {
 	var action uint16
 	switch request.Action {
 	case "OPEN":
-		action = bms.ControlOpen
+		action = bms.ControlOff
 	case "CLOSE":
-		action = bms.ControlClose
+		action = bms.ControlOn
 	default:
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid action. Valid actions: OPEN, CLOSE"})
 		return
