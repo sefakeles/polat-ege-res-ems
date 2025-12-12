@@ -2,8 +2,6 @@ package bms
 
 import (
 	"fmt"
-
-	"powerkonnekt/ems/pkg/logger"
 )
 
 // readBMSData reads BMS data
@@ -65,8 +63,8 @@ func (s *Service) readAlarms() error {
 
 	s.processAlarms(data)
 
-	// Read alarms for each rack
-	for rackNo := uint8(1); rackNo <= uint8(s.config.RackCount); rackNo++ {
+	// !Read alarms for each rack
+	/*for rackNo := uint8(1); rackNo <= uint8(s.config.RackCount); rackNo++ {
 		startAddr := GetRackAlarmStartAddr(rackNo)
 
 		rackAlarmData, err := s.baseClient.ReadHoldingRegisters(s.ctx, startAddr, BMSRackAlarmLength)
@@ -78,7 +76,7 @@ func (s *Service) readAlarms() error {
 		}
 
 		s.processRackAlarms(rackAlarmData, rackNo)
-	}
+	}*/
 
 	return nil
 }
