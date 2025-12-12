@@ -68,6 +68,10 @@ func (s *Service) processWarnings(data []byte) {
 			message := GetWarningMessage(warningCode)
 			severity := GetWarningSeverity(warningCode)
 
+			if message == "Unknown warning" {
+				continue
+			}
+
 			warning := database.BMSAlarmData{
 				Timestamp: timestamp,
 				AlarmType: fmt.Sprintf("PCS_%d_WARNING", s.config.ID),
