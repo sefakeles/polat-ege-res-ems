@@ -29,6 +29,10 @@ func (s *Service) processFaults(data []byte) {
 			message := GetAlarmMessage(alarmCode)
 			severity := GetAlarmSeverity(alarmCode)
 
+			if message == "Unknown alarm" {
+				continue
+			}
+
 			alarm := database.BMSAlarmData{
 				Timestamp: timestamp,
 				AlarmType: fmt.Sprintf("PCS_%d", s.config.ID),

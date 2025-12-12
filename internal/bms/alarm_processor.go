@@ -20,6 +20,10 @@ func (s *Service) processAlarms(data []byte) {
 			message := GetAlarmMessage(alarmCode)
 			severity := GetAlarmSeverity(alarmCode)
 
+			if message == "Unknown alarm" {
+				continue
+			}
+
 			alarm := database.BMSAlarmData{
 				Timestamp: timestamp,
 				AlarmType: fmt.Sprintf("BMS_%d", s.config.ID),
