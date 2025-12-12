@@ -181,7 +181,7 @@
   ],
   "influxdb": {
     "url": "http://localhost:8086",
-    "token": "oB0mAGb8xsOTP8DQSaqS_EXEMCz-v6LUwkXVt6C1cvBc2OKjN-ISuYb-3NIVCQjGK2J3rpoz7hHildmIHBEh_g==",
+    "token": "ckEJ_rPeYqi_CPeDjJA7IP6oGwwAxF_ZtTvfVTN_8-lEcvSTjW_dqFBg2rk7NOzemV5yiP_Zvk0kNj_0YixGgw==",
     "organization": "inovat",
     "bucket": "powerkonnekt"
   },
