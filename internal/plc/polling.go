@@ -97,19 +97,29 @@ func (s *Service) checkProtectionRelayFaults(data database.PLCData) {
 		"Transformer 4 Relay":      data.ProtectionRelays.Transformer4Fault,
 	}
 
-	alarmCode := uint16(1) // Start alarm codes at 1
+	alarmCode := uint16(1)
 	for relayName, hasFault := range relayFaults {
-		alarm := database.BMSAlarmData{
-			Timestamp: timestamp,
-			AlarmType: fmt.Sprintf("PLC_%d_RELAY", s.config.ID),
-			AlarmCode: alarmCode,
-			Message:   fmt.Sprintf("%s Fault", relayName),
-			Severity:  "HIGH",
-			Active:    hasFault,
-		}
+		// Check if state has changed
+		previousState, exists := s.previousRelayStates[relayName]
+		stateChanged := !exists || previousState != hasFault
 
-		if s.alarmManager != nil {
-			s.alarmManager.ProcessAlarm(alarm)
+		// Only process if state changed
+		if stateChanged {
+			alarm := database.BMSAlarmData{
+				Timestamp: timestamp,
+				AlarmType: fmt.Sprintf("PLC_%d_RELAY", s.config.ID),
+				AlarmCode: alarmCode,
+				Message:   fmt.Sprintf("%s Fault", relayName),
+				Severity:  "HIGH",
+				Active:    hasFault,
+			}
+
+			if s.alarmManager != nil {
+				s.alarmManager.ProcessAlarm(alarm)
+			}
+
+			// Update previous state
+			s.previousRelayStates[relayName] = hasFault
 		}
 
 		alarmCode++

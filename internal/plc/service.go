@@ -28,6 +28,9 @@ type Service struct {
 
 	// Data storage
 	lastPLCData database.PLCData
+
+	// Previous relay states for change detection
+	previousRelayStates map[string]bool
 }
 
 // NewService creates a new PLC service
@@ -43,14 +46,15 @@ func NewService(cfg config.PLCConfig, influxDB *database.InfluxDB, alarmManager 
 	)
 
 	return &Service{
-		config:         cfg,
-		influxDB:       influxDB,
-		alarmManager:   alarmManager,
-		client:         client,
-		ctx:            ctx,
-		cancel:         cancel,
-		log:            serviceLogger,
-		dataUpdateChan: make(chan struct{}, 1),
+		config:              cfg,
+		influxDB:            influxDB,
+		alarmManager:        alarmManager,
+		client:              client,
+		ctx:                 ctx,
+		cancel:              cancel,
+		log:                 serviceLogger,
+		dataUpdateChan:      make(chan struct{}, 1),
+		previousRelayStates: make(map[string]bool),
 	}
 }
 
