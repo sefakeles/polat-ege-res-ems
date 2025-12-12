@@ -226,6 +226,12 @@ func (l *Logic) calculateChargePower(bmsData database.BMSData) float32 {
 	return maxPower
 }
 
+// GetBESSUpdateChannel returns the BESS data update channel for reactive control
+func (l *Logic) GetBESSUpdateChannel() <-chan struct{} {
+	bms1Service, _ := l.bmsManager.GetService(1)
+	return bms1Service.GetBaseDataUpdateChannel()
+}
+
 func (l *Logic) calculateDischargePower(bmsData database.BMSData) float32 {
 	maxPower := min(float32(bmsData.MaxDischargePower), l.config.MaxDischargePower)
 
