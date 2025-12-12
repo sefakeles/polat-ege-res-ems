@@ -48,6 +48,22 @@ func (s *Service) updateHeartbeat() error {
 	return nil
 }
 
+// ResetSystem sends a command to reset the PCS
+func (s *Service) ResetSystem() error {
+	if !s.client.IsConnected() {
+		return fmt.Errorf("PCS not connected")
+	}
+
+	err := s.client.WriteSingleRegister(s.ctx, SystemResetRegister, ControlReset)
+	if err != nil {
+		return fmt.Errorf("failed to write system reset command: %w", err)
+	}
+
+	s.log.Info("PCS reset command sent successfully")
+
+	return nil
+}
+
 // StartStopCommand sends a command to start or stop the PCS
 func (s *Service) StartStopCommand(start bool) error {
 	if !s.client.IsConnected() {

@@ -52,6 +52,7 @@ func SetupRoutes(handlers *Handlers) *gin.Engine {
 			pcsGroup.GET("/data/:id", handlers.GetPCSData)
 			pcsGroup.GET("/command-state/:id", handlers.GetPCSCommandState)
 			pcsGroup.POST("/start", handlers.SetPCSStartStop)
+			pcsGroup.POST("/reset", handlers.PCSReset)
 		}
 
 		// PLC endpoints

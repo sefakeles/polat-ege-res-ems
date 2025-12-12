@@ -547,6 +547,34 @@ func (h *Handlers) BMSReset(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "BMS system reset executed"})
 }
 
+// PCSReset resets the PCS system
+func (h *Handlers) PCSReset(c *gin.Context) {
+	var request struct {
+		ID int `json:"id" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	service, err := h.pcsManager.GetService(request.ID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := service.ResetSystem(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	h.log.Info("PCS system reset executed",
+		logger.String("client_ip", c.ClientIP()))
+
+	c.JSON(http.StatusOK, gin.H{"message": "PCS system reset executed"})
+}
+
 // BMSBreakerControl controls the main breaker
 func (h *Handlers) BMSBreakerControl(c *gin.Context) {
 	var request struct {

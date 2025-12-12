@@ -43,6 +43,7 @@ const (
 	CmdActivePowerRegister   = 862
 	CmdReactivePowerRegister = 867
 	HeartbeatRegister        = 8027
+	SystemResetRegister      = 41
 )
 
 // Run Commands
