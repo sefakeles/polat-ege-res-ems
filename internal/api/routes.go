@@ -65,6 +65,7 @@ func SetupRoutes(handlers *Handlers) *gin.Engine {
 			plcGroup.POST("/auxiliary-cb", handlers.ControlAuxiliaryCB)
 			plcGroup.POST("/mv-aux-transformer-cb", handlers.ControlMVAuxTransformerCB)
 			plcGroup.POST("/transformer-cb", handlers.ControlTransformerCB)
+			plcGroup.POST("/autoproducer-cb", handlers.ControlAutoproducerCB)
 			plcGroup.POST("/reset-all", handlers.ResetAllCircuitBreakers)
 		}
 	}

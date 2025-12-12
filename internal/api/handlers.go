@@ -763,6 +763,44 @@ func (h *Handlers) ControlTransformerCB(c *gin.Context) {
 	})
 }
 
+// ControlAutoproducerCB controls the autoproducer circuit breaker
+func (h *Handlers) ControlAutoproducerCB(c *gin.Context) {
+	var request struct {
+		ID    int   `json:"id" binding:"required"`
+		Close *bool `json:"close" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	service, err := h.plcManager.GetService(request.ID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := service.ControlAutoproducerCB(*request.Close); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	action := "opened"
+	if *request.Close {
+		action = "closed"
+	}
+
+	h.log.Info("Autoproducer CB control executed",
+		logger.String("action", action),
+		logger.String("client_ip", c.ClientIP()))
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": fmt.Sprintf("Autoproducer CB %s successfully", action),
+		"close":   *request.Close,
+	})
+}
+
 // ResetAllCircuitBreakers opens all circuit breakers (emergency function)
 func (h *Handlers) ResetAllCircuitBreakers(c *gin.Context) {
 	var request struct {
