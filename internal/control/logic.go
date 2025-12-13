@@ -114,6 +114,17 @@ func (l *Logic) checkBMSPCSPairs() {
 		shouldStopPCS := false
 		reason := ""
 
+		// Get PCS data to check power direction
+		pcsService, err := l.pcsManager.GetService(pcsID)
+		if err != nil {
+			l.log.Error("Failed to get PCS service",
+				logger.Err(err),
+				logger.Int("pcs_id", pcsID))
+			continue
+		}
+		pcsCommandState := pcsService.GetCommandState()
+		pcsPower := pcsCommandState.ActivePowerCommand
+
 		// Check BMS1 for this PCS
 		bms1Service, err := l.bmsManager.GetService(bms1ID)
 		if err == nil {
@@ -126,14 +137,14 @@ func (l *Logic) checkBMSPCSPairs() {
 				reason = fmt.Sprintf("BMS%d in fault state", bms1ID)
 			}
 
-			// Check for high SOC during charging
-			if bms.IsFullChargeState(bmsStatusData.SystemStatus) && float32(bmsData.SOC) >= l.config.MaxSOC {
+			// Check for high SOC during charging (negative power)
+			if bms.IsFullChargeState(bmsStatusData.SystemStatus) || (pcsPower < 0 && float32(bmsData.SOC) >= l.config.MaxSOC) {
 				shouldStopPCS = true
 				reason = fmt.Sprintf("BMS%d SOC at MaxSOC during charging", bms1ID)
 			}
 
-			// Check for low SOC during discharging
-			if bms.IsFullDischargeState(bmsStatusData.SystemStatus) && float32(bmsData.SOC) <= l.config.MinSOC {
+			// Check for low SOC during discharging (positive power)
+			if bms.IsFullDischargeState(bmsStatusData.SystemStatus) || (pcsPower > 0 && float32(bmsData.SOC) <= l.config.MinSOC) {
 				shouldStopPCS = true
 				reason = fmt.Sprintf("BMS%d SOC at MinSOC during discharging", bms1ID)
 			}
@@ -155,8 +166,8 @@ func (l *Logic) checkBMSPCSPairs() {
 				}
 			}
 
-			// Check for high SOC during charging
-			if bms.IsFullChargeState(bmsStatusData.SystemStatus) && float32(bmsData.SOC) >= l.config.MaxSOC {
+			// Check for high SOC during charging (negative power)
+			if bms.IsFullChargeState(bmsStatusData.SystemStatus) || (pcsPower < 0 && float32(bmsData.SOC) >= l.config.MaxSOC) {
 				shouldStopPCS = true
 				if reason != "" {
 					reason += fmt.Sprintf(", BMS%d SOC at MaxSOC during charging", bms2ID)
@@ -165,8 +176,8 @@ func (l *Logic) checkBMSPCSPairs() {
 				}
 			}
 
-			// Check for low SOC during discharging
-			if bms.IsFullDischargeState(bmsStatusData.SystemStatus) && float32(bmsData.SOC) <= l.config.MinSOC {
+			// Check for low SOC during discharging (positive power)
+			if bms.IsFullDischargeState(bmsStatusData.SystemStatus) || (pcsPower > 0 && float32(bmsData.SOC) <= l.config.MinSOC) {
 				shouldStopPCS = true
 				if reason != "" {
 					reason += fmt.Sprintf(", BMS%d SOC at MinSOC during discharging", bms2ID)
@@ -178,14 +189,6 @@ func (l *Logic) checkBMSPCSPairs() {
 
 		// Stop PCS if needed
 		if shouldStopPCS {
-			pcsService, err := l.pcsManager.GetService(pcsID)
-			if err != nil {
-				l.log.Error("Failed to get PCS service",
-					logger.Err(err),
-					logger.Int("pcs_id", pcsID))
-				continue
-			}
-
 			l.log.Warn("Stopping PCS due to BMS condition",
 				logger.Int("pcs_id", pcsID),
 				logger.String("reason", reason))
