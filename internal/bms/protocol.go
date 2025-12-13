@@ -54,12 +54,12 @@ const (
 
 // State Codes
 const (
-	StateInitial     = 0
-	StateNormal      = 1
-	StateCharging    = 2
-	StateDischarging = 3
-	StateWarning     = 4
-	StateFault       = 5
+	StateInitial       = 0
+	StateNormal        = 1
+	StateFullCharge    = 2
+	StateFullDischarge = 3
+	StateWarning       = 4
+	StateFault         = 5
 )
 
 // AlarmDefinition defines the properties of an alarm
@@ -274,10 +274,10 @@ func GetStateDescription(state uint16) string {
 		return "Initial"
 	case StateNormal:
 		return "Normal"
-	case StateCharging:
-		return "Charging"
-	case StateDischarging:
-		return "Discharging"
+	case StateFullCharge:
+		return "Full Charge"
+	case StateFullDischarge:
+		return "Full Discharge"
 	case StateWarning:
 		return "Warning"
 	case StateFault:
@@ -292,14 +292,14 @@ func IsNormalState(state uint16) bool {
 	return state == StateNormal
 }
 
-// IsChargingState checks if the state is charging
-func IsChargingState(state uint16) bool {
-	return state == StateCharging
+// IsFullChargeState checks if the state is full charge
+func IsFullChargeState(state uint16) bool {
+	return state == StateFullCharge
 }
 
-// IsDischargingState checks if the state is discharging
-func IsDischargingState(state uint16) bool {
-	return state == StateDischarging
+// IsFullDischargeState checks if the state is full discharge
+func IsFullDischargeState(state uint16) bool {
+	return state == StateFullDischarge
 }
 
 // IsWarningState checks if the state is warning

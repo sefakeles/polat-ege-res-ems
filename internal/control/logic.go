@@ -127,13 +127,13 @@ func (l *Logic) checkBMSPCSPairs() {
 			}
 
 			// Check for high SOC during charging
-			if bms.IsChargingState(bmsStatusData.SystemStatus) && float32(bmsData.SOC) >= l.config.MaxSOC {
+			if bms.IsFullChargeState(bmsStatusData.SystemStatus) && float32(bmsData.SOC) >= l.config.MaxSOC {
 				shouldStopPCS = true
 				reason = fmt.Sprintf("BMS%d SOC at MaxSOC during charging", bms1ID)
 			}
 
 			// Check for low SOC during discharging
-			if bms.IsDischargingState(bmsStatusData.SystemStatus) && float32(bmsData.SOC) <= l.config.MinSOC {
+			if bms.IsFullDischargeState(bmsStatusData.SystemStatus) && float32(bmsData.SOC) <= l.config.MinSOC {
 				shouldStopPCS = true
 				reason = fmt.Sprintf("BMS%d SOC at MinSOC during discharging", bms1ID)
 			}
@@ -156,7 +156,7 @@ func (l *Logic) checkBMSPCSPairs() {
 			}
 
 			// Check for high SOC during charging
-			if bms.IsChargingState(bmsStatusData.SystemStatus) && float32(bmsData.SOC) >= l.config.MaxSOC {
+			if bms.IsFullChargeState(bmsStatusData.SystemStatus) && float32(bmsData.SOC) >= l.config.MaxSOC {
 				shouldStopPCS = true
 				if reason != "" {
 					reason += fmt.Sprintf(", BMS%d SOC at MaxSOC during charging", bms2ID)
@@ -166,7 +166,7 @@ func (l *Logic) checkBMSPCSPairs() {
 			}
 
 			// Check for low SOC during discharging
-			if bms.IsDischargingState(bmsStatusData.SystemStatus) && float32(bmsData.SOC) <= l.config.MinSOC {
+			if bms.IsFullDischargeState(bmsStatusData.SystemStatus) && float32(bmsData.SOC) <= l.config.MinSOC {
 				shouldStopPCS = true
 				if reason != "" {
 					reason += fmt.Sprintf(", BMS%d SOC at MinSOC during discharging", bms2ID)
