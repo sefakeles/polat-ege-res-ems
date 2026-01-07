@@ -19,7 +19,7 @@ const (
 	FreqFCRNDeadband = 0.1  // Full activation at ±0.1 Hz
 
 	// NEM/AEM power factors (as fraction of capacity)
-	NEMPowerFactor = 0.34 // NEM power is 0.34 * C_FCR-N
+	NEMPowerFactor = 0.10 // NEM power is 0.10 * C_FCR-N
 
 	// Rolling average window size (5 minutes at 1 second resolution)
 	RollingAverageWindowSize = 300
