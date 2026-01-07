@@ -10,6 +10,7 @@ import (
 	"powerkonnekt/ems/internal/bms"
 	"powerkonnekt/ems/internal/control"
 	"powerkonnekt/ems/internal/database"
+	"powerkonnekt/ems/internal/fcr"
 	"powerkonnekt/ems/internal/health"
 	"powerkonnekt/ems/internal/pcs"
 	"powerkonnekt/ems/internal/plc"
@@ -25,6 +26,7 @@ type Handlers struct {
 	pcsManager      *pcs.Manager
 	plcManager      *plc.Manager
 	windFarmManager *windfarm.Manager
+	fcrnService     *fcr.Service
 	alarmManager    *alarm.Manager
 	controlLogic    *control.Logic
 	healthService   *health.HealthService
@@ -37,6 +39,7 @@ func NewHandlers(
 	pcsManager *pcs.Manager,
 	plcManager *plc.Manager,
 	windFarmManager *windfarm.Manager,
+	fcrnService *fcr.Service,
 	alarmManager *alarm.Manager,
 	controlLogic *control.Logic,
 	healthService *health.HealthService,
@@ -51,6 +54,7 @@ func NewHandlers(
 		pcsManager:      pcsManager,
 		plcManager:      plcManager,
 		windFarmManager: windFarmManager,
+		fcrnService:     fcrnService,
 		alarmManager:    alarmManager,
 		controlLogic:    controlLogic,
 		healthService:   healthService,
@@ -861,8 +865,8 @@ func (h *Handlers) GetWindFarmData(c *gin.Context) {
 	data := service.GetLatestData()
 
 	c.JSON(http.StatusOK, gin.H{
-		"data":      data,
-		"connected": service.IsConnected(),
+		"data":       data,
+		"connected":  service.IsConnected(),
 		"fcu_online": service.IsFCUOnline(),
 	})
 }

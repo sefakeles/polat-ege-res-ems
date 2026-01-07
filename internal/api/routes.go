@@ -85,6 +85,12 @@ func SetupRoutes(handlers *Handlers) *gin.Engine {
 			windFarmGroup.POST("/power-factor-setpoint", handlers.SetWindFarmPowerFactorSetpoint)
 			windFarmGroup.POST("/rapid-downward", handlers.SetWindFarmRapidDownward)
 		}
+
+		// FCR-N endpoints
+		if handlers.fcrnService != nil {
+			fcrnHandlers := NewFCRNHandlers(handlers.fcrnService)
+			fcrnHandlers.RegisterRoutes(api)
+		}
 	}
 
 	return router
