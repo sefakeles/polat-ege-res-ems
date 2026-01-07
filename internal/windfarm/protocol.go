@@ -13,14 +13,14 @@ const (
 	PowerFactorSetpointAddr = 612
 
 	// Wind farm control
-	WindFarmStartStopAddr   = 629
-	RapidDownwardSignalAddr = 639
+	WindFarmStartStopAddr   = 630
+	RapidDownwardSignalAddr = 640
 )
 
 const (
 	// Return values length
-	ReturnValuesStartAddr = 649
-	ReturnValuesLength    = 41 // 649-689
+	ReturnValuesStartAddr = 650
+	ReturnValuesLength    = 41
 )
 
 const (
