@@ -295,3 +295,103 @@ type RuntimeMetrics struct {
 	TotalAllocMB float64 `json:"total_alloc_mb"`
 	LookupsTotal uint64  `json:"lookups_total"`
 }
+
+// =============================================================================
+// Wind Farm (ENERCON FCU) Data Models
+// =============================================================================
+
+// WindFarmData represents aggregated wind farm data
+type WindFarmData struct {
+	MeasuringData WindFarmMeasuringData `json:"measuring_data"`
+	StatusData    WindFarmStatusData    `json:"status_data"`
+	SetpointData  WindFarmSetpointData  `json:"setpoint_data"`
+	WeatherData   WindFarmWeatherData   `json:"weather_data"`
+}
+
+// WindFarmMeasuringData represents real-time measuring data at NCP (Network Connection Point)
+type WindFarmMeasuringData struct {
+	Timestamp                 time.Time `json:"timestamp"`
+	ID                        int       `json:"id"`
+	ActivePowerNCP            float32   `json:"active_power_ncp"`            // MW, scale 0.01
+	ReactivePowerNCP          float32   `json:"reactive_power_ncp"`          // Mvar, scale 0.01
+	VoltageNCP                float32   `json:"voltage_ncp"`                 // kV, scale 0.01
+	CurrentNCP                float32   `json:"current_ncp"`                 // A, scale 0.1
+	PowerFactorNCP            float32   `json:"power_factor_ncp"`            // scale 0.001
+	FrequencyNCP              float32   `json:"frequency_ncp"`               // Hz, scale 0.01
+	WECAvailability           uint16    `json:"wec_availability"`            // %
+	WindSpeed                 float32   `json:"wind_speed"`                  // m/s, scale 0.01
+	WindDirection             uint16    `json:"wind_direction"`              // degrees
+	PossibleWECPower          float32   `json:"possible_wec_power"`          // MW, scale 0.01
+	WECCommunication          uint16    `json:"wec_communication"`           // %
+	RelativePowerAvailability float32   `json:"relative_power_availability"` // %, scale 0.01
+	AbsolutePowerAvailability float32   `json:"absolute_power_availability"` // MW, scale 0.01/0.1
+	RelativeMinReactivePower  float32   `json:"relative_min_reactive_power"` // %, scale 0.01
+	AbsoluteMinReactivePower  float32   `json:"absolute_min_reactive_power"` // MVar, scale 0.01/0.1
+	RelativeMaxReactivePower  float32   `json:"relative_max_reactive_power"` // %, scale 0.01
+	AbsoluteMaxReactivePower  float32   `json:"absolute_max_reactive_power"` // MVar, scale 0.01/0.1
+}
+
+// WindFarmStatusData represents FCU status data
+type WindFarmStatusData struct {
+	Timestamp                 time.Time `json:"timestamp"`
+	ID                        int       `json:"id"`
+	FCUOnline                 bool      `json:"fcu_online"`
+	FCUMode                   uint16    `json:"fcu_mode"`                    // 0=Standard, 2=Master
+	FCUHeartbeatCounter       uint16    `json:"fcu_heartbeat_counter"`       // Increments once per second
+	ActivePowerControlMode    uint16    `json:"active_power_control_mode"`   // 0=Open, 1=Closed
+	ReactivePowerControlMode  uint16    `json:"reactive_power_control_mode"` // 0=Q, 1=U, 2=CosPhi, 3=Q(dU)
+	WindFarmRunning           bool      `json:"wind_farm_running"`           // Start/Stop status
+	RapidDownwardSignalActive bool      `json:"rapid_downward_signal_active"`
+}
+
+// WindFarmSetpointData represents setpoint values (both commanded and current)
+type WindFarmSetpointData struct {
+	Timestamp time.Time `json:"timestamp"`
+	ID        int       `json:"id"`
+	// Commanded setpoints (mirrors)
+	PSetpointMirror          float32 `json:"p_setpoint_mirror"`          // %, scale 0.01
+	QSetpointMirror          float32 `json:"q_setpoint_mirror"`          // %, scale 0.01
+	PowerFactorMirror        float32 `json:"power_factor_mirror"`        // scale 0.001
+	USetpointMirror          float32 `json:"u_setpoint_mirror"`          // %, scale 0.01
+	QdUSetpointMirror        float32 `json:"qdu_setpoint_mirror"`        // %, scale 0.01
+	DPDtMinMirror            float32 `json:"dpdt_min_mirror"`            // p.u./min, scale 0.001
+	DPDtMaxMirror            float32 `json:"dpdt_max_mirror"`            // p.u./min, scale 0.001
+	FrequencyReserveCapacity uint16  `json:"frequency_reserve_capacity"` // %
+	PfDeadbandMirror         float32 `json:"pf_deadband_mirror"`         // Hz, scale 0.001
+	PfSlopeMirror            float32 `json:"pf_slope_mirror"`            // p.u./Hz, scale 0.001
+	// Currently used setpoints
+	PSetpointCurrent   float32 `json:"p_setpoint_current"`   // %, scale 0.01
+	QSetpointCurrent   float32 `json:"q_setpoint_current"`   // %, scale 0.01
+	PowerFactorCurrent float32 `json:"power_factor_current"` // scale 0.001
+	USetpointCurrent   float32 `json:"u_setpoint_current"`   // %, scale 0.01
+	QdUSetpointCurrent float32 `json:"qdu_setpoint_current"` // %, scale 0.01
+}
+
+// WindFarmWeatherData represents weather/meteo data
+type WindFarmWeatherData struct {
+	Timestamp                time.Time `json:"timestamp"`
+	ID                       int       `json:"id"`
+	WindSpeedMeteo           float32   `json:"wind_speed_meteo"`        // m/s, scale 0.1
+	WindDirectionMeteo       float32   `json:"wind_direction_meteo"`    // degrees, scale 0.1
+	OutsideTemperature       float32   `json:"outside_temperature"`     // °C, scale 0.1
+	AtmosphericPressure      uint16    `json:"atmospheric_pressure"`    // mbar
+	AirHumidity              float32   `json:"air_humidity"`            // %, scale 0.1
+	RainfallVolume           float32   `json:"rainfall_volume"`         // l/m²h, scale 0.01
+	SolarRadiation           float32   `json:"solar_radiation"`         // W/m², scale 0.1
+	WindFarmCommunication    uint16    `json:"wind_farm_communication"` // %
+	WeatherMeasurementsCount uint16    `json:"weather_measurements_count"`
+}
+
+// WindFarmCommandState represents the current command state for the wind farm
+type WindFarmCommandState struct {
+	LastUpdated              time.Time `json:"last_updated"`
+	HeartbeatCounter         uint16    `json:"heartbeat_counter"`
+	ActivePowerControlMode   uint16    `json:"active_power_control_mode"`
+	ReactivePowerControlMode uint16    `json:"reactive_power_control_mode"`
+	PSetpoint                float32   `json:"p_setpoint"`
+	QSetpoint                float32   `json:"q_setpoint"`
+	PowerFactorSetpoint      float32   `json:"power_factor_setpoint"`
+	USetpoint                float32   `json:"u_setpoint"`
+	WindFarmStartStop        uint16    `json:"wind_farm_start_stop"`
+	RapidDownwardSignal      uint16    `json:"rapid_downward_signal"`
+}

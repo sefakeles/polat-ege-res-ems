@@ -12,21 +12,23 @@ import (
 	"powerkonnekt/ems/internal/modbus"
 	"powerkonnekt/ems/internal/pcs"
 	"powerkonnekt/ems/internal/plc"
+	"powerkonnekt/ems/internal/windfarm"
 	"powerkonnekt/ems/pkg/logger"
 )
 
 type Container struct {
-	Config         *config.Config
-	InfluxDB       *database.InfluxDB
-	PostgresDB     *database.PostgresDB
-	BMSManager     *bms.Manager
-	PCSManager     *pcs.Manager
-	PLCManager     *plc.Manager
-	ControlLogic   *control.Logic
-	AlarmManager   *alarm.Manager
-	MetricsManager *metrics.Manager
-	ModbusServer   *modbus.Server
-	log            logger.Logger
+	Config          *config.Config
+	InfluxDB        *database.InfluxDB
+	PostgresDB      *database.PostgresDB
+	BMSManager      *bms.Manager
+	PCSManager      *pcs.Manager
+	PLCManager      *plc.Manager
+	WindFarmManager *windfarm.Manager
+	ControlLogic    *control.Logic
+	AlarmManager    *alarm.Manager
+	MetricsManager  *metrics.Manager
+	ModbusServer    *modbus.Server
+	log             logger.Logger
 }
 
 func NewContainer(cfg *config.Config) (*Container, error) {
@@ -58,6 +60,7 @@ func NewContainer(cfg *config.Config) (*Container, error) {
 	bmsManager := bms.NewManager(cfg.BMS, influxDB, alarmManager)
 	pcsManager := pcs.NewManager(cfg.PCS, influxDB, alarmManager)
 	plcManager := plc.NewManager(cfg.PLC, influxDB, alarmManager)
+	windFarmManager := windfarm.NewManager(cfg.WindFarm, influxDB)
 
 	// Initialize control logic with managers
 	controlLogic := control.NewLogic(bmsManager, pcsManager, cfg.EMS)
@@ -69,17 +72,18 @@ func NewContainer(cfg *config.Config) (*Container, error) {
 	}
 
 	container := &Container{
-		Config:         cfg,
-		InfluxDB:       influxDB,
-		PostgresDB:     postgresDB,
-		BMSManager:     bmsManager,
-		PCSManager:     pcsManager,
-		PLCManager:     plcManager,
-		ControlLogic:   controlLogic,
-		AlarmManager:   alarmManager,
-		MetricsManager: metricsManager,
-		ModbusServer:   modbusServer,
-		log:            containerLogger,
+		Config:          cfg,
+		InfluxDB:        influxDB,
+		PostgresDB:      postgresDB,
+		BMSManager:      bmsManager,
+		PCSManager:      pcsManager,
+		PLCManager:      plcManager,
+		WindFarmManager: windFarmManager,
+		ControlLogic:    controlLogic,
+		AlarmManager:    alarmManager,
+		MetricsManager:  metricsManager,
+		ModbusServer:    modbusServer,
+		log:             containerLogger,
 	}
 
 	containerLogger.Info("Dependency injection container initialized successfully")

@@ -438,6 +438,98 @@ func (db *InfluxDB) WriteRuntimeMetrics(data RuntimeMetrics) error {
 	return nil
 }
 
+// WriteWindFarmMeasuringData writes wind farm measuring data to InfluxDB
+func (db *InfluxDB) WriteWindFarmMeasuringData(data WindFarmMeasuringData) error {
+	point := influxdb2.NewPointWithMeasurement("windfarm_measuring").
+		AddTag("id", fmt.Sprintf("%d", data.ID)).
+		AddField("active_power_ncp", data.ActivePowerNCP).
+		AddField("reactive_power_ncp", data.ReactivePowerNCP).
+		AddField("voltage_ncp", data.VoltageNCP).
+		AddField("current_ncp", data.CurrentNCP).
+		AddField("power_factor_ncp", data.PowerFactorNCP).
+		AddField("frequency_ncp", data.FrequencyNCP).
+		AddField("wec_availability", data.WECAvailability).
+		AddField("wind_speed", data.WindSpeed).
+		AddField("wind_direction", data.WindDirection).
+		AddField("possible_wec_power", data.PossibleWECPower).
+		AddField("wec_communication", data.WECCommunication).
+		AddField("relative_power_availability", data.RelativePowerAvailability).
+		AddField("absolute_power_availability", data.AbsolutePowerAvailability).
+		AddField("relative_min_reactive_power", data.RelativeMinReactivePower).
+		AddField("absolute_min_reactive_power", data.AbsoluteMinReactivePower).
+		AddField("relative_max_reactive_power", data.RelativeMaxReactivePower).
+		AddField("absolute_max_reactive_power", data.AbsoluteMaxReactivePower).
+		SetTime(data.Timestamp)
+
+	db.writeAPI.WritePoint(point)
+
+	return nil
+}
+
+// WriteWindFarmStatusData writes wind farm status data to InfluxDB
+func (db *InfluxDB) WriteWindFarmStatusData(data WindFarmStatusData) error {
+	point := influxdb2.NewPointWithMeasurement("windfarm_status").
+		AddTag("id", fmt.Sprintf("%d", data.ID)).
+		AddField("fcu_online", data.FCUOnline).
+		AddField("fcu_mode", data.FCUMode).
+		AddField("fcu_heartbeat_counter", data.FCUHeartbeatCounter).
+		AddField("active_power_control_mode", data.ActivePowerControlMode).
+		AddField("reactive_power_control_mode", data.ReactivePowerControlMode).
+		AddField("wind_farm_running", data.WindFarmRunning).
+		AddField("rapid_downward_signal_active", data.RapidDownwardSignalActive).
+		SetTime(data.Timestamp)
+
+	db.writeAPI.WritePoint(point)
+
+	return nil
+}
+
+// WriteWindFarmSetpointData writes wind farm setpoint data to InfluxDB
+func (db *InfluxDB) WriteWindFarmSetpointData(data WindFarmSetpointData) error {
+	point := influxdb2.NewPointWithMeasurement("windfarm_setpoint").
+		AddTag("id", fmt.Sprintf("%d", data.ID)).
+		AddField("p_setpoint_mirror", data.PSetpointMirror).
+		AddField("q_setpoint_mirror", data.QSetpointMirror).
+		AddField("power_factor_mirror", data.PowerFactorMirror).
+		AddField("u_setpoint_mirror", data.USetpointMirror).
+		AddField("qdu_setpoint_mirror", data.QdUSetpointMirror).
+		AddField("dpdt_min_mirror", data.DPDtMinMirror).
+		AddField("dpdt_max_mirror", data.DPDtMaxMirror).
+		AddField("frequency_reserve_capacity", data.FrequencyReserveCapacity).
+		AddField("pf_deadband_mirror", data.PfDeadbandMirror).
+		AddField("pf_slope_mirror", data.PfSlopeMirror).
+		AddField("p_setpoint_current", data.PSetpointCurrent).
+		AddField("q_setpoint_current", data.QSetpointCurrent).
+		AddField("power_factor_current", data.PowerFactorCurrent).
+		AddField("u_setpoint_current", data.USetpointCurrent).
+		AddField("qdu_setpoint_current", data.QdUSetpointCurrent).
+		SetTime(data.Timestamp)
+
+	db.writeAPI.WritePoint(point)
+
+	return nil
+}
+
+// WriteWindFarmWeatherData writes wind farm weather data to InfluxDB
+func (db *InfluxDB) WriteWindFarmWeatherData(data WindFarmWeatherData) error {
+	point := influxdb2.NewPointWithMeasurement("windfarm_weather").
+		AddTag("id", fmt.Sprintf("%d", data.ID)).
+		AddField("wind_speed_meteo", data.WindSpeedMeteo).
+		AddField("wind_direction_meteo", data.WindDirectionMeteo).
+		AddField("outside_temperature", data.OutsideTemperature).
+		AddField("atmospheric_pressure", data.AtmosphericPressure).
+		AddField("air_humidity", data.AirHumidity).
+		AddField("rainfall_volume", data.RainfallVolume).
+		AddField("solar_radiation", data.SolarRadiation).
+		AddField("wind_farm_communication", data.WindFarmCommunication).
+		AddField("weather_measurements_count", data.WeatherMeasurementsCount).
+		SetTime(data.Timestamp)
+
+	db.writeAPI.WritePoint(point)
+
+	return nil
+}
+
 // Flush forces writing of any buffered data
 func (db *InfluxDB) Flush() {
 	db.writeAPI.Flush()

@@ -14,6 +14,7 @@ type Config struct {
 	PCS          []PCSConfig        `mapstructure:"pcs" validate:"required,min=1,dive"`
 	BMS          []BMSConfig        `mapstructure:"bms" validate:"required,min=1,dive"`
 	PLC          []PLCConfig        `mapstructure:"plc" validate:"required,min=1,dive"`
+	WindFarm     []WindFarmConfig   `mapstructure:"windfarm" validate:"required,min=1,dive"`
 	EMS          EMSConfig          `mapstructure:"ems" validate:"required"`
 	InfluxDB     InfluxDBConfig     `mapstructure:"influxdb" validate:"required"`
 	PostgreSQL   PostgreSQLConfig   `mapstructure:"postgresql" validate:"required"`
@@ -61,6 +62,19 @@ type PLCConfig struct {
 	ReconnectDelay  time.Duration `mapstructure:"reconnect_delay" validate:"required"`
 	PollInterval    time.Duration `mapstructure:"poll_interval" validate:"required"`
 	PersistInterval time.Duration `mapstructure:"persist_interval" validate:"required"`
+}
+
+// WindFarmConfig contains Wind Farm (ENERCON FCU) specific configuration
+type WindFarmConfig struct {
+	ID                int           `mapstructure:"id" validate:"required,min=1"`
+	Host              string        `mapstructure:"host" validate:"required,hostname_rfc1123|ip"`
+	Port              int           `mapstructure:"port" validate:"required,min=1,max=65535"`
+	SlaveID           byte          `mapstructure:"slave_id" validate:"required,min=1,max=255"`
+	Timeout           time.Duration `mapstructure:"timeout" validate:"required"`
+	ReconnectDelay    time.Duration `mapstructure:"reconnect_delay" validate:"required"`
+	PollInterval      time.Duration `mapstructure:"poll_interval" validate:"required"`
+	HeartbeatInterval time.Duration `mapstructure:"heartbeat_interval" validate:"required"`
+	PersistInterval   time.Duration `mapstructure:"persist_interval" validate:"required"`
 }
 
 // EMSConfig contains EMS-specific configuration
