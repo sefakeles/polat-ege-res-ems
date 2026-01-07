@@ -92,6 +92,10 @@ func (e *EMS) Start() error {
 		return fmt.Errorf("failed to start PLC services: %w", err)
 	}
 
+	if err := e.container.WindFarmManager.Start(); err != nil {
+		return fmt.Errorf("failed to start Wind Farm services: %w", err)
+	}
+
 	// Start Modbus server
 	if err := e.container.ModbusServer.Start(); err != nil {
 		return fmt.Errorf("failed to start Modbus server: %w", err)
@@ -132,6 +136,7 @@ func (e *EMS) Stop() {
 	e.container.BMSManager.Stop()
 	e.container.PCSManager.Stop()
 	e.container.PLCManager.Stop()
+	e.container.WindFarmManager.Stop()
 	e.container.MetricsManager.Stop()
 
 	// Close databases
