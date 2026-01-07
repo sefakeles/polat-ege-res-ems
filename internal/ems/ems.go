@@ -177,6 +177,7 @@ func (e *EMS) setupHTTPServer() {
 		e.container.BMSManager,
 		e.container.PCSManager,
 		e.container.PLCManager,
+		e.container.WindFarmManager,
 		e.container.AlarmManager,
 		e.container.ControlLogic,
 		e.healthService,

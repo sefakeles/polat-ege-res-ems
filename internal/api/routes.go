@@ -68,6 +68,23 @@ func SetupRoutes(handlers *Handlers) *gin.Engine {
 			plcGroup.POST("/autoproducer-cb", handlers.ControlAutoproducerCB)
 			plcGroup.POST("/reset-all", handlers.ResetAllCircuitBreakers)
 		}
+
+		// Wind Farm endpoints
+		windFarmGroup := api.Group("/windfarm")
+		{
+			// Data endpoints
+			windFarmGroup.GET("/data/:id", handlers.GetWindFarmData)
+			windFarmGroup.GET("/summary", handlers.GetWindFarmSummary)
+			windFarmGroup.GET("/command-state/:id", handlers.GetWindFarmCommandState)
+
+			// Control endpoints
+			windFarmGroup.POST("/start", handlers.StartWindFarm)
+			windFarmGroup.POST("/stop", handlers.StopWindFarm)
+			windFarmGroup.POST("/power-setpoint", handlers.SetWindFarmPowerSetpoint)
+			windFarmGroup.POST("/reactive-power-setpoint", handlers.SetWindFarmReactivePowerSetpoint)
+			windFarmGroup.POST("/power-factor-setpoint", handlers.SetWindFarmPowerFactorSetpoint)
+			windFarmGroup.POST("/rapid-downward", handlers.SetWindFarmRapidDownward)
+		}
 	}
 
 	return router

@@ -13,6 +13,7 @@ import (
 	"powerkonnekt/ems/internal/health"
 	"powerkonnekt/ems/internal/pcs"
 	"powerkonnekt/ems/internal/plc"
+	"powerkonnekt/ems/internal/windfarm"
 	"powerkonnekt/ems/pkg/logger"
 
 	"github.com/gin-gonic/gin"
@@ -20,13 +21,14 @@ import (
 
 // Handlers contains all API handlers
 type Handlers struct {
-	bmsManager    *bms.Manager
-	pcsManager    *pcs.Manager
-	plcManager    *plc.Manager
-	alarmManager  *alarm.Manager
-	controlLogic  *control.Logic
-	healthService *health.HealthService
-	log           logger.Logger
+	bmsManager      *bms.Manager
+	pcsManager      *pcs.Manager
+	plcManager      *plc.Manager
+	windFarmManager *windfarm.Manager
+	alarmManager    *alarm.Manager
+	controlLogic    *control.Logic
+	healthService   *health.HealthService
+	log             logger.Logger
 }
 
 // NewHandlers creates a new handlers instance
@@ -34,6 +36,7 @@ func NewHandlers(
 	bmsManager *bms.Manager,
 	pcsManager *pcs.Manager,
 	plcManager *plc.Manager,
+	windFarmManager *windfarm.Manager,
 	alarmManager *alarm.Manager,
 	controlLogic *control.Logic,
 	healthService *health.HealthService,
@@ -44,13 +47,14 @@ func NewHandlers(
 	)
 
 	return &Handlers{
-		bmsManager:    bmsManager,
-		pcsManager:    pcsManager,
-		plcManager:    plcManager,
-		alarmManager:  alarmManager,
-		controlLogic:  controlLogic,
-		healthService: healthService,
-		log:           handlersLogger,
+		bmsManager:      bmsManager,
+		pcsManager:      pcsManager,
+		plcManager:      plcManager,
+		windFarmManager: windFarmManager,
+		alarmManager:    alarmManager,
+		controlLogic:    controlLogic,
+		healthService:   healthService,
+		log:             handlersLogger,
 	}
 }
 
@@ -834,5 +838,268 @@ func (h *Handlers) ResetAllCircuitBreakers(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "All circuit breakers opened successfully",
+	})
+}
+
+// Wind Farm Handlers
+
+// GetWindFarmData returns wind farm data
+func (h *Handlers) GetWindFarmData(c *gin.Context) {
+	windFarmID := c.Param("id")
+	windFarmIDInt, err := strconv.Atoi(windFarmID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid wind farm ID"})
+		return
+	}
+
+	service, err := h.windFarmManager.GetService(windFarmIDInt)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+
+	data := service.GetLatestData()
+
+	c.JSON(http.StatusOK, gin.H{
+		"data":      data,
+		"connected": service.IsConnected(),
+		"fcu_online": service.IsFCUOnline(),
+	})
+}
+
+// GetWindFarmSummary returns aggregated data from all wind farms
+func (h *Handlers) GetWindFarmSummary(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{
+		"total_active_power":   h.windFarmManager.GetTotalActivePower(),
+		"total_reactive_power": h.windFarmManager.GetTotalReactivePower(),
+		"total_possible_power": h.windFarmManager.GetTotalPossiblePower(),
+		"average_wind_speed":   h.windFarmManager.GetAverageWindSpeed(),
+		"service_count":        h.windFarmManager.GetServiceCount(),
+		"all_fcus_online":      h.windFarmManager.AreAllFCUsOnline(),
+	})
+}
+
+// GetWindFarmCommandState returns wind farm command state
+func (h *Handlers) GetWindFarmCommandState(c *gin.Context) {
+	windFarmID := c.Param("id")
+	windFarmIDInt, err := strconv.Atoi(windFarmID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid wind farm ID"})
+		return
+	}
+
+	service, err := h.windFarmManager.GetService(windFarmIDInt)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+
+	commandState := service.GetCommandState()
+
+	c.JSON(http.StatusOK, gin.H{
+		"command_state": commandState,
+	})
+}
+
+// StartWindFarm starts a wind farm
+func (h *Handlers) StartWindFarm(c *gin.Context) {
+	var request struct {
+		ID int `json:"id" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	service, err := h.windFarmManager.GetService(request.ID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := service.StartWindFarm(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	h.log.Info("Wind farm start command executed",
+		logger.Int("id", request.ID),
+		logger.String("client_ip", c.ClientIP()))
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Wind farm start command sent successfully",
+	})
+}
+
+// StopWindFarm stops a wind farm
+func (h *Handlers) StopWindFarm(c *gin.Context) {
+	var request struct {
+		ID int `json:"id" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	service, err := h.windFarmManager.GetService(request.ID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := service.StopWindFarm(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	h.log.Info("Wind farm stop command executed",
+		logger.Int("id", request.ID),
+		logger.String("client_ip", c.ClientIP()))
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Wind farm stop command sent successfully",
+	})
+}
+
+// SetWindFarmPowerSetpoint sets the active power setpoint for a wind farm
+func (h *Handlers) SetWindFarmPowerSetpoint(c *gin.Context) {
+	var request struct {
+		ID       int      `json:"id" binding:"required"`
+		Setpoint *float32 `json:"setpoint" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	service, err := h.windFarmManager.GetService(request.ID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := service.SetPowerSetpoint(*request.Setpoint); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	h.log.Info("Wind farm power setpoint set",
+		logger.Int("id", request.ID),
+		logger.Float32("setpoint", *request.Setpoint),
+		logger.String("client_ip", c.ClientIP()))
+
+	c.JSON(http.StatusOK, gin.H{
+		"message":  "Power setpoint set successfully",
+		"setpoint": *request.Setpoint,
+	})
+}
+
+// SetWindFarmReactivePowerSetpoint sets the reactive power setpoint for a wind farm
+func (h *Handlers) SetWindFarmReactivePowerSetpoint(c *gin.Context) {
+	var request struct {
+		ID       int      `json:"id" binding:"required"`
+		Setpoint *float32 `json:"setpoint" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	service, err := h.windFarmManager.GetService(request.ID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := service.SetReactivePowerSetpoint(*request.Setpoint); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	h.log.Info("Wind farm reactive power setpoint set",
+		logger.Int("id", request.ID),
+		logger.Float32("setpoint", *request.Setpoint),
+		logger.String("client_ip", c.ClientIP()))
+
+	c.JSON(http.StatusOK, gin.H{
+		"message":  "Reactive power setpoint set successfully",
+		"setpoint": *request.Setpoint,
+	})
+}
+
+// SetWindFarmPowerFactorSetpoint sets the power factor setpoint for a wind farm
+func (h *Handlers) SetWindFarmPowerFactorSetpoint(c *gin.Context) {
+	var request struct {
+		ID       int      `json:"id" binding:"required"`
+		Setpoint *float32 `json:"setpoint" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	service, err := h.windFarmManager.GetService(request.ID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := service.SetPowerFactorSetpoint(*request.Setpoint); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	h.log.Info("Wind farm power factor setpoint set",
+		logger.Int("id", request.ID),
+		logger.Float32("setpoint", *request.Setpoint),
+		logger.String("client_ip", c.ClientIP()))
+
+	c.JSON(http.StatusOK, gin.H{
+		"message":  "Power factor setpoint set successfully",
+		"setpoint": *request.Setpoint,
+	})
+}
+
+// SetWindFarmRapidDownward sets the rapid downward signal for a wind farm
+func (h *Handlers) SetWindFarmRapidDownward(c *gin.Context) {
+	var request struct {
+		ID int   `json:"id" binding:"required"`
+		On *bool `json:"on" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	service, err := h.windFarmManager.GetService(request.ID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := service.SetRapidDownwardSignal(*request.On); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	status := "deactivated"
+	if *request.On {
+		status = "activated"
+	}
+
+	h.log.Info("Wind farm rapid downward signal set",
+		logger.Int("id", request.ID),
+		logger.Bool("on", *request.On),
+		logger.String("client_ip", c.ClientIP()))
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": fmt.Sprintf("Rapid downward signal %s successfully", status),
+		"on":      *request.On,
 	})
 }
