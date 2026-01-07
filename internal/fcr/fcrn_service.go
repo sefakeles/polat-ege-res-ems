@@ -288,7 +288,7 @@ func (s *Service) sendPowerCommand(power float64) error {
 	// ! Don't convert to float32 here, keep as float64 for bessService
 	pcsServices := s.pcsManager.GetAllServices()
 	for _, pcsService := range pcsServices {
-		if err := pcsService.SetActivePowerCommand(float32(power)); err != nil {
+		if err := pcsService.SetActivePowerCommand(float32(power / 4)); err != nil {
 			return fmt.Errorf("failed to send power command: %w", err)
 		}
 	}
