@@ -2,6 +2,7 @@ package pcs
 
 import (
 	"fmt"
+	"sync"
 
 	"powerkonnekt/ems/pkg/logger"
 )
@@ -126,49 +127,42 @@ func (s *Service) readWarnings() error {
 	return nil
 }
 
-// readPCSData reads all PCS data registers
+// readPCSData reads all PCS data registers concurrently
 func (s *Service) readPCSData() error {
+	var wg sync.WaitGroup
+	var mu sync.Mutex
 	var lastErr error
 
-	if err := s.readStatusData(); err != nil {
-		s.log.Error("Failed to read status data", logger.Err(err))
-		lastErr = err
+	// Read all register blocks concurrently
+	readFuncs := []struct {
+		name string
+		fn   func() error
+	}{
+		{"status", s.readStatusData},
+		{"equipment", s.readEquipmentData},
+		{"environment", s.readEnvironmentData},
+		{"dc_source", s.readDCSourceData},
+		{"grid", s.readGridData},
+		{"counter", s.readCounterData},
+		{"faults", s.readFaults},
+		{"warnings", s.readWarnings},
 	}
 
-	if err := s.readEquipmentData(); err != nil {
-		s.log.Error("Failed to read equipment data", logger.Err(err))
-		lastErr = err
+	wg.Add(len(readFuncs))
+
+	for _, rf := range readFuncs {
+		go func(name string, fn func() error) {
+			defer wg.Done()
+			if err := fn(); err != nil {
+				s.log.Error("Failed to read "+name+" data", logger.Err(err))
+				mu.Lock()
+				lastErr = err
+				mu.Unlock()
+			}
+		}(rf.name, rf.fn)
 	}
 
-	if err := s.readEnvironmentData(); err != nil {
-		s.log.Error("Failed to read environment data", logger.Err(err))
-		lastErr = err
-	}
-
-	if err := s.readDCSourceData(); err != nil {
-		s.log.Error("Failed to read DC source data", logger.Err(err))
-		lastErr = err
-	}
-
-	if err := s.readGridData(); err != nil {
-		s.log.Error("Failed to read grid data", logger.Err(err))
-		lastErr = err
-	}
-
-	if err := s.readCounterData(); err != nil {
-		s.log.Error("Failed to read counter data", logger.Err(err))
-		lastErr = err
-	}
-
-	if err := s.readFaults(); err != nil {
-		s.log.Error("Failed to read faults", logger.Err(err))
-		lastErr = err
-	}
-
-	if err := s.readWarnings(); err != nil {
-		s.log.Error("Failed to read warnings", logger.Err(err))
-		lastErr = err
-	}
+	wg.Wait()
 
 	return lastErr
 }
