@@ -8,32 +8,32 @@ import (
 )
 
 // ParseStatusData parses status data registers
-func ParseStatusData(data []byte, id int) database.PCSStatusData {
+func ParseStatusData(data []byte, id int, timestamp time.Time) database.PCSStatusData {
 	if len(data) < StatusDataLength*2 {
 		return database.PCSStatusData{
-			Timestamp: time.Now(),
+			Timestamp: timestamp,
 			ID:        id,
 		}
 	}
 
 	return database.PCSStatusData{
-		Timestamp: time.Now(),
+		Timestamp: timestamp,
 		ID:        id,
 		Status:    utils.FromBytes[uint16](data[0:2]), // 1003 - Status
 	}
 }
 
 // ParseEquipmentData parses equipment data registers
-func ParseEquipmentData(data []byte, id int) database.PCSEquipmentData {
+func ParseEquipmentData(data []byte, id int, timestamp time.Time) database.PCSEquipmentData {
 	if len(data) < EquipmentDataLength*2 {
 		return database.PCSEquipmentData{
-			Timestamp: time.Now(),
+			Timestamp: timestamp,
 			ID:        id,
 		}
 	}
 
 	return database.PCSEquipmentData{
-		Timestamp:              time.Now(),
+		Timestamp:              timestamp,
 		ID:                     id,
 		LVSwitchStatus:         utils.FromBytes[uint16](data[0:2]),   // 631 - LV switch status
 		MVSwitchStatus:         utils.FromBytes[uint16](data[4:6]),   // 633 - MV switch status
@@ -47,32 +47,32 @@ func ParseEquipmentData(data []byte, id int) database.PCSEquipmentData {
 }
 
 // ParseEnvironmentData parses environment data registers
-func ParseEnvironmentData(data []byte, id int) database.PCSEnvironmentData {
+func ParseEnvironmentData(data []byte, id int, timestamp time.Time) database.PCSEnvironmentData {
 	if len(data) < EnvironmentDataLength*2 {
 		return database.PCSEnvironmentData{
-			Timestamp: time.Now(),
+			Timestamp: timestamp,
 			ID:        id,
 		}
 	}
 
 	return database.PCSEnvironmentData{
-		Timestamp:           time.Now(),
+		Timestamp:           timestamp,
 		ID:                  id,
 		AirInletTemperature: utils.FromBytes[int16](data[0:2]), // 1104 - Air inlet temperature (°C)
 	}
 }
 
 // ParseDCSourceData parses DC source data registers
-func ParseDCSourceData(data []byte, id int) database.PCSDCSourceData {
+func ParseDCSourceData(data []byte, id int, timestamp time.Time) database.PCSDCSourceData {
 	if len(data) < DCSourceDataLength*2 {
 		return database.PCSDCSourceData{
-			Timestamp: time.Now(),
+			Timestamp: timestamp,
 			ID:        id,
 		}
 	}
 
 	return database.PCSDCSourceData{
-		Timestamp:  time.Now(),
+		Timestamp:  timestamp,
 		ID:         id,
 		DC1Power:   utils.FromBytes[int16](data[0:2]),    // 1372 - DC power of busbar 1 (kW)
 		DC2Power:   utils.FromBytes[int16](data[2:4]),    // 1373 - DC power of busbar 2 (kW)
@@ -86,16 +86,16 @@ func ParseDCSourceData(data []byte, id int) database.PCSDCSourceData {
 }
 
 // ParseGridData parses grid data registers
-func ParseGridData(data []byte, id int) database.PCSGridData {
+func ParseGridData(data []byte, id int, timestamp time.Time) database.PCSGridData {
 	if len(data) < GridDataLength*2 {
 		return database.PCSGridData{
-			Timestamp: time.Now(),
+			Timestamp: timestamp,
 			ID:        id,
 		}
 	}
 
 	return database.PCSGridData{
-		Timestamp:           time.Now(),
+		Timestamp:           timestamp,
 		ID:                  id,
 		MVGridVoltageAB:     utils.Scale(utils.FromBytes[uint16](data[0:2]), float32(0.1)),      // 4300 - MV grid voltage AB (0.1V)
 		MVGridVoltageBC:     utils.Scale(utils.FromBytes[uint16](data[2:4]), float32(0.1)),      // 4301 - MV grid voltage BC (0.1V)
@@ -122,16 +122,16 @@ func ParseGridData(data []byte, id int) database.PCSGridData {
 }
 
 // ParseCounterData parses counter data registers
-func ParseCounterData(data []byte, id int) database.PCSCounterData {
+func ParseCounterData(data []byte, id int, timestamp time.Time) database.PCSCounterData {
 	if len(data) < CounterDataLength*2 {
 		return database.PCSCounterData{
-			Timestamp: time.Now(),
+			Timestamp: timestamp,
 			ID:        id,
 		}
 	}
 
 	return database.PCSCounterData{
-		Timestamp:               time.Now(),
+		Timestamp:               timestamp,
 		ID:                      id,
 		ActiveEnergyToday:       utils.FromBytes[uint32](data[0:4]),   // 539-540 - Today's active energy (kWh)
 		ActiveEnergyYesterday:   utils.FromBytes[uint32](data[4:8]),   // 541-542 - Yesterday's active energy (kWh)

@@ -3,6 +3,7 @@ package pcs
 import (
 	"fmt"
 	"sync"
+	"time"
 
 	"powerkonnekt/ems/internal/database"
 	"powerkonnekt/ems/pkg/logger"
@@ -38,6 +39,9 @@ func (s *Service) readPCSData() error {
 	var mu sync.Mutex
 	var lastErr error
 
+	// Create a single timestamp for all data
+	timestamp := time.Now()
+
 	// Temporary storage for concurrent reads
 	var (
 		statusData      database.PCSStatusData
@@ -58,7 +62,7 @@ func (s *Service) readPCSData() error {
 			if err != nil {
 				return fmt.Errorf("failed to read registers: %w", err)
 			}
-			statusData = ParseStatusData(data, s.config.ID)
+			statusData = ParseStatusData(data, s.config.ID, timestamp)
 			return nil
 		}},
 		{"equipment", func() error {
@@ -66,7 +70,7 @@ func (s *Service) readPCSData() error {
 			if err != nil {
 				return fmt.Errorf("failed to read registers: %w", err)
 			}
-			equipmentData = ParseEquipmentData(data, s.config.ID)
+			equipmentData = ParseEquipmentData(data, s.config.ID, timestamp)
 			return nil
 		}},
 		{"environment", func() error {
@@ -74,7 +78,7 @@ func (s *Service) readPCSData() error {
 			if err != nil {
 				return fmt.Errorf("failed to read registers: %w", err)
 			}
-			environmentData = ParseEnvironmentData(data, s.config.ID)
+			environmentData = ParseEnvironmentData(data, s.config.ID, timestamp)
 			return nil
 		}},
 		{"dc_source", func() error {
@@ -82,7 +86,7 @@ func (s *Service) readPCSData() error {
 			if err != nil {
 				return fmt.Errorf("failed to read registers: %w", err)
 			}
-			dcSourceData = ParseDCSourceData(data, s.config.ID)
+			dcSourceData = ParseDCSourceData(data, s.config.ID, timestamp)
 			return nil
 		}},
 		{"grid", func() error {
@@ -90,7 +94,7 @@ func (s *Service) readPCSData() error {
 			if err != nil {
 				return fmt.Errorf("failed to read registers: %w", err)
 			}
-			gridData = ParseGridData(data, s.config.ID)
+			gridData = ParseGridData(data, s.config.ID, timestamp)
 			return nil
 		}},
 		{"counter", func() error {
@@ -98,7 +102,7 @@ func (s *Service) readPCSData() error {
 			if err != nil {
 				return fmt.Errorf("failed to read registers: %w", err)
 			}
-			counterData = ParseCounterData(data, s.config.ID)
+			counterData = ParseCounterData(data, s.config.ID, timestamp)
 			return nil
 		}},
 		{"faults", s.readFaults},
