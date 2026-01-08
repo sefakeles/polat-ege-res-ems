@@ -270,9 +270,14 @@ func (s *Service) updateSOC() error {
 	}
 	data := bmsService.GetLatestBMSData()
 
+	soc := data.SOC
+	if soc >= 60.0 || soc <= 40.0 {
+		soc = 50.0
+	}
+
 	// Update controller with SOC
 	// ! Converting to float64 for controller
-	s.controller.UpdateSOC(float64(data.SOC))
+	s.controller.UpdateSOC(float64(soc))
 	return nil
 }
 
