@@ -395,3 +395,39 @@ type WindFarmCommandState struct {
 	WindFarmStartStop        uint16    `json:"wind_farm_start_stop"`
 	RapidDownwardSignal      uint16    `json:"rapid_downward_signal"`
 }
+
+// TelemetryResponse represents the complete telemetry response
+type TelemetryResponse struct {
+	ParkName         string         `json:"park-name"`
+	Timestamp        string         `json:"timestamp"`
+	PowerplantStatus int            `json:"powerplant-status"`
+	GenerationData   GenerationData `json:"generation-data"`
+	BESSData         BESSData       `json:"bess-data"`
+	POIData          POIData        `json:"poi-data"`
+}
+
+// GenerationData represents generation unit data
+type GenerationData struct {
+	TotalActivePowerMW                  float64 `json:"total-active-power-mw"`
+	TotalReactivePowerMvar              float64 `json:"total-reactive-power-mvar"`
+	AmbientTemperatureCelcius           float64 `json:"ambient-temperature-celcius"`
+	CurrentMaximumActivePowerSetpointMW float64 `json:"current-maximum-active-power-setpoint-mw"`
+}
+
+// BESSData represents battery energy storage system data
+type BESSData struct {
+	TotalSOCMWh                    float64 `json:"total-soc-mwh"`
+	TotalSOCPercentage             float64 `json:"total-soc-percentage"`
+	TotalSOHPercentage             float64 `json:"total-soh-percentage"`
+	TotalAvailableCapacityMWh      float64 `json:"total-available-capacity-mwh"`
+	MaxAvailableChargingPowerMW    float64 `json:"max-available-charging-power-mw"`
+	MaxAvailableDischargingPowerMW float64 `json:"max-available-discharging-power-mw"`
+	CurrentActivePowerMW           float64 `json:"current-active-power-mw"`
+	CurrentActivePowerSetpointMW   float64 `json:"current-active-power-setpoint-mw"`
+}
+
+// POIData represents point of injection data
+type POIData struct {
+	CurrentPOIActivePowerMW   float64 `json:"current-poi-active-power-mw"`
+	CurrentPOIReactivePowerMW float64 `json:"current-poi-reactive-power-mw"`
+}

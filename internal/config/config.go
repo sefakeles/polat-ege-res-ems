@@ -80,6 +80,7 @@ type WindFarmConfig struct {
 
 // EMSConfig contains EMS-specific configuration
 type EMSConfig struct {
+	ParkName          string  `mapstructure:"park_name" validate:"required"`
 	HTTPPort          int     `mapstructure:"http_port" validate:"required,min=1,max=65535"`
 	MaxSOC            float32 `mapstructure:"max_soc" validate:"required,min=0,max=100,gtfield=MinSOC"`
 	MinSOC            float32 `mapstructure:"min_soc" validate:"required,min=0,max=100"`
@@ -178,6 +179,7 @@ func Load(configPath string) (*Config, error) {
 // bindEnvVariables explicitly binds all configuration keys to environment variables
 func bindEnvVariables(v *viper.Viper) {
 	// EMS
+	v.BindEnv("ems.park_name")
 	v.BindEnv("ems.http_port")
 	v.BindEnv("ems.max_soc")
 	v.BindEnv("ems.min_soc")
@@ -216,6 +218,7 @@ func bindEnvVariables(v *viper.Viper) {
 // setDefaults sets default configuration values
 func setDefaults(v *viper.Viper) {
 	// EMS defaults
+	v.SetDefault("ems.park_name", "polat-ege-res")
 	v.SetDefault("ems.http_port", 8080)
 	v.SetDefault("ems.max_soc", 90.0)
 	v.SetDefault("ems.min_soc", 10.0)

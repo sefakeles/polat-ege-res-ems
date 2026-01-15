@@ -8,6 +8,7 @@ import (
 
 	"powerkonnekt/ems/internal/alarm"
 	"powerkonnekt/ems/internal/bms"
+	"powerkonnekt/ems/internal/config"
 	"powerkonnekt/ems/internal/control"
 	"powerkonnekt/ems/internal/database"
 	"powerkonnekt/ems/internal/fcr"
@@ -30,6 +31,7 @@ type Handlers struct {
 	alarmManager    *alarm.Manager
 	controlLogic    *control.Logic
 	healthService   *health.HealthService
+	config          *config.Config
 	log             logger.Logger
 }
 
@@ -43,6 +45,7 @@ func NewHandlers(
 	alarmManager *alarm.Manager,
 	controlLogic *control.Logic,
 	healthService *health.HealthService,
+	config *config.Config,
 ) *Handlers {
 	// Create handlers-specific logger
 	handlersLogger := logger.With(
@@ -58,6 +61,7 @@ func NewHandlers(
 		alarmManager:    alarmManager,
 		controlLogic:    controlLogic,
 		healthService:   healthService,
+		config:          config,
 		log:             handlersLogger,
 	}
 }
@@ -1106,4 +1110,115 @@ func (h *Handlers) SetWindFarmRapidDownward(c *gin.Context) {
 		"message": fmt.Sprintf("Rapid downward signal %s successfully", status),
 		"on":      *request.On,
 	})
+}
+
+// GetTelemetry returns telemetry data in standard format
+func (h *Handlers) GetTelemetry(c *gin.Context) {
+	timestamp := time.Now().UTC()
+
+	// Initialize telemetry response
+	response := database.TelemetryResponse{
+		ParkName:         h.config.EMS.ParkName,
+		Timestamp:        timestamp.Format(time.RFC3339),
+		PowerplantStatus: 0, // 0 = Success
+	}
+
+	// Collect BESS data from all BMS units
+	bmsServices := h.bmsManager.GetAllServices()
+	var totalSOCMWh, totalSOCPercentage, totalSOHPercentage, totalCapacityMWh float64
+	var maxChargePowerMW, maxDischargePowerMW, currentActivePowerMW float64
+	var bmsCount int
+
+	for _, bmsService := range bmsServices {
+		if !bmsService.IsConnected() {
+			continue
+		}
+		bmsData := bmsService.GetLatestBMSData()
+
+		// Convert from kWh to MWh and accumulate
+		socMWh := float64(bmsData.SOC) * 1896.96 / 100.0 / 1000.0
+		totalSOCMWh += socMWh
+		totalSOCPercentage += float64(bmsData.SOC)
+		totalSOHPercentage += float64(bmsData.SOH)
+		totalCapacityMWh += 1896.96 / 1000.0 // Convert kWh to MWh
+
+		// Convert from kW to MW
+		maxChargePowerMW += float64(bmsData.MaxChargePower) / 1000.0
+		maxDischargePowerMW += float64(bmsData.MaxDischargePower) / 1000.0
+		currentActivePowerMW += float64(bmsData.Power) / 1000.0
+
+		bmsCount++
+	}
+
+	// Calculate averages for percentage values
+	if bmsCount > 0 {
+		totalSOCPercentage /= float64(bmsCount)
+		totalSOHPercentage /= float64(bmsCount)
+	}
+
+	// Collect PCS data for active power setpoint
+	pcsServices := h.pcsManager.GetAllServices()
+	var currentActivePowerSetpointMW float64
+	for _, pcsService := range pcsServices {
+		if !pcsService.IsConnected() {
+			continue
+		}
+		pcsCommandState := pcsService.GetCommandState()
+		// Convert from kW to MW
+		currentActivePowerSetpointMW += float64(pcsCommandState.ActivePowerCommand) * 3200.0 / 100.0 / 1000.0
+	}
+
+	response.BESSData = database.BESSData{
+		TotalSOCMWh:                    totalSOCMWh,
+		TotalSOCPercentage:             totalSOCPercentage,
+		TotalSOHPercentage:             totalSOHPercentage,
+		TotalAvailableCapacityMWh:      totalCapacityMWh,
+		MaxAvailableChargingPowerMW:    maxChargePowerMW,
+		MaxAvailableDischargingPowerMW: maxDischargePowerMW,
+		CurrentActivePowerMW:           currentActivePowerMW,
+		CurrentActivePowerSetpointMW:   currentActivePowerSetpointMW,
+	}
+
+	// Collect Wind Farm generation data
+	totalActivePowerMW := h.windFarmManager.GetTotalActivePower()
+	totalReactivePowerMvar := h.windFarmManager.GetTotalReactivePower()
+	totalPossiblePowerMW := h.windFarmManager.GetTotalPossiblePower()
+
+	// Get ambient temperature from wind farm weather data (if available)
+	var ambientTemp float64
+	windFarmServices := h.windFarmManager.GetAllServices()
+	var tempCount int
+	for _, wfService := range windFarmServices {
+		if !wfService.IsConnected() {
+			continue
+		}
+		wfWeatherData := wfService.GetLatestWeatherData()
+		if wfWeatherData.OutsideTemperature != 0 {
+			ambientTemp += float64(wfWeatherData.OutsideTemperature) / 10.0 // Scale 0.1
+			tempCount++
+		}
+	}
+	if tempCount > 0 {
+		ambientTemp /= float64(tempCount)
+	}
+
+	response.GenerationData = database.GenerationData{
+		TotalActivePowerMW:                  float64(totalActivePowerMW),
+		TotalReactivePowerMvar:              float64(totalReactivePowerMvar),
+		AmbientTemperatureCelcius:           ambientTemp,
+		CurrentMaximumActivePowerSetpointMW: float64(totalPossiblePowerMW),
+	}
+
+	// Calculate POI data (Generation + BESS)
+	response.POIData = database.POIData{
+		CurrentPOIActivePowerMW:   float64(totalActivePowerMW) + currentActivePowerMW,
+		CurrentPOIReactivePowerMW: float64(totalReactivePowerMvar),
+	}
+
+	// Check system health and set powerplant status
+	if !h.windFarmManager.AreAllFCUsOnline() || bmsCount == 0 {
+		response.PowerplantStatus = 1 // Error
+	}
+
+	c.JSON(http.StatusOK, response)
 }

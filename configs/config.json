@@ -192,6 +192,17 @@
       "persist_interval": "5s"
     }
   ],
+  "ems": {
+    "park_name": "polat-ege-res",
+    "http_port": 8080,
+    "max_soc": 90.0,
+    "min_soc": 10.0,
+    "max_charge_power": 100.0,
+    "max_discharge_power": 100.0
+  },
+  "fcrn": {
+    "enabled": false
+  },
   "influxdb": {
     "url": "http://localhost:8086",
     "token": "ckEJ_rPeYqi_CPeDjJA7IP6oGwwAxF_ZtTvfVTN_8-lEcvSTjW_dqFBg2rk7NOzemV5yiP_Zvk0kNj_0YixGgw==",
@@ -203,5 +214,15 @@
     "database": "postgres",
     "username": "postgres",
     "password": "postgres"
+  },
+  "modbus_server": {
+    "host": "0.0.0.0",
+    "port": 502,
+    "timeout": "30s",
+    "max_clients": 10
+  },
+  "logger": {
+    "level": "INFO",
+    "format": "json"
   }
 }

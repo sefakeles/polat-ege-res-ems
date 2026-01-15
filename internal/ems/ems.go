@@ -187,6 +187,7 @@ func (e *EMS) setupHTTPServer() {
 		e.container.AlarmManager,
 		e.container.ControlLogic,
 		e.healthService,
+		e.container.Config,
 	)
 	router := api.SetupRoutes(handlers)
 

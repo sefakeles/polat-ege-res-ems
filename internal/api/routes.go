@@ -24,6 +24,9 @@ func SetupRoutes(handlers *Handlers) *gin.Engine {
 		// System status
 		api.GET("/status", handlers.GetStatus)
 
+		// Telemetry endpoint
+		api.GET("/telemetry", handlers.GetTelemetry)
+
 		// Data endpoints
 		api.GET("/alarms", handlers.GetAlarms)
 
