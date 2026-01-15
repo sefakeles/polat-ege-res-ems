@@ -30,6 +30,9 @@ func SetupRoutes(handlers *Handlers) *gin.Engine {
 		// Data endpoints
 		api.GET("/alarms", handlers.GetAlarms)
 
+		// Schedule endpoint
+		api.POST("/schedule", handlers.ReceiveSchedule)
+
 		// Control endpoints
 		api.POST("/control/mode", handlers.SetControlMode)
 		api.POST("/control/active-power", handlers.SetPowerCommand)

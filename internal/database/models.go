@@ -431,3 +431,29 @@ type POIData struct {
 	CurrentPOIActivePowerMW   float64 `json:"current-poi-active-power-mw"`
 	CurrentPOIReactivePowerMW float64 `json:"current-poi-reactive-power-mw"`
 }
+
+// ScheduleDataPoint represents a single data point in the schedule
+type ScheduleDataPoint struct {
+	Timestamp               string  `json:"timestamp"`
+	GenPCurtailmentSchedule float64 `json:"gen-p-curtailment-schedule"`
+	GenPTradeSchedule       float64 `json:"gen-p-trade-schedule"`
+	BessPTradeSchedule      float64 `json:"bess-p-trade-schedule"`
+	PlantModeOfOperation    int     `json:"plant-mode-of-operation"`
+}
+
+// ScheduleRequest represents the schedule request payload
+type ScheduleRequest struct {
+	MsgID          string              `json:"msg-id"`
+	ParkName       string              `json:"park-name"`
+	MessageVersion string              `json:"message-version"`
+	VersionDate    string              `json:"version-date"`
+	SPSeconds      int                 `json:"sp-seconds"`
+	Data           []ScheduleDataPoint `json:"data"`
+}
+
+// ScheduleResponse represents the schedule response
+type ScheduleResponse struct {
+	MsgID         string  `json:"msg-id"`
+	Status        bool    `json:"status"`
+	StatusMessage *string `json:"status-message"`
+}

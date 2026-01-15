@@ -1222,3 +1222,54 @@ func (h *Handlers) GetTelemetry(c *gin.Context) {
 
 	c.JSON(http.StatusOK, response)
 }
+
+// ReceiveSchedule handles incoming schedule data
+func (h *Handlers) ReceiveSchedule(c *gin.Context) {
+	var schedule database.ScheduleRequest
+
+	if err := c.ShouldBindJSON(&schedule); err != nil {
+		h.log.Error("Failed to parse schedule request",
+			logger.Err(err))
+
+		response := database.ScheduleResponse{
+			MsgID:         "",
+			Status:        false,
+			StatusMessage: strPtr("Invalid JSON format: " + err.Error()),
+		}
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	// Log the received schedule
+	h.log.Info("Received schedule",
+		logger.String("msg-id", schedule.MsgID),
+		logger.String("park-name", schedule.ParkName),
+		logger.String("message-version", schedule.MessageVersion),
+		logger.String("version-date", schedule.VersionDate),
+		logger.Int("sp-seconds", schedule.SPSeconds),
+		logger.Int("data-points", len(schedule.Data)))
+
+	// Log each data point
+	for i, dp := range schedule.Data {
+		h.log.Info("Schedule data point",
+			logger.Int("index", i),
+			logger.String("timestamp", dp.Timestamp),
+			logger.Float64("gen-p-curtailment-schedule", dp.GenPCurtailmentSchedule),
+			logger.Float64("gen-p-trade-schedule", dp.GenPTradeSchedule),
+			logger.Float64("bess-p-trade-schedule", dp.BessPTradeSchedule),
+			logger.Int("plant-mode-of-operation", dp.PlantModeOfOperation))
+	}
+
+	// Return success response
+	response := database.ScheduleResponse{
+		MsgID:         schedule.MsgID,
+		Status:        true,
+		StatusMessage: nil,
+	}
+	c.JSON(http.StatusOK, response)
+}
+
+// strPtr is a helper function to create a string pointer
+func strPtr(s string) *string {
+	return &s
+}
