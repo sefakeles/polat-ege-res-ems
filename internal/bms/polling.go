@@ -9,6 +9,10 @@ import (
 
 // baseDataPollLoop periodically reads base data from the BMS
 func (s *Service) baseDataPollLoop() {
+	if err := s.baseClient.Connect(s.ctx); err != nil {
+		s.log.Warn("Initial base Modbus connection failed", logger.Err(err))
+	}
+
 	ticker := time.NewTicker(s.config.PollInterval)
 	defer ticker.Stop()
 
@@ -40,6 +44,10 @@ func (s *Service) baseDataPollLoop() {
 func (s *Service) cellDataPollLoop() {
 	if !s.config.EnableCellData {
 		return
+	}
+
+	if err := s.cellClient.Connect(s.ctx); err != nil {
+		s.log.Warn("Initial cell Modbus connection failed", logger.Err(err))
 	}
 
 	ticker := time.NewTicker(s.config.CellDataInterval)

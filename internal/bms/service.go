@@ -73,14 +73,6 @@ func NewService(cfg config.BMSConfig, influxDB *database.InfluxDB, alarmManager 
 
 // Start starts the BMS service
 func (s *Service) Start() error {
-	if err := s.baseClient.Connect(s.ctx); err != nil {
-		s.log.Warn("Initial base Modbus connection failed", logger.Err(err))
-	}
-
-	if err := s.cellClient.Connect(s.ctx); err != nil {
-		s.log.Warn("Initial cell Modbus connection failed", logger.Err(err))
-	}
-
 	s.wg.Go(s.baseDataPollLoop)
 	s.wg.Go(s.cellDataPollLoop)
 	s.wg.Go(s.heartbeatLoop)
