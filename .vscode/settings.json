@@ -1,7 +1,8 @@
 {
   "makefile.configureOnOpen": false,
   "gopls": {
-    "formatting.gofumpt": true
+    "formatting.gofumpt": true,
+    "formatting.local": "powerkonnekt/ems"
   },
   "[json][jsonc][yaml]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
