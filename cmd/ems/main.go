@@ -50,7 +50,7 @@ func main() {
 		// API server
 		api.Module,
 
-		// EMS lifecycle management
+		// EMS
 		ems.Module,
 	)
 
