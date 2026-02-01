@@ -8,7 +8,6 @@ import (
 	"powerkonnekt/ems/internal/config"
 	"powerkonnekt/ems/internal/control"
 	"powerkonnekt/ems/internal/database"
-	"powerkonnekt/ems/internal/fcr"
 	"powerkonnekt/ems/internal/metrics"
 	"powerkonnekt/ems/internal/modbus"
 	"powerkonnekt/ems/internal/pcs"
@@ -25,7 +24,6 @@ type Container struct {
 	PCSManager      *pcs.Manager
 	PLCManager      *plc.Manager
 	WindFarmManager *windfarm.Manager
-	FCRNService     *fcr.Service
 	ControlLogic    *control.Logic
 	AlarmManager    *alarm.Manager
 	MetricsManager  *metrics.Manager
@@ -64,32 +62,6 @@ func NewContainer(cfg *config.Config) (*Container, error) {
 	plcManager := plc.NewManager(cfg.PLC, influxDB, alarmManager)
 	windFarmManager := windfarm.NewManager(cfg.WindFarm, influxDB)
 
-	// Initialize FCR-N service if enabled
-	var fcrnService *fcr.Service
-	if cfg.FCRN.Enabled {
-		var freqSource fcr.FrequencySource
-
-		// Create frequency source based on configuration
-		switch cfg.FCRN.FrequencySource {
-		case "test":
-			freqSource = fcr.NewTestFrequencySource()
-			containerLogger.Info("Using test frequency source for FCR-N")
-		case "pcs":
-			freqSource = fcr.NewPCSFrequencySource(pcsManager, uint8(cfg.FCRN.PCSNumber))
-			containerLogger.Info("Using PCS frequency source for FCR-N",
-				logger.Int("pcs_number", cfg.FCRN.PCSNumber))
-		default:
-			containerLogger.Warn("Unknown frequency source, using analyzer",
-				logger.String("source", cfg.FCRN.FrequencySource))
-			freqSource = fcr.NewPCSFrequencySource(pcsManager, uint8(cfg.FCRN.PCSNumber))
-		}
-
-		fcrnService, err = fcr.NewService(cfg.FCRN, pcsManager, bmsManager, freqSource)
-		if err != nil {
-			return nil, fmt.Errorf("failed to create FCR-N service: %w", err)
-		}
-	}
-
 	// Initialize control logic with managers
 	controlLogic := control.NewLogic(bmsManager, pcsManager, cfg.EMS)
 
@@ -107,7 +79,6 @@ func NewContainer(cfg *config.Config) (*Container, error) {
 		PCSManager:      pcsManager,
 		PLCManager:      plcManager,
 		WindFarmManager: windFarmManager,
-		FCRNService:     fcrnService,
 		ControlLogic:    controlLogic,
 		AlarmManager:    alarmManager,
 		MetricsManager:  metricsManager,

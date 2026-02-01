@@ -16,7 +16,6 @@ type Config struct {
 	PLC          []PLCConfig        `mapstructure:"plc" validate:"required,min=1,dive"`
 	WindFarm     []WindFarmConfig   `mapstructure:"windfarm" validate:"required,min=1,dive"`
 	EMS          EMSConfig          `mapstructure:"ems" validate:"required"`
-	FCRN         FCRNConfig         `mapstructure:"fcrn" validate:"required"`
 	InfluxDB     InfluxDBConfig     `mapstructure:"influxdb" validate:"required"`
 	PostgreSQL   PostgreSQLConfig   `mapstructure:"postgresql" validate:"required"`
 	ModbusServer ModbusServerConfig `mapstructure:"modbus_server" validate:"required"`
@@ -224,29 +223,6 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("ems.min_soc", 10.0)
 	v.SetDefault("ems.max_charge_power", 100.0)
 	v.SetDefault("ems.max_discharge_power", 100.0)
-
-	// FCRN defaults
-	v.SetDefault("fcrn.enabled", false)
-	v.SetDefault("fcrn.capacity", 12.8)
-	v.SetDefault("fcrn.droop", 4.0)
-	v.SetDefault("fcrn.max_power", 12.8)
-	v.SetDefault("fcrn.min_power", -12.8)
-	v.SetDefault("fcrn.update_interval", 100*time.Millisecond)
-	v.SetDefault("fcrn.enable_energy_management", true)
-	v.SetDefault("fcrn.reservoir_capacity", 14.8)
-	v.SetDefault("fcrn.min_soc", 10.0)
-	v.SetDefault("fcrn.max_soc", 90.0)
-	v.SetDefault("fcrn.frequency_source", "pcs")
-	v.SetDefault("fcrn.frequency_update_rate", 100*time.Millisecond)
-	v.SetDefault("fcrn.frequency_smooth_window", 5)
-	v.SetDefault("fcrn.pcs_number", 1)
-	v.SetDefault("fcrn.smooth_activation", true)
-	v.SetDefault("fcrn.activation_ramp_time", 5*time.Second)
-	v.SetDefault("fcrn.deactivation_ramp_time", 5*time.Second)
-	v.SetDefault("fcrn.enable_telemetry", true)
-	v.SetDefault("fcrn.telemetry_interval", 1*time.Second)
-	v.SetDefault("fcrn.log_level", "INFO")
-	v.SetDefault("fcrn.data_logging_enabled", true)
 
 	// InfluxDB defaults
 	v.SetDefault("influxdb.batch_size", 100)

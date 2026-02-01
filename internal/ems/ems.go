@@ -96,10 +96,6 @@ func (e *EMS) Start() error {
 		return fmt.Errorf("failed to start Wind Farm services: %w", err)
 	}
 
-	if err := e.container.FCRNService.Start(); err != nil {
-		return fmt.Errorf("failed to start FCR-N service: %w", err)
-	}
-
 	// Start Modbus server
 	if err := e.container.ModbusServer.Start(); err != nil {
 		return fmt.Errorf("failed to start Modbus server: %w", err)
@@ -141,7 +137,6 @@ func (e *EMS) Stop() {
 	e.container.PCSManager.Stop()
 	e.container.PLCManager.Stop()
 	e.container.WindFarmManager.Stop()
-	e.container.FCRNService.Stop()
 	e.container.MetricsManager.Stop()
 
 	// Close databases
@@ -183,7 +178,6 @@ func (e *EMS) setupHTTPServer() {
 		e.container.PCSManager,
 		e.container.PLCManager,
 		e.container.WindFarmManager,
-		e.container.FCRNService,
 		e.container.AlarmManager,
 		e.container.ControlLogic,
 		e.healthService,

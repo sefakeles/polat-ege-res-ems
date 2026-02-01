@@ -11,7 +11,6 @@ import (
 	"powerkonnekt/ems/internal/config"
 	"powerkonnekt/ems/internal/control"
 	"powerkonnekt/ems/internal/database"
-	"powerkonnekt/ems/internal/fcr"
 	"powerkonnekt/ems/internal/health"
 	"powerkonnekt/ems/internal/pcs"
 	"powerkonnekt/ems/internal/plc"
@@ -27,7 +26,6 @@ type Handlers struct {
 	pcsManager      *pcs.Manager
 	plcManager      *plc.Manager
 	windFarmManager *windfarm.Manager
-	fcrnService     *fcr.Service
 	alarmManager    *alarm.Manager
 	controlLogic    *control.Logic
 	healthService   *health.HealthService
@@ -41,7 +39,6 @@ func NewHandlers(
 	pcsManager *pcs.Manager,
 	plcManager *plc.Manager,
 	windFarmManager *windfarm.Manager,
-	fcrnService *fcr.Service,
 	alarmManager *alarm.Manager,
 	controlLogic *control.Logic,
 	healthService *health.HealthService,
@@ -57,7 +54,6 @@ func NewHandlers(
 		pcsManager:      pcsManager,
 		plcManager:      plcManager,
 		windFarmManager: windFarmManager,
-		fcrnService:     fcrnService,
 		alarmManager:    alarmManager,
 		controlLogic:    controlLogic,
 		healthService:   healthService,
