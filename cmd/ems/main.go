@@ -1,58 +1,58 @@
 package main
 
 import (
-	"os"
-	"os/signal"
-	"syscall"
+	"go.uber.org/fx"
 
+	"powerkonnekt/ems/internal/alarm"
+	"powerkonnekt/ems/internal/api"
+	"powerkonnekt/ems/internal/bms"
 	"powerkonnekt/ems/internal/config"
+	"powerkonnekt/ems/internal/control"
+	"powerkonnekt/ems/internal/database"
 	"powerkonnekt/ems/internal/ems"
+	"powerkonnekt/ems/internal/health"
+	"powerkonnekt/ems/internal/metrics"
+	"powerkonnekt/ems/internal/modbus"
+	"powerkonnekt/ems/internal/pcs"
+	"powerkonnekt/ems/internal/plc"
+	"powerkonnekt/ems/internal/windfarm"
 	"powerkonnekt/ems/pkg/logger"
 )
 
 func main() {
-	// Handle graceful shutdown
-	sigChan := make(chan os.Signal, 1)
-	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+	app := fx.New(
+		// Configuration and Logger
+		config.Module,
+		logger.Module,
 
-	// Load configuration
-	cfg, err := config.Load("configs/config.json")
-	if err != nil {
-		panic("Failed to load configuration: " + err.Error())
-	}
+		// Database connections
+		database.Module,
 
-	// Convert config.LoggerConfig to logger.Config
-	loggerConfig := logger.Config{
-		Level:  cfg.Logger.Level,
-		Format: cfg.Logger.Format,
-	}
+		// Core services
+		alarm.Module,
+		metrics.Module,
 
-	// Initialize logger
-	if err := logger.InitializeWithConfig(loggerConfig); err != nil {
-		panic("Failed to initialize logger: " + err.Error())
-	}
-	defer logger.Sync()
+		// Device managers
+		bms.Module,
+		pcs.Module,
+		plc.Module,
+		windfarm.Module,
 
-	logger.Info("Starting EMS application",
-		logger.String("version", "dev"),
-		logger.String("log_level", cfg.Logger.Level))
+		// Control logic
+		control.Module,
 
-	// Initialize EMS
-	emsInstance, err := ems.New(cfg)
-	if err != nil {
-		logger.Fatal("Failed to initialize EMS", logger.Err(err))
-	}
+		// Modbus server
+		modbus.Module,
 
-	// Start EMS
-	if err := emsInstance.Start(); err != nil {
-		logger.Fatal("Failed to start EMS", logger.Err(err))
-	}
+		// Health monitoring
+		health.Module,
 
-	// Wait for shutdown signal
-	<-sigChan
-	logger.Info("Shutdown signal received")
+		// API server
+		api.Module,
 
-	// Stop EMS
-	emsInstance.Stop()
-	logger.Info("EMS application stopped")
+		// EMS lifecycle management
+		ems.Module,
+	)
+
+	app.Run()
 }

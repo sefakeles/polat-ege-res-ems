@@ -22,6 +22,7 @@ import (
 
 // Handlers contains all API handlers
 type Handlers struct {
+	config          *config.Config
 	bmsManager      *bms.Manager
 	pcsManager      *pcs.Manager
 	plcManager      *plc.Manager
@@ -29,12 +30,12 @@ type Handlers struct {
 	alarmManager    *alarm.Manager
 	controlLogic    *control.Logic
 	healthService   *health.HealthService
-	config          *config.Config
 	log             logger.Logger
 }
 
 // NewHandlers creates a new handlers instance
 func NewHandlers(
+	config *config.Config,
 	bmsManager *bms.Manager,
 	pcsManager *pcs.Manager,
 	plcManager *plc.Manager,
@@ -42,7 +43,6 @@ func NewHandlers(
 	alarmManager *alarm.Manager,
 	controlLogic *control.Logic,
 	healthService *health.HealthService,
-	config *config.Config,
 ) *Handlers {
 	// Create handlers-specific logger
 	handlersLogger := logger.With(
@@ -50,6 +50,7 @@ func NewHandlers(
 	)
 
 	return &Handlers{
+		config:          config,
 		bmsManager:      bmsManager,
 		pcsManager:      pcsManager,
 		plcManager:      plcManager,
@@ -57,7 +58,6 @@ func NewHandlers(
 		alarmManager:    alarmManager,
 		controlLogic:    controlLogic,
 		healthService:   healthService,
-		config:          config,
 		log:             handlersLogger,
 	}
 }

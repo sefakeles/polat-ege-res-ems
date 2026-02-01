@@ -174,6 +174,7 @@ func (e *EMS) reactiveControlLoop() {
 // setupHTTPServer initializes the HTTP server with routes and handlers
 func (e *EMS) setupHTTPServer() {
 	handlers := api.NewHandlers(
+		e.container.Config,
 		e.container.BMSManager,
 		e.container.PCSManager,
 		e.container.PLCManager,
@@ -181,7 +182,6 @@ func (e *EMS) setupHTTPServer() {
 		e.container.AlarmManager,
 		e.container.ControlLogic,
 		e.healthService,
-		e.container.Config,
 	)
 	router := api.SetupRoutes(handlers)
 
