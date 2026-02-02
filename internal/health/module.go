@@ -23,7 +23,7 @@ func ProvideHealthService(
 	plcManager *plc.Manager,
 	windFarmManager *windfarm.Manager,
 ) *HealthService {
-	healthService := NewHealthService()
+	healthService := NewService()
 
 	// Register health checkers for all BMS instances
 	bmsServices := bmsManager.GetAllServices()

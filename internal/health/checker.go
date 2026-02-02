@@ -35,7 +35,7 @@ type HealthService struct {
 	checkers []Checker
 }
 
-func NewHealthService() *HealthService {
+func NewService() *HealthService {
 	return &HealthService{
 		checkers: make([]Checker, 0),
 		timeout:  5 * time.Second,
