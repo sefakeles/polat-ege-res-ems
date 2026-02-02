@@ -173,7 +173,7 @@ ems:
 
 influxdb:
   url: http://localhost:8086
-  token: ckEJ_rPeYqi_CPeDjJA7IP6oGwwAxF_ZtTvfVTN_8-lEcvSTjW_dqFBg2rk7NOzemV5yiP_Zvk0kNj_0YixGgw==
+  token: aZAKTVg9bn7j44rSNm0DRLJ5SyhO0l0KOG0XsskeYfYmLoqJhR0GTJ9n0ls9TKMqCSFJ1yNMKQE9vujEGvNvgw==
   organization: inovat
   bucket: powerkonnekt
 
