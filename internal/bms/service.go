@@ -73,7 +73,9 @@ func NewService(cfg config.BMSConfig, influxDB *database.InfluxDB, alarmManager 
 // Start starts the BMS service
 func (s *Service) Start() error {
 	s.wg.Go(s.baseDataPollLoop)
-	s.wg.Go(s.cellDataPollLoop)
+	if s.config.EnableCellData {
+		s.wg.Go(s.cellDataPollLoop)
+	}
 	s.wg.Go(s.heartbeatLoop)
 	s.wg.Go(s.persistenceLoop)
 

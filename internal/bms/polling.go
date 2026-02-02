@@ -13,66 +13,90 @@ func (s *Service) baseDataPollLoop() {
 		s.log.Warn("Initial base Modbus connection failed", zap.Error(err))
 	}
 
-	ticker := time.NewTicker(s.config.PollInterval)
-	defer ticker.Stop()
+	interval := s.config.PollInterval
+
+	// Calculate first aligned time and create timer
+	nextTick := time.Now().Truncate(interval).Add(interval)
+	timer := time.NewTimer(time.Until(nextTick))
+	defer timer.Stop()
 
 	for {
 		select {
 		case <-s.ctx.Done():
 			return
-		case <-ticker.C:
+		case <-timer.C:
 			if !s.baseClient.IsConnected() {
 				s.handleBaseClientConnectionError()
+			} else {
+				startTime := time.Now()
+				if err := s.readBaseData(); err != nil {
+					s.log.Error("Error reading base data", zap.Error(err))
+				} else {
+					// Signal that new base data is available
+					select {
+					case s.baseDataUpdateChan <- struct{}{}:
+					default:
+						// Channel full, skip signal
+					}
+				}
+
+				if duration := time.Since(startTime); duration > interval {
+					s.log.Warn("Data read exceeded poll interval (system client)",
+						zap.Duration("read_duration", duration),
+						zap.Duration("interval", interval))
+				}
 			}
 
-			if err := s.readBaseData(); err != nil {
-				s.log.Error("Error reading base data", zap.Error(err))
-				continue
-			}
-
-			// Signal that new base data is available
-			select {
-			case s.baseDataUpdateChan <- struct{}{}:
-			default:
-				// Channel full, skip signal
-			}
+			// Calculate next aligned time and reset timer
+			nextTick = time.Now().Truncate(interval).Add(interval)
+			timer.Reset(time.Until(nextTick))
 		}
 	}
 }
 
 // cellDataPollLoop periodically reads cell data from the BMS
 func (s *Service) cellDataPollLoop() {
-	if !s.config.EnableCellData {
-		return
-	}
-
 	if err := s.cellClient.Connect(s.ctx); err != nil {
 		s.log.Warn("Initial cell Modbus connection failed", zap.Error(err))
 	}
 
-	ticker := time.NewTicker(s.config.CellDataInterval)
-	defer ticker.Stop()
+	interval := s.config.CellDataInterval
+
+	// Calculate first aligned time and create timer
+	nextTick := time.Now().Truncate(interval).Add(interval)
+	timer := time.NewTimer(time.Until(nextTick))
+	defer timer.Stop()
 
 	for {
 		select {
 		case <-s.ctx.Done():
 			return
-		case <-ticker.C:
+		case <-timer.C:
 			if !s.cellClient.IsConnected() {
 				s.handleCellClientConnectionError()
+			} else {
+				startTime := time.Now()
+				if err := s.readCellDataForAllRacks(); err != nil {
+					s.log.Error("Error reading cell data", zap.Error(err))
+				} else {
+					// Signal that new cell data is available
+					select {
+					case s.cellDataUpdateChan <- struct{}{}:
+					default:
+						// Channel full, skip signal
+					}
+				}
+
+				if duration := time.Since(startTime); duration > interval {
+					s.log.Warn("Data read exceeded poll interval (cell client)",
+						zap.Duration("read_duration", duration),
+						zap.Duration("interval", interval))
+				}
 			}
 
-			if err := s.readCellDataForAllRacks(); err != nil {
-				s.log.Error("Error reading cell data", zap.Error(err))
-				continue
-			}
-
-			// Signal that new cell data is available
-			select {
-			case s.cellDataUpdateChan <- struct{}{}:
-			default:
-				// Channel full, skip signal
-			}
+			// Calculate next aligned time and reset timer
+			nextTick = time.Now().Truncate(interval).Add(interval)
+			timer.Reset(time.Until(nextTick))
 		}
 	}
 }
@@ -83,17 +107,20 @@ func (s *Service) handleBaseClientConnectionError() {
 	s.baseClient.Disconnect()
 
 	reconnectAttempts := 0
+	timer := time.NewTimer(s.config.ReconnectDelay)
+	defer timer.Stop()
+
 	for !s.baseClient.IsConnected() {
 		select {
 		case <-s.ctx.Done():
 			return
-		case <-time.After(s.config.ReconnectDelay):
+		case <-timer.C:
 			reconnectAttempts++
 			if err := s.baseClient.Connect(s.ctx); err != nil {
 				s.log.Error("Failed to reconnect to BMS base client",
 					zap.Error(err),
-					zap.Int("attempt", reconnectAttempts),
-					zap.Duration("retry_delay", s.config.ReconnectDelay))
+					zap.Int("attempt", reconnectAttempts))
+				timer.Reset(s.config.ReconnectDelay)
 			} else {
 				s.log.Info("Successfully reconnected to BMS base client",
 					zap.Int("total_attempts", reconnectAttempts),
@@ -110,17 +137,20 @@ func (s *Service) handleCellClientConnectionError() {
 	s.cellClient.Disconnect()
 
 	reconnectAttempts := 0
+	timer := time.NewTimer(s.config.ReconnectDelay)
+	defer timer.Stop()
+
 	for !s.cellClient.IsConnected() {
 		select {
 		case <-s.ctx.Done():
 			return
-		case <-time.After(s.config.ReconnectDelay):
+		case <-timer.C:
 			reconnectAttempts++
 			if err := s.cellClient.Connect(s.ctx); err != nil {
 				s.log.Error("Failed to reconnect to BMS cell client",
 					zap.Error(err),
-					zap.Int("attempt", reconnectAttempts),
-					zap.Duration("retry_delay", s.config.ReconnectDelay))
+					zap.Int("attempt", reconnectAttempts))
+				timer.Reset(s.config.ReconnectDelay)
 			} else {
 				s.log.Info("Successfully reconnected to BMS cell client",
 					zap.Int("total_attempts", reconnectAttempts),
