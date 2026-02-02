@@ -61,8 +61,10 @@ func ProvideRouter(handlers *Handlers, logger *zap.Logger) *gin.Engine {
 
 // ProvideHTTPServer creates the HTTP server
 func ProvideHTTPServer(cfg *config.Config, router *gin.Engine) *http.Server {
+	addr := fmt.Sprintf(":%d", cfg.EMS.HTTPPort)
+
 	return &http.Server{
-		Addr:    fmt.Sprintf(":%d", cfg.EMS.HTTPPort),
+		Addr:    addr,
 		Handler: router,
 	}
 }
