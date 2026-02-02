@@ -52,7 +52,7 @@ func InitializePostgreSQL(cfg config.PostgreSQLConfig, logger *zap.Logger) (*Pos
 		cfg.Host, cfg.Username, cfg.Password, cfg.Database, cfg.Port, cfg.SSLMode)
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
-		Logger: gormLogger.Default.LogMode(gormLogger.Info),
+		Logger: gormLogger.Default.LogMode(gormLogger.Error),
 	})
 	if err != nil {
 		dbLogger.Error("Failed to connect to PostgreSQL", zap.Error(err))
