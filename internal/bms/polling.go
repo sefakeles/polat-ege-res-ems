@@ -32,7 +32,7 @@ func (s *Service) systemDataPollLoop() {
 				if err := s.readSystemData(); err != nil {
 					s.log.Error("Error reading system data", zap.Error(err))
 				} else {
-					// Signal that new base data is available
+					// Signal that new system data is available
 					select {
 					case s.systemDataUpdateChan <- struct{}{}:
 					default:
