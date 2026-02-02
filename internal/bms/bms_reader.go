@@ -4,7 +4,7 @@ import "fmt"
 
 // readBMSData reads BMS data
 func (s *Service) readBMSData() error {
-	data, err := s.baseClient.ReadHoldingRegisters(s.ctx, BMSDataStartAddr, BMSDataLength)
+	data, err := s.systemClient.ReadHoldingRegisters(s.ctx, BMSDataStartAddr, BMSDataLength)
 	if err != nil {
 		return fmt.Errorf("failed to read registers: %w", err)
 	}
@@ -20,7 +20,7 @@ func (s *Service) readBMSData() error {
 
 // readBMSStatusData reads BMS status data
 func (s *Service) readBMSStatusData() error {
-	data, err := s.baseClient.ReadHoldingRegisters(s.ctx, BMSStatusDataStartAddr, BMSStatusDataLength)
+	data, err := s.systemClient.ReadHoldingRegisters(s.ctx, BMSStatusDataStartAddr, BMSStatusDataLength)
 	if err != nil {
 		return fmt.Errorf("failed to read registers: %w", err)
 	}
@@ -38,7 +38,7 @@ func (s *Service) readBMSStatusData() error {
 func (s *Service) readBMSRackData(rackNo uint8) error {
 	startAddr := GetRackDataStartAddr(rackNo)
 
-	data, err := s.baseClient.ReadHoldingRegisters(s.ctx, startAddr, BMSRackDataLength)
+	data, err := s.systemClient.ReadHoldingRegisters(s.ctx, startAddr, BMSRackDataLength)
 	if err != nil {
 		return fmt.Errorf("failed to read registers: %w", err)
 	}
@@ -54,7 +54,7 @@ func (s *Service) readBMSRackData(rackNo uint8) error {
 
 // readAlarms reads alarms
 func (s *Service) readAlarms() error {
-	data, err := s.baseClient.ReadHoldingRegisters(s.ctx, BMSAlarmStartAddr, BMSAlarmLength)
+	data, err := s.systemClient.ReadHoldingRegisters(s.ctx, BMSAlarmStartAddr, BMSAlarmLength)
 	if err != nil {
 		return fmt.Errorf("failed to read registers: %w", err)
 	}

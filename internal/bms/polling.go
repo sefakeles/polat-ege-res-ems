@@ -7,10 +7,10 @@ import (
 	"go.uber.org/zap"
 )
 
-// baseDataPollLoop periodically reads base data from the BMS
-func (s *Service) baseDataPollLoop() {
-	if err := s.baseClient.Connect(s.ctx); err != nil {
-		s.log.Warn("Initial base Modbus connection failed", zap.Error(err))
+// systemDataPollLoop periodically reads system data from the BMS
+func (s *Service) systemDataPollLoop() {
+	if err := s.systemClient.Connect(s.ctx); err != nil {
+		s.log.Warn("Initial Modbus connection failed (system client)", zap.Error(err))
 	}
 
 	interval := s.config.PollInterval
@@ -25,16 +25,16 @@ func (s *Service) baseDataPollLoop() {
 		case <-s.ctx.Done():
 			return
 		case <-timer.C:
-			if !s.baseClient.IsConnected() {
+			if !s.systemClient.IsConnected() {
 				s.handleBaseClientConnectionError()
 			} else {
 				startTime := time.Now()
-				if err := s.readBaseData(); err != nil {
-					s.log.Error("Error reading base data", zap.Error(err))
+				if err := s.readSystemData(); err != nil {
+					s.log.Error("Error reading system data", zap.Error(err))
 				} else {
 					// Signal that new base data is available
 					select {
-					case s.baseDataUpdateChan <- struct{}{}:
+					case s.systemDataUpdateChan <- struct{}{}:
 					default:
 						// Channel full, skip signal
 					}
@@ -57,7 +57,7 @@ func (s *Service) baseDataPollLoop() {
 // cellDataPollLoop periodically reads cell data from the BMS
 func (s *Service) cellDataPollLoop() {
 	if err := s.cellClient.Connect(s.ctx); err != nil {
-		s.log.Warn("Initial cell Modbus connection failed", zap.Error(err))
+		s.log.Warn("Initial Modbus connection failed (cell client)", zap.Error(err))
 	}
 
 	interval := s.config.CellDataInterval
@@ -103,26 +103,26 @@ func (s *Service) cellDataPollLoop() {
 
 // handleBaseClientConnectionError attempts to reconnect to the BMS
 func (s *Service) handleBaseClientConnectionError() {
-	s.log.Warn("BMS base client connection lost, initiating reconnection procedure")
-	s.baseClient.Disconnect()
+	s.log.Warn("BMS connection lost, attempting reconnection (system client)")
+	s.systemClient.Disconnect()
 
 	reconnectAttempts := 0
 	timer := time.NewTimer(s.config.ReconnectDelay)
 	defer timer.Stop()
 
-	for !s.baseClient.IsConnected() {
+	for !s.systemClient.IsConnected() {
 		select {
 		case <-s.ctx.Done():
 			return
 		case <-timer.C:
 			reconnectAttempts++
-			if err := s.baseClient.Connect(s.ctx); err != nil {
-				s.log.Error("Failed to reconnect to BMS base client",
+			if err := s.systemClient.Connect(s.ctx); err != nil {
+				s.log.Error("Failed to reconnect to BMS (system client)",
 					zap.Error(err),
 					zap.Int("attempt", reconnectAttempts))
 				timer.Reset(s.config.ReconnectDelay)
 			} else {
-				s.log.Info("Successfully reconnected to BMS base client",
+				s.log.Info("Successfully reconnected to BMS (system client)",
 					zap.Int("total_attempts", reconnectAttempts),
 					zap.Duration("total_downtime", time.Duration(reconnectAttempts)*s.config.ReconnectDelay))
 				return
@@ -133,7 +133,7 @@ func (s *Service) handleBaseClientConnectionError() {
 
 // handleCellClientConnectionError attempts to reconnect to the BMS
 func (s *Service) handleCellClientConnectionError() {
-	s.log.Warn("BMS cell client connection lost, initiating reconnection procedure")
+	s.log.Warn("BMS connection lost, attempting reconnection (cell client)")
 	s.cellClient.Disconnect()
 
 	reconnectAttempts := 0
@@ -147,12 +147,12 @@ func (s *Service) handleCellClientConnectionError() {
 		case <-timer.C:
 			reconnectAttempts++
 			if err := s.cellClient.Connect(s.ctx); err != nil {
-				s.log.Error("Failed to reconnect to BMS cell client",
+				s.log.Error("Failed to reconnect to BMS (cell client)",
 					zap.Error(err),
 					zap.Int("attempt", reconnectAttempts))
 				timer.Reset(s.config.ReconnectDelay)
 			} else {
-				s.log.Info("Successfully reconnected to BMS cell client",
+				s.log.Info("Successfully reconnected to BMS (cell client)",
 					zap.Int("total_attempts", reconnectAttempts),
 					zap.Duration("total_downtime", time.Duration(reconnectAttempts)*s.config.ReconnectDelay))
 				return
@@ -161,8 +161,8 @@ func (s *Service) handleCellClientConnectionError() {
 	}
 }
 
-// readBaseData reads base data
-func (s *Service) readBaseData() error {
+// readSystemData reads system data
+func (s *Service) readSystemData() error {
 	// Read BMS data
 	if err := s.readBMSData(); err != nil {
 		return fmt.Errorf("failed to read BMS data: %w", err)

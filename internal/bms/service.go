@@ -17,15 +17,15 @@ type Service struct {
 	config       config.BMSConfig
 	influxDB     *database.InfluxDB
 	alarmManager *alarm.Manager
-	baseClient   *modbus.Client
+	systemClient *modbus.Client
 	cellClient   *modbus.Client
 	ctx          context.Context
 	cancel       context.CancelFunc
 	wg           sync.WaitGroup
 	log          *zap.Logger
 
-	baseDataUpdateChan chan struct{}
-	cellDataUpdateChan chan struct{}
+	systemDataUpdateChan chan struct{}
+	cellDataUpdateChan   chan struct{}
 
 	mutex                sync.RWMutex
 	lastBMSData          database.BMSData
@@ -40,7 +40,7 @@ type Service struct {
 
 // NewService creates a new BMS service
 func NewService(cfg config.BMSConfig, influxDB *database.InfluxDB, alarmManager *alarm.Manager, logger *zap.Logger) *Service {
-	baseClient := modbus.NewClient(cfg.Host, cfg.Port, cfg.SlaveID, cfg.Timeout)
+	systemClient := modbus.NewClient(cfg.Host, cfg.Port, cfg.SlaveID, cfg.Timeout)
 	cellClient := modbus.NewClient(cfg.Host, cfg.Port, cfg.SlaveID, cfg.Timeout)
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -56,12 +56,12 @@ func NewService(cfg config.BMSConfig, influxDB *database.InfluxDB, alarmManager 
 		config:               cfg,
 		influxDB:             influxDB,
 		alarmManager:         alarmManager,
-		baseClient:           baseClient,
+		systemClient:         systemClient,
 		cellClient:           cellClient,
 		ctx:                  ctx,
 		cancel:               cancel,
 		log:                  serviceLogger,
-		baseDataUpdateChan:   make(chan struct{}, 1),
+		systemDataUpdateChan: make(chan struct{}, 1),
 		cellDataUpdateChan:   make(chan struct{}, 1),
 		lastBMSRackData:      make([]database.BMSRackData, cfg.RackCount),
 		lastCellVoltages:     make([][]database.BMSCellVoltageData, cfg.RackCount),
@@ -72,7 +72,7 @@ func NewService(cfg config.BMSConfig, influxDB *database.InfluxDB, alarmManager 
 
 // Start starts the BMS service
 func (s *Service) Start() error {
-	s.wg.Go(s.baseDataPollLoop)
+	s.wg.Go(s.systemDataPollLoop)
 	if s.config.EnableCellData {
 		s.wg.Go(s.cellDataPollLoop)
 	}
@@ -90,7 +90,7 @@ func (s *Service) Start() error {
 func (s *Service) Stop() {
 	s.cancel()
 	s.wg.Wait()
-	s.baseClient.Disconnect()
+	s.systemClient.Disconnect()
 	s.cellClient.Disconnect()
 	s.log.Info("BMS service stopped")
 }

@@ -14,12 +14,12 @@ func (s *Service) GetTotalTempSensorsPerRack() int {
 
 // IsConnected returns the connection status
 func (s *Service) IsConnected() bool {
-	return s.baseClient.IsConnected()
+	return s.systemClient.IsConnected()
 }
 
-// GetBaseDataUpdateChannel returns the channel that signals when new base data is available
-func (s *Service) GetBaseDataUpdateChannel() <-chan struct{} {
-	return s.baseDataUpdateChan
+// GetSystemDataUpdateChannel returns the channel that signals when new system data is available
+func (s *Service) GetSystemDataUpdateChannel() <-chan struct{} {
+	return s.systemDataUpdateChan
 }
 
 // GetCellDataUpdateChannel returns the channel that signals when new cell data is available

@@ -17,7 +17,7 @@ func (s *Service) heartbeatLoop() {
 		case <-s.ctx.Done():
 			return
 		case <-ticker.C:
-			if !s.baseClient.IsConnected() {
+			if !s.systemClient.IsConnected() {
 				continue
 			}
 
@@ -39,7 +39,7 @@ func (s *Service) updateHeartbeat() error {
 	s.heartbeatCount++
 	s.mutex.Unlock()
 
-	err := s.baseClient.WriteSingleRegister(s.ctx, HeartbeatRegister, heartbeatValue)
+	err := s.systemClient.WriteSingleRegister(s.ctx, HeartbeatRegister, heartbeatValue)
 	if err != nil {
 		return fmt.Errorf("failed to write register: %w", err)
 	}
@@ -49,7 +49,7 @@ func (s *Service) updateHeartbeat() error {
 
 // ResetSystem sends a command to reset the BMS
 func (s *Service) ResetSystem() error {
-	return s.baseClient.WriteSingleRegister(s.ctx, SystemResetRegister, ControlReset)
+	return s.systemClient.WriteSingleRegister(s.ctx, SystemResetRegister, ControlReset)
 }
 
 // ControlMainBreaker sends a command to open or close the main breaker
@@ -69,7 +69,7 @@ func (s *Service) ControlMainBreaker(action uint16) error {
 	s.commandState.LastUpdated = time.Now()
 	s.mutex.Unlock()
 
-	err := s.baseClient.WriteSingleRegister(s.ctx, BreakerControlRegister, action)
+	err := s.systemClient.WriteSingleRegister(s.ctx, BreakerControlRegister, action)
 	if err != nil {
 		return fmt.Errorf("failed to %s circuit breaker: %w", logAction, err)
 	}
