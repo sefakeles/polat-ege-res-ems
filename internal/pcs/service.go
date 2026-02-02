@@ -64,10 +64,6 @@ func NewService(cfg config.PCSConfig, influxDB *database.InfluxDB, alarmManager 
 
 // Start starts the PCS service
 func (s *Service) Start() error {
-	if err := s.client.Connect(s.ctx); err != nil {
-		s.log.Warn("Initial Modbus connection failed", zap.Error(err))
-	}
-
 	s.wg.Go(s.pollLoop)
 	s.wg.Go(s.heartbeatLoop)
 	s.wg.Go(s.persistenceLoop)
