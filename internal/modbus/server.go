@@ -17,15 +17,16 @@ import (
 
 // Server represents the Modbus TCP server
 type Server struct {
-	server    *modbus.ModbusServer
-	handler   *RequestHandler
-	config    config.ModbusServerConfig
-	ctx       context.Context
-	cancel    context.CancelFunc
-	wg        sync.WaitGroup
-	isRunning bool
+	server  *modbus.ModbusServer
+	handler *RequestHandler
+	config  config.ModbusServerConfig
+	ctx     context.Context
+	cancel  context.CancelFunc
+	wg      sync.WaitGroup
+	log     *zap.Logger
+
 	mutex     sync.RWMutex
-	log       *zap.Logger
+	isRunning bool
 }
 
 // NewServer creates a new Modbus TCP server
