@@ -62,7 +62,7 @@ func (h *RequestHandler) convertBMSDataToRegisters(
 	setReg(15, uint16(data.ChargeCapacity))
 	setReg(16, uint16(data.DischargeCapacity))
 	setReg(17, uint16(data.MaxChargeVoltage*10))
-	setReg(18, uint16(data.MaxDischargeVoltage*10))
+	setReg(18, uint16(data.MinDischargeVoltage*10))
 	setReg(19, uint16(data.InsulationResistancePos))
 	setReg(20, uint16(data.InsulationResistanceNeg))
 

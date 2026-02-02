@@ -24,7 +24,7 @@ type BMSData struct {
 	ChargeCapacity          uint16    `json:"charge_capacity"`
 	DischargeCapacity       uint16    `json:"discharge_capacity"`
 	MaxChargeVoltage        float32   `json:"max_charge_voltage"`
-	MaxDischargeVoltage     float32   `json:"max_discharge_voltage"`
+	MinDischargeVoltage     float32   `json:"min_discharge_voltage"`
 	InsulationResistancePos uint16    `json:"insulation_resistance_pos"`
 	InsulationResistanceNeg uint16    `json:"insulation_resistance_neg"`
 }
@@ -49,7 +49,7 @@ type BMSRackData struct {
 	MaxChargePower       float32   `json:"max_charge_power"`
 	MaxDischargePower    float32   `json:"max_discharge_power"`
 	MaxChargeVoltage     float32   `json:"max_charge_voltage"`
-	MaxDischargeVoltage  float32   `json:"max_discharge_voltage"`
+	MinDischargeVoltage  float32   `json:"min_discharge_voltage"`
 	MaxChargeCurrent     float32   `json:"max_charge_current"`
 	MaxDischargeCurrent  float32   `json:"max_discharge_current"`
 	Voltage              float32   `json:"voltage"`

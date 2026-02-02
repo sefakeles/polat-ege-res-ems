@@ -128,7 +128,7 @@ func (db *InfluxDB) WriteBMSData(data BMSData) error {
 		AddField("charge_capacity", data.ChargeCapacity).
 		AddField("discharge_capacity", data.DischargeCapacity).
 		AddField("max_charge_voltage", data.MaxChargeVoltage).
-		AddField("max_discharge_voltage", data.MaxDischargeVoltage).
+		AddField("min_discharge_voltage", data.MinDischargeVoltage).
 		AddField("insulation_resistance_pos", data.InsulationResistancePos).
 		AddField("insulation_resistance_neg", data.InsulationResistanceNeg).
 		SetTime(data.Timestamp)
@@ -162,7 +162,7 @@ func (db *InfluxDB) WriteBMSRackData(data BMSRackData) error {
 		AddField("max_charge_power", data.MaxChargePower).
 		AddField("max_discharge_power", data.MaxDischargePower).
 		AddField("max_charge_voltage", data.MaxChargeVoltage).
-		AddField("max_discharge_voltage", data.MaxDischargeVoltage).
+		AddField("min_discharge_voltage", data.MinDischargeVoltage).
 		AddField("max_charge_current", data.MaxChargeCurrent).
 		AddField("max_discharge_current", data.MaxDischargeCurrent).
 		AddField("voltage", data.Voltage).

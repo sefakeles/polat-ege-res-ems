@@ -34,7 +34,7 @@ func ParseBMSData(data []byte, id int) database.BMSData {
 		ChargeCapacity:          utils.FromBytes[uint16](data[34:36]),                              // 49 - Charge capacity (kWh)
 		DischargeCapacity:       utils.FromBytes[uint16](data[36:38]),                              // 50 - Discharge capacity (kWh)
 		MaxChargeVoltage:        utils.Scale(utils.FromBytes[uint16](data[38:40]), float32(0.1)),   // 51 - Max charge voltage (0.1V)
-		MaxDischargeVoltage:     utils.Scale(utils.FromBytes[uint16](data[40:42]), float32(0.1)),   // 52 - Max discharge voltage (0.1V)
+		MinDischargeVoltage:     utils.Scale(utils.FromBytes[uint16](data[40:42]), float32(0.1)),   // 52 - Min discharge voltage (0.1V)
 		InsulationResistancePos: utils.FromBytes[uint16](data[44:46]),                              // 54 - Insulation resistance positive (kΩ)
 		InsulationResistanceNeg: utils.FromBytes[uint16](data[46:48]),                              // 55 - Insulation resistance negative (kΩ)
 	}
@@ -75,7 +75,7 @@ func ParseBMSRackData(data []byte, id int, rackNo uint8) database.BMSRackData {
 		MaxChargePower:       utils.Scale(utils.FromBytes[uint16](data[2:4]), float32(0.1)),            // 101 - Max charge power (0.1kW)
 		MaxDischargePower:    utils.Scale(utils.FromBytes[uint16](data[4:6]), float32(0.1)),            // 102 - Max discharge power (0.1kW)
 		MaxChargeVoltage:     utils.Scale(utils.FromBytes[uint16](data[6:8]), float32(0.1)),            // 103 - Max charge voltage (0.1V)
-		MaxDischargeVoltage:  utils.Scale(utils.FromBytes[uint16](data[8:10]), float32(0.1)),           // 104 - Max discharge voltage (0.1V)
+		MinDischargeVoltage:  utils.Scale(utils.FromBytes[uint16](data[8:10]), float32(0.1)),           // 104 - Min discharge voltage (0.1V)
 		MaxChargeCurrent:     utils.Scale(utils.FromBytes[uint16](data[10:12]), float32(0.1)),          // 105 - Max charge current (0.1A)
 		MaxDischargeCurrent:  utils.Scale(utils.FromBytes[uint16](data[12:14]), float32(0.1)),          // 106 - Max discharge current (0.1A)
 		Voltage:              utils.Scale(utils.FromBytes[uint16](data[30:32]), float32(0.1)),          // 115 - Voltage (0.1V)
