@@ -35,9 +35,8 @@ type Service struct {
 	lastGridData        database.PCSGridData
 	lastCounterData     database.PCSCounterData
 	commandState        database.PCSCommandState
-
-	// Heartbeat counter
-	heartbeatCount uint16
+	previousAlarmStates map[string]bool
+	heartbeatCount      uint16
 }
 
 // NewService creates a new PCS service
@@ -53,14 +52,15 @@ func NewService(cfg config.PCSConfig, influxDB *database.InfluxDB, alarmManager 
 	)
 
 	return &Service{
-		config:         cfg,
-		influxDB:       influxDB,
-		alarmManager:   alarmManager,
-		client:         client,
-		ctx:            ctx,
-		cancel:         cancel,
-		log:            serviceLogger,
-		dataUpdateChan: make(chan struct{}, 1),
+		config:              cfg,
+		influxDB:            influxDB,
+		alarmManager:        alarmManager,
+		client:              client,
+		ctx:                 ctx,
+		cancel:              cancel,
+		log:                 serviceLogger,
+		dataUpdateChan:      make(chan struct{}, 1),
+		previousAlarmStates: make(map[string]bool),
 	}
 }
 

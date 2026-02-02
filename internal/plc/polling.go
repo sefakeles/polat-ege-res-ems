@@ -116,7 +116,7 @@ func (s *Service) checkProtectionRelayFaults(data database.PLCData) {
 			}
 
 			if s.alarmManager != nil {
-				s.alarmManager.ProcessAlarm(alarm)
+				s.alarmManager.SubmitAlarm(alarm)
 			}
 
 			// Update previous state

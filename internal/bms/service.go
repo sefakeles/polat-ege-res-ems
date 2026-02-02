@@ -36,9 +36,8 @@ type Service struct {
 	lastCellVoltages     [][]database.BMSCellVoltageData
 	lastCellTemperatures [][]database.BMSCellTemperatureData
 	commandState         database.BMSCommandState
-
-	// Heartbeat counter
-	heartbeatCount uint16
+	previousAlarmStates  map[string]bool
+	heartbeatCount       uint16
 }
 
 // NewService creates a new BMS service
@@ -69,6 +68,7 @@ func NewService(cfg config.BMSConfig, influxDB *database.InfluxDB, alarmManager 
 		lastBMSRackData:      make([]database.BMSRackData, cfg.RackCount),
 		lastCellVoltages:     make([][]database.BMSCellVoltageData, cfg.RackCount),
 		lastCellTemperatures: make([][]database.BMSCellTemperatureData, cfg.RackCount),
+		previousAlarmStates:  make(map[string]bool),
 	}
 }
 

@@ -252,6 +252,21 @@ func (p *PostgresDB) UpdateAlarmStatus(id uint, active bool) error {
 	return nil
 }
 
+// DeactivateAllAlarms deactivates all active alarms in a single query
+func (p *PostgresDB) DeactivateAllAlarms() (int64, error) {
+	result := p.db.Model(&AlarmRecord{}).
+		Where("active = ?", true).
+		Update("active", false)
+
+	if result.Error != nil {
+		p.log.Error("Failed to deactivate all alarms", zap.Error(result.Error))
+		return 0, result.Error
+	}
+
+	p.log.Info("Deactivated all active alarms", zap.Int64("count", result.RowsAffected))
+	return result.RowsAffected, nil
+}
+
 // DeleteOldAlarms deletes alarms older than the specified duration
 func (p *PostgresDB) DeleteOldAlarms(olderThan time.Duration) error {
 	cutoffTime := time.Now().Add(-olderThan)

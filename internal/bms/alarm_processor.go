@@ -16,6 +16,7 @@ func (s *Service) processAlarms(data []byte) {
 			relativeCode := uint16(byteIdx*8 + bitIdx)
 			isActive := (b & (1 << bitIdx)) != 0
 
+			alarmType := fmt.Sprintf("BMS_%d", s.config.ID)
 			alarmCode := relativeCode + 1
 			message := GetAlarmMessage(alarmCode)
 			severity := GetAlarmSeverity(alarmCode)
@@ -24,16 +25,28 @@ func (s *Service) processAlarms(data []byte) {
 				continue
 			}
 
-			alarm := database.BMSAlarmData{
-				Timestamp: timestamp,
-				AlarmType: fmt.Sprintf("BMS_%d", s.config.ID),
-				AlarmCode: alarmCode,
-				Message:   message,
-				Severity:  severity,
-				Active:    isActive,
-			}
+			// Create unique alarm key
+			alarmKey := fmt.Sprintf("%s_%d", alarmType, alarmCode)
 
-			s.alarmManager.ProcessAlarm(alarm)
+			// Check if alarm state has changed
+			s.mutex.Lock()
+			previousState, exists := s.previousAlarmStates[alarmKey]
+			stateChanged := (!exists && isActive) || (exists && previousState != isActive)
+			s.previousAlarmStates[alarmKey] = isActive
+			s.mutex.Unlock()
+
+			if stateChanged {
+				alarm := database.BMSAlarmData{
+					Timestamp: timestamp,
+					AlarmType: alarmType,
+					AlarmCode: alarmCode,
+					Message:   message,
+					Severity:  severity,
+					Active:    isActive,
+				}
+
+				s.alarmManager.SubmitAlarm(alarm)
+			}
 		}
 	}
 }
@@ -48,20 +61,33 @@ func (s *Service) processRackAlarms(data []byte, rackNo uint8) {
 			relativeCode := uint16(byteIdx*8 + bitIdx)
 			isActive := (b & (1 << bitIdx)) != 0
 
+			alarmType := fmt.Sprintf("BMS_%d_RACK", s.config.ID)
 			alarmCode := baseCode + relativeCode
 			message := GetRackAlarmMessage(relativeCode)
 			severity := GetRackAlarmSeverity(relativeCode)
 
-			alarm := database.BMSAlarmData{
-				Timestamp: timestamp,
-				AlarmType: fmt.Sprintf("BMS_%d_RACK", s.config.ID),
-				AlarmCode: alarmCode,
-				Message:   message,
-				Severity:  severity,
-				Active:    isActive,
-			}
+			// Create unique alarm key
+			alarmKey := fmt.Sprintf("%s_%d", alarmType, alarmCode)
 
-			s.alarmManager.ProcessAlarm(alarm)
+			// Check if alarm state has changed
+			s.mutex.Lock()
+			previousState, exists := s.previousAlarmStates[alarmKey]
+			stateChanged := (!exists && isActive) || (exists && previousState != isActive)
+			s.previousAlarmStates[alarmKey] = isActive
+			s.mutex.Unlock()
+
+			if stateChanged {
+				alarm := database.BMSAlarmData{
+					Timestamp: timestamp,
+					AlarmType: alarmType,
+					AlarmCode: alarmCode,
+					Message:   message,
+					Severity:  severity,
+					Active:    isActive,
+				}
+
+				s.alarmManager.SubmitAlarm(alarm)
+			}
 		}
 	}
 }

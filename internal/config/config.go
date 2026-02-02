@@ -16,6 +16,7 @@ type Config struct {
 	PLC          []PLCConfig        `mapstructure:"plc" validate:"required,min=1,dive"`
 	WindFarm     []WindFarmConfig   `mapstructure:"windfarm" validate:"required,min=1,dive"`
 	EMS          EMSConfig          `mapstructure:"ems" validate:"required"`
+	Alarm        AlarmConfig        `mapstructure:"alarm" validate:"required"`
 	InfluxDB     InfluxDBConfig     `mapstructure:"influxdb" validate:"required"`
 	PostgreSQL   PostgreSQLConfig   `mapstructure:"postgresql" validate:"required"`
 	ModbusServer ModbusServerConfig `mapstructure:"modbus_server" validate:"required"`
@@ -85,6 +86,11 @@ type EMSConfig struct {
 	MinSOC            float32 `mapstructure:"min_soc" validate:"required,min=0,max=100"`
 	MaxChargePower    float32 `mapstructure:"max_charge_power" validate:"required,min=0"`
 	MaxDischargePower float32 `mapstructure:"max_discharge_power" validate:"required,min=0"`
+}
+
+// AlarmConfig contains alarm processing configuration
+type AlarmConfig struct {
+	QueueBufferSize int `mapstructure:"queue_buffer_size" validate:"min=1,max=10000"`
 }
 
 // InfluxDBConfig contains InfluxDB-specific configuration
@@ -171,6 +177,9 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("ems.min_soc", 10.0)
 	v.SetDefault("ems.max_charge_power", 100.0)
 	v.SetDefault("ems.max_discharge_power", 100.0)
+
+	// Alarm defaults
+	v.SetDefault("alarm.queue_buffer_size", 100)
 
 	// InfluxDB defaults
 	v.SetDefault("influxdb.url", "http://localhost:8086")
