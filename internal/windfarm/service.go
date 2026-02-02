@@ -19,21 +19,17 @@ type Service struct {
 	ctx      context.Context
 	cancel   context.CancelFunc
 	wg       sync.WaitGroup
-	mutex    sync.RWMutex
 	log      *zap.Logger
 
-	// Channel to signal new data availability
 	dataUpdateChan chan struct{}
 
-	// Data storage
+	mutex             sync.RWMutex
 	lastMeasuringData database.WindFarmMeasuringData
 	lastStatusData    database.WindFarmStatusData
 	lastSetpointData  database.WindFarmSetpointData
 	lastWeatherData   database.WindFarmWeatherData
 	commandState      database.WindFarmCommandState
-
-	// Heartbeat counter for heartbeat
-	heartbeatCounter uint16
+	heartbeatCounter  uint16
 }
 
 // NewService creates a new Wind Farm service
