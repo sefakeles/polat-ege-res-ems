@@ -20,13 +20,10 @@ type Manager struct {
 	ctx    context.Context
 	cancel context.CancelFunc
 	wg     sync.WaitGroup
-	mutex  sync.RWMutex
 	log    *zap.Logger
 
-	// Runtime metrics
+	mutex     sync.RWMutex
 	startTime time.Time
-
-	// Network metrics
 	lastNetRx uint64
 	lastNetTx uint64
 }
