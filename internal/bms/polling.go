@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"time"
 
-	"powerkonnekt/ems/pkg/logger"
+	"go.uber.org/zap"
 )
 
 // baseDataPollLoop periodically reads base data from the BMS
 func (s *Service) baseDataPollLoop() {
 	if err := s.baseClient.Connect(s.ctx); err != nil {
-		s.log.Warn("Initial base Modbus connection failed", logger.Err(err))
+		s.log.Warn("Initial base Modbus connection failed", zap.Error(err))
 	}
 
 	ticker := time.NewTicker(s.config.PollInterval)
@@ -26,7 +26,7 @@ func (s *Service) baseDataPollLoop() {
 			}
 
 			if err := s.readBaseData(); err != nil {
-				s.log.Error("Error reading base data", logger.Err(err))
+				s.log.Error("Error reading base data", zap.Error(err))
 				continue
 			}
 
@@ -47,7 +47,7 @@ func (s *Service) cellDataPollLoop() {
 	}
 
 	if err := s.cellClient.Connect(s.ctx); err != nil {
-		s.log.Warn("Initial cell Modbus connection failed", logger.Err(err))
+		s.log.Warn("Initial cell Modbus connection failed", zap.Error(err))
 	}
 
 	ticker := time.NewTicker(s.config.CellDataInterval)
@@ -63,7 +63,7 @@ func (s *Service) cellDataPollLoop() {
 			}
 
 			if err := s.readCellDataForAllRacks(); err != nil {
-				s.log.Error("Error reading cell data", logger.Err(err))
+				s.log.Error("Error reading cell data", zap.Error(err))
 				continue
 			}
 
@@ -91,13 +91,13 @@ func (s *Service) handleBaseClientConnectionError() {
 			reconnectAttempts++
 			if err := s.baseClient.Connect(s.ctx); err != nil {
 				s.log.Error("Failed to reconnect to BMS base client",
-					logger.Err(err),
-					logger.Int("attempt", reconnectAttempts),
-					logger.Duration("retry_delay", s.config.ReconnectDelay))
+					zap.Error(err),
+					zap.Int("attempt", reconnectAttempts),
+					zap.Duration("retry_delay", s.config.ReconnectDelay))
 			} else {
 				s.log.Info("Successfully reconnected to BMS base client",
-					logger.Int("total_attempts", reconnectAttempts),
-					logger.Duration("total_downtime", time.Duration(reconnectAttempts)*s.config.ReconnectDelay))
+					zap.Int("total_attempts", reconnectAttempts),
+					zap.Duration("total_downtime", time.Duration(reconnectAttempts)*s.config.ReconnectDelay))
 				return
 			}
 		}
@@ -118,13 +118,13 @@ func (s *Service) handleCellClientConnectionError() {
 			reconnectAttempts++
 			if err := s.cellClient.Connect(s.ctx); err != nil {
 				s.log.Error("Failed to reconnect to BMS cell client",
-					logger.Err(err),
-					logger.Int("attempt", reconnectAttempts),
-					logger.Duration("retry_delay", s.config.ReconnectDelay))
+					zap.Error(err),
+					zap.Int("attempt", reconnectAttempts),
+					zap.Duration("retry_delay", s.config.ReconnectDelay))
 			} else {
 				s.log.Info("Successfully reconnected to BMS cell client",
-					logger.Int("total_attempts", reconnectAttempts),
-					logger.Duration("total_downtime", time.Duration(reconnectAttempts)*s.config.ReconnectDelay))
+					zap.Int("total_attempts", reconnectAttempts),
+					zap.Duration("total_downtime", time.Duration(reconnectAttempts)*s.config.ReconnectDelay))
 				return
 			}
 		}
@@ -158,8 +158,8 @@ func (s *Service) readBaseData() error {
 		// Read BMS rack data
 		if err := s.readBMSRackData(rackNo); err != nil {
 			s.log.Error("Failed to read BMS rack data",
-				logger.Err(err),
-				logger.Uint8("rack_no", rackNo))
+				zap.Error(err),
+				zap.Uint8("rack_no", rackNo))
 		}
 	}
 
@@ -179,8 +179,8 @@ func (s *Service) readCellDataForAllRacks() error {
 		// Read cell data
 		if err := s.readCellData(rackNo); err != nil {
 			s.log.Error("Failed to read cell data",
-				logger.Err(err),
-				logger.Uint8("rack_no", rackNo))
+				zap.Error(err),
+				zap.Uint8("rack_no", rackNo))
 		}
 	}
 

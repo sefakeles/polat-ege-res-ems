@@ -5,8 +5,9 @@ import (
 	"sync"
 	"time"
 
+	"go.uber.org/zap"
+
 	"powerkonnekt/ems/internal/database"
-	"powerkonnekt/ems/pkg/logger"
 )
 
 // readFaults reads fault registers
@@ -115,7 +116,7 @@ func (s *Service) readPCSData() error {
 		go func(name string, fn func() error) {
 			defer wg.Done()
 			if err := fn(); err != nil {
-				s.log.Error("Failed to read "+name+" data", logger.Err(err))
+				s.log.Error("Failed to read "+name+" data", zap.Error(err))
 				mu.Lock()
 				lastErr = err
 				mu.Unlock()

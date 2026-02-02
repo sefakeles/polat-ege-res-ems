@@ -3,8 +3,9 @@ package bms
 import (
 	"time"
 
+	"go.uber.org/zap"
+
 	"powerkonnekt/ems/internal/database"
-	"powerkonnekt/ems/pkg/logger"
 )
 
 // persistenceLoop handles data persistence
@@ -46,14 +47,14 @@ func (s *Service) persistLatestData() {
 	// Save BMS data to InfluxDB
 	if !bmsData.Timestamp.IsZero() {
 		if err := s.influxDB.WriteBMSData(bmsData); err != nil {
-			s.log.Error("Failed to save BMS data to InfluxDB", logger.Err(err))
+			s.log.Error("Failed to save BMS data to InfluxDB", zap.Error(err))
 		}
 	}
 
 	// Save BMS status data to InfluxDB
 	if !bmsStatusData.Timestamp.IsZero() {
 		if err := s.influxDB.WriteBMSStatusData(bmsStatusData); err != nil {
-			s.log.Error("Failed to save BMS status data to InfluxDB", logger.Err(err))
+			s.log.Error("Failed to save BMS status data to InfluxDB", zap.Error(err))
 		}
 	}
 
@@ -62,8 +63,8 @@ func (s *Service) persistLatestData() {
 		if !rack.Timestamp.IsZero() {
 			if err := s.influxDB.WriteBMSRackData(rack); err != nil {
 				s.log.Error("Failed to save BMS rack data to InfluxDB",
-					logger.Err(err),
-					logger.Uint8("rack_no", rack.Number))
+					zap.Error(err),
+					zap.Uint8("rack_no", rack.Number))
 			}
 		}
 	}
@@ -73,8 +74,8 @@ func (s *Service) persistLatestData() {
 		if len(cells) > 0 {
 			if err := s.influxDB.WriteBMSCellVoltageData(cells); err != nil {
 				s.log.Error("Failed to save cell voltage data to InfluxDB",
-					logger.Err(err),
-					logger.Int("rack_no", rackNo))
+					zap.Error(err),
+					zap.Int("rack_no", rackNo))
 			}
 		}
 	}
@@ -84,8 +85,8 @@ func (s *Service) persistLatestData() {
 		if len(cells) > 0 {
 			if err := s.influxDB.WriteBMSCellTemperatureData(cells); err != nil {
 				s.log.Error("Failed to save cell temperature data to InfluxDB",
-					logger.Err(err),
-					logger.Int("rack_no", rackNo))
+					zap.Error(err),
+					zap.Int("rack_no", rackNo))
 			}
 		}
 	}

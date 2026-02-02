@@ -2,6 +2,7 @@ package alarm
 
 import (
 	"go.uber.org/fx"
+	"go.uber.org/zap"
 
 	"powerkonnekt/ems/internal/database"
 )
@@ -12,6 +13,6 @@ var Module = fx.Module("alarm",
 )
 
 // ProvideManager creates and provides an alarm manager instance
-func ProvideManager(db *database.PostgresDB) *Manager {
-	return NewManager(db)
+func ProvideManager(postgresDB *database.PostgresDB, logger *zap.Logger) *Manager {
+	return NewManager(postgresDB, logger)
 }

@@ -7,11 +7,11 @@ import (
 	"time"
 
 	"powerkonnekt/ems/internal/database"
-	"powerkonnekt/ems/pkg/logger"
 
 	"github.com/shirou/gopsutil/v3/cpu"
 	"github.com/shirou/gopsutil/v3/disk"
 	"github.com/shirou/gopsutil/v3/net"
+	"go.uber.org/zap"
 )
 
 // Manager handles metrics collection and storage
@@ -21,7 +21,7 @@ type Manager struct {
 	cancel context.CancelFunc
 	wg     sync.WaitGroup
 	mutex  sync.RWMutex
-	log    logger.Logger
+	log    *zap.Logger
 
 	// Runtime metrics
 	startTime time.Time
@@ -32,12 +32,12 @@ type Manager struct {
 }
 
 // NewManager creates a new metrics manager
-func NewManager(db *database.InfluxDB) *Manager {
+func NewManager(db *database.InfluxDB, logger *zap.Logger) *Manager {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	// Create component-specific logger
 	metricsLogger := logger.With(
-		logger.String("component", "metrics_manager"),
+		zap.String("component", "metrics_manager"),
 	)
 
 	return &Manager{
@@ -57,7 +57,7 @@ func (m *Manager) Start() error {
 	m.wg.Go(m.collectLoop)
 
 	m.log.Info("Metrics manager started",
-		logger.Time("start_time", m.startTime))
+		zap.Time("start_time", m.startTime))
 	return nil
 }
 
@@ -86,7 +86,7 @@ func (m *Manager) collectLoop() {
 func (m *Manager) initNetworkCounters() {
 	netStats, err := net.IOCounters(false)
 	if err != nil || len(netStats) == 0 {
-		m.log.Error("Failed to initialize network counters", logger.Err(err))
+		m.log.Error("Failed to initialize network counters", zap.Error(err))
 		return
 	}
 
@@ -104,7 +104,7 @@ func (m *Manager) collectSystemMetrics() {
 	cpuPercent, err := cpu.Percent(time.Second, false)
 	var cpuUsage float32
 	if err != nil || len(cpuPercent) == 0 {
-		m.log.Error("Failed to get CPU usage", logger.Err(err))
+		m.log.Error("Failed to get CPU usage", zap.Error(err))
 		cpuUsage = 0.0
 	} else {
 		cpuUsage = float32(cpuPercent[0])
@@ -114,7 +114,7 @@ func (m *Manager) collectSystemMetrics() {
 	diskStat, err := disk.Usage("/")
 	var diskUsage float32
 	if err != nil {
-		m.log.Error("Failed to get disk usage", logger.Err(err))
+		m.log.Error("Failed to get disk usage", zap.Error(err))
 		diskUsage = 0.0
 	} else {
 		diskUsage = float32(diskStat.UsedPercent)
@@ -134,14 +134,14 @@ func (m *Manager) collectSystemMetrics() {
 
 	// Save to InfluxDB
 	if err := m.db.WriteSystemMetrics(metrics); err != nil {
-		m.log.Error("Failed to save system metrics to InfluxDB", logger.Err(err))
+		m.log.Error("Failed to save system metrics to InfluxDB", zap.Error(err))
 	}
 }
 
 func (m *Manager) getNetworkStats() (uint64, uint64) {
 	netStats, err := net.IOCounters(false)
 	if err != nil || len(netStats) == 0 {
-		m.log.Error("Failed to get network statistics", logger.Err(err))
+		m.log.Error("Failed to get network statistics", zap.Error(err))
 		return 0, 0
 	}
 
@@ -194,6 +194,6 @@ func (m *Manager) collectRuntimeMetrics() {
 
 	// Save to InfluxDB
 	if err := m.db.WriteRuntimeMetrics(runtimeMetrics); err != nil {
-		m.log.Error("Failed to save runtime metrics to InfluxDB", logger.Err(err))
+		m.log.Error("Failed to save runtime metrics to InfluxDB", zap.Error(err))
 	}
 }

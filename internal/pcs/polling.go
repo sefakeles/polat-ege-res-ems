@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"powerkonnekt/ems/pkg/logger"
+	"go.uber.org/zap"
 )
 
 // pollLoop periodically reads data from the PCS
@@ -22,7 +22,7 @@ func (s *Service) pollLoop() {
 			}
 
 			if err := s.readAllData(); err != nil {
-				s.log.Error("Error reading data", logger.Err(err))
+				s.log.Error("Error reading data", zap.Error(err))
 				continue
 			}
 
@@ -50,13 +50,13 @@ func (s *Service) handleConnectionError() {
 			reconnectAttempts++
 			if err := s.client.Connect(s.ctx); err != nil {
 				s.log.Error("Failed to reconnect to PCS",
-					logger.Err(err),
-					logger.Int("attempt", reconnectAttempts),
-					logger.Duration("retry_delay", s.config.ReconnectDelay))
+					zap.Error(err),
+					zap.Int("attempt", reconnectAttempts),
+					zap.Duration("retry_delay", s.config.ReconnectDelay))
 			} else {
 				s.log.Info("Successfully reconnected to PCS",
-					logger.Int("total_attempts", reconnectAttempts),
-					logger.Duration("total_downtime", time.Duration(reconnectAttempts)*s.config.ReconnectDelay))
+					zap.Int("total_attempts", reconnectAttempts),
+					zap.Duration("total_downtime", time.Duration(reconnectAttempts)*s.config.ReconnectDelay))
 				return
 			}
 		}

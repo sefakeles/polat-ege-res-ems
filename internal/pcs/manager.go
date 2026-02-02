@@ -5,22 +5,23 @@ import (
 	"maps"
 	"sync"
 
+	"go.uber.org/zap"
+
 	"powerkonnekt/ems/internal/alarm"
 	"powerkonnekt/ems/internal/config"
 	"powerkonnekt/ems/internal/database"
-	"powerkonnekt/ems/pkg/logger"
 )
 
 // Manager manages multiple PCS services
 type Manager struct {
 	services map[int]*Service
 	mutex    sync.RWMutex
-	log      logger.Logger
+	log      *zap.Logger
 }
 
 // NewManager creates a new PCS manager
-func NewManager(configs []config.PCSConfig, influxDB *database.InfluxDB, alarmManager *alarm.Manager) *Manager {
-	managerLogger := logger.With(logger.String("component", "pcs_manager"))
+func NewManager(configs []config.PCSConfig, influxDB *database.InfluxDB, alarmManager *alarm.Manager, logger *zap.Logger) *Manager {
+	managerLogger := logger.With(zap.String("component", "pcs_manager"))
 
 	manager := &Manager{
 		services: make(map[int]*Service),
@@ -28,7 +29,7 @@ func NewManager(configs []config.PCSConfig, influxDB *database.InfluxDB, alarmMa
 	}
 
 	for _, cfg := range configs {
-		service := NewService(cfg, influxDB, alarmManager)
+		service := NewService(cfg, influxDB, alarmManager, logger)
 		manager.services[cfg.ID] = service
 	}
 
@@ -42,10 +43,10 @@ func (m *Manager) Start() error {
 
 	for id, service := range m.services {
 		if err := service.Start(); err != nil {
-			m.log.Error("Failed to start PCS service", logger.Int("id", id), logger.Err(err))
+			m.log.Error("Failed to start PCS service", zap.Int("id", id), zap.Error(err))
 			return fmt.Errorf("failed to start PCS service %d: %w", id, err)
 		}
-		m.log.Info("PCS service started", logger.Int("id", id))
+		m.log.Info("PCS service started", zap.Int("id", id))
 	}
 
 	return nil
@@ -58,7 +59,7 @@ func (m *Manager) Stop() {
 
 	for id, service := range m.services {
 		service.Stop()
-		m.log.Info("PCS service stopped", logger.Int("id", id))
+		m.log.Info("PCS service stopped", zap.Int("id", id))
 	}
 }
 
@@ -118,9 +119,9 @@ func (m *Manager) StartStopCommandAll(start bool) error {
 
 	if errCount > 0 {
 		m.log.Error("Failed to send start/stop command to some PCS units",
-			logger.Int("failed_count", errCount),
-			logger.Int("total_count", len(services)),
-			logger.Err(lastErr))
+			zap.Int("failed_count", errCount),
+			zap.Int("total_count", len(services)),
+			zap.Error(lastErr))
 		return fmt.Errorf("failed to send command to %d/%d PCS units: %w", errCount, len(services), lastErr)
 	}
 
@@ -159,10 +160,10 @@ func (m *Manager) SetActivePowerCommandAll(power float32) error {
 
 	if errCount > 0 {
 		m.log.Error("Failed to send active power command to some PCS units",
-			logger.Int("failed_count", errCount),
-			logger.Int("total_count", len(services)),
-			logger.Float32("power", power),
-			logger.Err(lastErr))
+			zap.Int("failed_count", errCount),
+			zap.Int("total_count", len(services)),
+			zap.Float32("power", power),
+			zap.Error(lastErr))
 		return fmt.Errorf("failed to send command to %d/%d PCS units: %w", errCount, len(services), lastErr)
 	}
 
@@ -201,10 +202,10 @@ func (m *Manager) SetReactivePowerCommandAll(power float32) error {
 
 	if errCount > 0 {
 		m.log.Error("Failed to send reactive power command to some PCS units",
-			logger.Int("failed_count", errCount),
-			logger.Int("total_count", len(services)),
-			logger.Float32("power", power),
-			logger.Err(lastErr))
+			zap.Int("failed_count", errCount),
+			zap.Int("total_count", len(services)),
+			zap.Float32("power", power),
+			zap.Error(lastErr))
 		return fmt.Errorf("failed to send command to %d/%d PCS units: %w", errCount, len(services), lastErr)
 	}
 
@@ -243,9 +244,9 @@ func (m *Manager) ResetSystemAll() error {
 
 	if errCount > 0 {
 		m.log.Error("Failed to send reset command to some PCS units",
-			logger.Int("failed_count", errCount),
-			logger.Int("total_count", len(services)),
-			logger.Err(lastErr))
+			zap.Int("failed_count", errCount),
+			zap.Int("total_count", len(services)),
+			zap.Error(lastErr))
 		return fmt.Errorf("failed to send command to %d/%d PCS units: %w", errCount, len(services), lastErr)
 	}
 

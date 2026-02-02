@@ -7,9 +7,9 @@ import (
 	"powerkonnekt/ems/internal/bms"
 	"powerkonnekt/ems/internal/control"
 	"powerkonnekt/ems/internal/pcs"
-	"powerkonnekt/ems/pkg/logger"
 
 	"github.com/simonvetter/modbus"
+	"go.uber.org/zap"
 )
 
 // RequestHandler implements the modbus.RequestHandler interface
@@ -20,7 +20,7 @@ type RequestHandler struct {
 	controlLogic *control.Logic
 	registers    *RegisterMap
 	mutex        sync.RWMutex
-	log          logger.Logger
+	log          *zap.Logger
 }
 
 // NewRequestHandler creates a new Modbus request handler
@@ -29,10 +29,11 @@ func NewRequestHandler(
 	pcsManager *pcs.Manager,
 	alarmManager *alarm.Manager,
 	controlLogic *control.Logic,
+	logger *zap.Logger,
 ) *RequestHandler {
 	// Create handler-specific logger
 	handlerLogger := logger.With(
-		logger.String("component", "modbus_handler"),
+		zap.String("component", "modbus_handler"),
 	)
 
 	return &RequestHandler{
@@ -81,7 +82,7 @@ func (h *RequestHandler) HandleInputRegisters(req *modbus.InputRegistersRequest)
 		return h.handlePCSInputRegisters(req.Addr, req.Quantity)
 	default:
 		h.log.Warn("Address out of range",
-			logger.Uint16("address", req.Addr))
+			zap.Uint16("address", req.Addr))
 		return nil, modbus.ErrIllegalDataAddress
 	}
 }
@@ -91,7 +92,7 @@ func (h *RequestHandler) handleBMSInputRegisters(addr uint16, quantity uint16) (
 	bmsNo := h.getBMSNumberFromServerAddress(addr)
 	if bmsNo == 0 {
 		h.log.Warn("Invalid BMS number",
-			logger.Uint8("bms_no", bmsNo))
+			zap.Uint8("bms_no", bmsNo))
 		return nil, modbus.ErrIllegalDataAddress
 	}
 
@@ -102,8 +103,8 @@ func (h *RequestHandler) handleBMSInputRegisters(addr uint16, quantity uint16) (
 		service, err := h.bmsManager.GetService(int(bmsNo))
 		if err != nil {
 			h.log.Warn("BMS service not found",
-				logger.Uint8("bms_no", bmsNo),
-				logger.Err(err))
+				zap.Uint8("bms_no", bmsNo),
+				zap.Error(err))
 			return nil, modbus.ErrIllegalDataAddress
 		}
 
@@ -112,8 +113,8 @@ func (h *RequestHandler) handleBMSInputRegisters(addr uint16, quantity uint16) (
 	}
 
 	h.log.Warn("Illegal data address requested",
-		logger.Uint16("address", addr),
-		logger.Uint8("bms_no", bmsNo))
+		zap.Uint16("address", addr),
+		zap.Uint8("bms_no", bmsNo))
 	return nil, modbus.ErrIllegalDataAddress
 }
 
@@ -122,7 +123,7 @@ func (h *RequestHandler) handlePCSInputRegisters(addr uint16, quantity uint16) (
 	pcsNo := h.getPCSNumberFromServerAddress(addr)
 	if pcsNo == 0 {
 		h.log.Warn("Invalid PCS number",
-			logger.Uint8("pcs_no", pcsNo))
+			zap.Uint8("pcs_no", pcsNo))
 		return nil, modbus.ErrIllegalDataAddress
 	}
 
@@ -133,8 +134,8 @@ func (h *RequestHandler) handlePCSInputRegisters(addr uint16, quantity uint16) (
 		service, err := h.pcsManager.GetService(int(pcsNo))
 		if err != nil {
 			h.log.Warn("PCS service not found",
-				logger.Uint8("pcs_no", pcsNo),
-				logger.Err(err))
+				zap.Uint8("pcs_no", pcsNo),
+				zap.Error(err))
 			return nil, modbus.ErrIllegalDataAddress
 		}
 
@@ -143,8 +144,8 @@ func (h *RequestHandler) handlePCSInputRegisters(addr uint16, quantity uint16) (
 	}
 
 	h.log.Warn("Illegal data address requested",
-		logger.Uint16("address", addr),
-		logger.Uint8("pcs_no", pcsNo))
+		zap.Uint16("address", addr),
+		zap.Uint8("pcs_no", pcsNo))
 	return nil, modbus.ErrIllegalDataAddress
 }
 
@@ -161,7 +162,7 @@ func (h *RequestHandler) handleHoldingRegistersRead(req *modbus.HoldingRegisters
 	// Calculate PCS number from command address
 	if addr < CmdBaseAddr {
 		h.log.Warn("Read attempt from invalid command address",
-			logger.Uint16("address", addr))
+			zap.Uint16("address", addr))
 		return nil, modbus.ErrIllegalDataAddress
 	}
 
@@ -172,8 +173,8 @@ func (h *RequestHandler) handleHoldingRegistersRead(req *modbus.HoldingRegisters
 	service, err := h.pcsManager.GetService(int(pcsNo))
 	if err != nil {
 		h.log.Warn("PCS service not found for command read",
-			logger.Uint8("pcs_no", pcsNo),
-			logger.Err(err))
+			zap.Uint8("pcs_no", pcsNo),
+			zap.Error(err))
 		return nil, modbus.ErrIllegalDataAddress
 	}
 
@@ -206,9 +207,9 @@ func (h *RequestHandler) handleHoldingRegistersRead(req *modbus.HoldingRegisters
 
 		default:
 			h.log.Warn("Read attempt from unsupported holding register",
-				logger.Uint16("address", addr+uint16(i)),
-				logger.Uint8("pcs_no", pcsNo),
-				logger.Uint16("cmd_offset", currentOffset))
+				zap.Uint16("address", addr+uint16(i)),
+				zap.Uint8("pcs_no", pcsNo),
+				zap.Uint16("cmd_offset", currentOffset))
 			return nil, modbus.ErrIllegalDataAddress
 		}
 	}
@@ -224,7 +225,7 @@ func (h *RequestHandler) handleHoldingRegistersWrite(req *modbus.HoldingRegister
 	// Calculate PCS number from command address
 	if addr < CmdBaseAddr {
 		h.log.Warn("Write attempt to invalid command address",
-			logger.Uint16("address", addr))
+			zap.Uint16("address", addr))
 		return nil, modbus.ErrIllegalDataAddress
 	}
 
@@ -235,8 +236,8 @@ func (h *RequestHandler) handleHoldingRegistersWrite(req *modbus.HoldingRegister
 	service, err := h.pcsManager.GetService(int(pcsNo))
 	if err != nil {
 		h.log.Warn("PCS service not found for command",
-			logger.Uint8("pcs_no", pcsNo),
-			logger.Err(err))
+			zap.Uint8("pcs_no", pcsNo),
+			zap.Error(err))
 		return nil, modbus.ErrIllegalDataAddress
 	}
 
@@ -250,20 +251,20 @@ func (h *RequestHandler) handleHoldingRegistersWrite(req *modbus.HoldingRegister
 		start := values[0] != 0
 
 		h.log.Info("Modbus start/stop command received",
-			logger.Uint8("pcs_no", pcsNo),
-			logger.Bool("start", start))
+			zap.Uint8("pcs_no", pcsNo),
+			zap.Bool("start", start))
 
 		if err := service.StartStopCommand(start); err != nil {
 			h.log.Error("Failed to execute Modbus start/stop command",
-				logger.Uint8("pcs_no", pcsNo),
-				logger.Err(err),
-				logger.Bool("start", start))
+				zap.Uint8("pcs_no", pcsNo),
+				zap.Error(err),
+				zap.Bool("start", start))
 			return nil, modbus.ErrServerDeviceFailure
 		}
 
 		h.log.Info("Modbus start/stop command executed successfully",
-			logger.Uint8("pcs_no", pcsNo),
-			logger.Bool("start", start))
+			zap.Uint8("pcs_no", pcsNo),
+			zap.Bool("start", start))
 		return values, nil
 
 	case RegActivePowerCommand:
@@ -276,20 +277,20 @@ func (h *RequestHandler) handleHoldingRegistersWrite(req *modbus.HoldingRegister
 		power := float32(powerValue) / 10.0
 
 		h.log.Info("Modbus active power command received",
-			logger.Uint8("pcs_no", pcsNo),
-			logger.Float32("power", power))
+			zap.Uint8("pcs_no", pcsNo),
+			zap.Float32("power", power))
 
 		if err := service.SetActivePowerCommand(power); err != nil {
 			h.log.Error("Failed to execute Modbus active power command",
-				logger.Uint8("pcs_no", pcsNo),
-				logger.Err(err),
-				logger.Float32("power", power))
+				zap.Uint8("pcs_no", pcsNo),
+				zap.Error(err),
+				zap.Float32("power", power))
 			return nil, modbus.ErrServerDeviceFailure
 		}
 
 		h.log.Info("Modbus active power command executed successfully",
-			logger.Uint8("pcs_no", pcsNo),
-			logger.Float32("power", power))
+			zap.Uint8("pcs_no", pcsNo),
+			zap.Float32("power", power))
 		return values, nil
 
 	case RegReactivePowerCommand:
@@ -302,27 +303,27 @@ func (h *RequestHandler) handleHoldingRegistersWrite(req *modbus.HoldingRegister
 		power := float32(powerValue) / 10.0
 
 		h.log.Info("Modbus reactive power command received",
-			logger.Uint8("pcs_no", pcsNo),
-			logger.Float32("power", power))
+			zap.Uint8("pcs_no", pcsNo),
+			zap.Float32("power", power))
 
 		if err := service.SetReactivePowerCommand(power); err != nil {
 			h.log.Error("Failed to execute Modbus reactive power command",
-				logger.Uint8("pcs_no", pcsNo),
-				logger.Err(err),
-				logger.Float32("power", power))
+				zap.Uint8("pcs_no", pcsNo),
+				zap.Error(err),
+				zap.Float32("power", power))
 			return nil, modbus.ErrServerDeviceFailure
 		}
 
 		h.log.Info("Modbus reactive power command executed successfully",
-			logger.Uint8("pcs_no", pcsNo),
-			logger.Float32("power", power))
+			zap.Uint8("pcs_no", pcsNo),
+			zap.Float32("power", power))
 		return values, nil
 
 	default:
 		h.log.Warn("Write attempt to unsupported holding register",
-			logger.Uint16("address", addr),
-			logger.Uint8("pcs_no", pcsNo),
-			logger.Uint16("cmd_offset", uint16(cmdOffset)))
+			zap.Uint16("address", addr),
+			zap.Uint8("pcs_no", pcsNo),
+			zap.Uint16("cmd_offset", uint16(cmdOffset)))
 		return nil, modbus.ErrIllegalDataAddress
 	}
 }

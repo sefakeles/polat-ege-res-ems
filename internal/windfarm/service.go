@@ -4,9 +4,10 @@ import (
 	"context"
 	"sync"
 
+	"go.uber.org/zap"
+
 	"powerkonnekt/ems/internal/config"
 	"powerkonnekt/ems/internal/database"
-	"powerkonnekt/ems/pkg/logger"
 	"powerkonnekt/ems/pkg/modbus"
 )
 
@@ -19,7 +20,7 @@ type Service struct {
 	cancel   context.CancelFunc
 	wg       sync.WaitGroup
 	mutex    sync.RWMutex
-	log      logger.Logger
+	log      *zap.Logger
 
 	// Channel to signal new data availability
 	dataUpdateChan chan struct{}
@@ -36,15 +37,15 @@ type Service struct {
 }
 
 // NewService creates a new Wind Farm service
-func NewService(cfg config.WindFarmConfig, influxDB *database.InfluxDB) *Service {
+func NewService(cfg config.WindFarmConfig, influxDB *database.InfluxDB, logger *zap.Logger) *Service {
 	client := modbus.NewClient(cfg.Host, cfg.Port, cfg.SlaveID, cfg.Timeout)
 	ctx, cancel := context.WithCancel(context.Background())
 
 	// Create service-specific logger
 	serviceLogger := logger.With(
-		logger.String("service", "windfarm"),
-		logger.String("host", cfg.Host),
-		logger.Int("port", cfg.Port),
+		zap.String("service", "windfarm"),
+		zap.String("host", cfg.Host),
+		zap.Int("port", cfg.Port),
 	)
 
 	return &Service{
@@ -61,7 +62,7 @@ func NewService(cfg config.WindFarmConfig, influxDB *database.InfluxDB) *Service
 // Start starts the Wind Farm service
 func (s *Service) Start() error {
 	if err := s.client.Connect(s.ctx); err != nil {
-		s.log.Warn("Initial Modbus connection failed", logger.Err(err))
+		s.log.Warn("Initial Modbus connection failed", zap.Error(err))
 	}
 
 	s.wg.Go(s.dataPollLoop)
@@ -69,8 +70,8 @@ func (s *Service) Start() error {
 	s.wg.Go(s.persistenceLoop)
 
 	s.log.Info("Wind Farm service started",
-		logger.Int("id", s.config.ID),
-		logger.String("host", s.config.Host))
+		zap.Int("id", s.config.ID),
+		zap.String("host", s.config.Host))
 
 	return nil
 }

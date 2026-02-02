@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"time"
 
+	"go.uber.org/zap"
+
 	"powerkonnekt/ems/internal/database"
-	"powerkonnekt/ems/pkg/logger"
 )
 
 // pollLoop periodically reads data from the PLC
@@ -23,7 +24,7 @@ func (s *Service) pollLoop() {
 			}
 
 			if err := s.readPLCData(); err != nil {
-				s.log.Error("Error reading PLC data", logger.Err(err))
+				s.log.Error("Error reading PLC data", zap.Error(err))
 				continue
 			}
 
@@ -51,13 +52,13 @@ func (s *Service) handleConnectionError() {
 			reconnectAttempts++
 			if err := s.client.Connect(s.ctx); err != nil {
 				s.log.Error("Failed to reconnect to PLC",
-					logger.Err(err),
-					logger.Int("attempt", reconnectAttempts),
-					logger.Duration("retry_delay", s.config.ReconnectDelay))
+					zap.Error(err),
+					zap.Int("attempt", reconnectAttempts),
+					zap.Duration("retry_delay", s.config.ReconnectDelay))
 			} else {
 				s.log.Info("Successfully reconnected to PLC",
-					logger.Int("total_attempts", reconnectAttempts),
-					logger.Duration("total_downtime", time.Duration(reconnectAttempts)*s.config.ReconnectDelay))
+					zap.Int("total_attempts", reconnectAttempts),
+					zap.Duration("total_downtime", time.Duration(reconnectAttempts)*s.config.ReconnectDelay))
 				return
 			}
 		}

@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"sync"
 
+	"go.uber.org/zap"
+
 	"powerkonnekt/ems/internal/bms"
 	"powerkonnekt/ems/internal/config"
 	"powerkonnekt/ems/internal/database"
 	"powerkonnekt/ems/internal/pcs"
-	"powerkonnekt/ems/pkg/logger"
 )
 
 type ActivePowerControl struct {
@@ -18,12 +19,12 @@ type ActivePowerControl struct {
 
 // Logic handles control logic and automation
 type Logic struct {
+	config     config.EMSConfig
 	bmsManager *bms.Manager
 	pcsManager *pcs.Manager
-	config     config.EMSConfig
 	mode       string // "AUTO", "MANUAL", "MAINTENANCE"
 	mutex      sync.RWMutex
-	log        logger.Logger
+	log        *zap.Logger
 
 	activePowerControl ActivePowerControl // Active power control state
 }
@@ -36,16 +37,16 @@ const (
 )
 
 // NewLogic creates a new control logic instance
-func NewLogic(bmsManager *bms.Manager, pcsManager *pcs.Manager, config config.EMSConfig) *Logic {
+func NewLogic(config config.EMSConfig, bmsManager *bms.Manager, pcsManager *pcs.Manager, logger *zap.Logger) *Logic {
 	// Create component-specific logger
 	controlLogger := logger.With(
-		logger.String("component", "control_logic"),
+		zap.String("component", "control_logic"),
 	)
 
 	return &Logic{
+		config:     config,
 		bmsManager: bmsManager,
 		pcsManager: pcsManager,
-		config:     config,
 		mode:       ModeManual,
 		log:        controlLogger,
 	}
@@ -59,8 +60,8 @@ func (l *Logic) SetMode(mode string) {
 	l.mode = mode
 
 	l.log.Info("Control mode changed",
-		logger.String("old_mode", oldMode),
-		logger.String("new_mode", mode))
+		zap.String("old_mode", oldMode),
+		zap.String("new_mode", mode))
 }
 
 // GetMode returns the current control mode
@@ -118,8 +119,8 @@ func (l *Logic) checkBMSPCSPairs() {
 		pcsService, err := l.pcsManager.GetService(pcsID)
 		if err != nil {
 			l.log.Error("Failed to get PCS service",
-				logger.Err(err),
-				logger.Int("pcs_id", pcsID))
+				zap.Error(err),
+				zap.Int("pcs_id", pcsID))
 			continue
 		}
 		pcsCommandState := pcsService.GetCommandState()
@@ -190,14 +191,14 @@ func (l *Logic) checkBMSPCSPairs() {
 		// Stop PCS if needed
 		if shouldStopPCS {
 			l.log.Warn("Stopping PCS due to BMS condition",
-				logger.Int("pcs_id", pcsID),
-				logger.String("reason", reason))
+				zap.Int("pcs_id", pcsID),
+				zap.String("reason", reason))
 
 			// Set active power to zero
 			if err := pcsService.SetActivePowerCommand(0); err != nil {
 				l.log.Error("Failed to set active power to zero",
-					logger.Err(err),
-					logger.Int("pcs_id", pcsID))
+					zap.Error(err),
+					zap.Int("pcs_id", pcsID))
 			}
 
 			// Optionally stop the PCS completely
@@ -258,8 +259,8 @@ func (l *Logic) calculateDischargePower(bmsData database.BMSData) float32 {
 func (l *Logic) ManualPowerCommand(power float32) error {
 	if l.GetMode() != "MANUAL" {
 		l.log.Warn("Manual power command rejected - not in manual mode",
-			logger.String("current_mode", l.GetMode()),
-			logger.Float32("requested_power", power))
+			zap.String("current_mode", l.GetMode()),
+			zap.Float32("requested_power", power))
 		return fmt.Errorf("manual power command only allowed in MANUAL mode")
 	}
 
@@ -272,8 +273,8 @@ func (l *Logic) ManualPowerCommand(power float32) error {
 	// Safety checks even in manual mode
 	if bms.IsFaultState(bmsStatusData.SystemStatus) {
 		l.log.Error("Manual power command rejected - BMS in fault state",
-			logger.Uint16("bms_state", bmsStatusData.SystemStatus),
-			logger.Float32("requested_power", power))
+			zap.Uint16("bms_state", bmsStatusData.SystemStatus),
+			zap.Float32("requested_power", power))
 		return fmt.Errorf("BMS in fault state, command rejected")
 	}
 
@@ -285,38 +286,38 @@ func (l *Logic) ManualPowerCommand(power float32) error {
 		if -power > maxCharge {
 			power = -maxCharge
 			l.log.Warn("Manual charge power limited",
-				logger.Float32("requested_power", originalPower),
-				logger.Float32("limited_power", power),
-				logger.Float32("max_charge", maxCharge))
+				zap.Float32("requested_power", originalPower),
+				zap.Float32("limited_power", power),
+				zap.Float32("max_charge", maxCharge))
 		}
 	} else if power > 0 { // Discharging (positive power)
 		maxDischarge := l.calculateDischargePower(bmsData)
 		if power > maxDischarge {
 			power = maxDischarge
 			l.log.Warn("Manual discharge power limited",
-				logger.Float32("requested_power", originalPower),
-				logger.Float32("limited_power", power),
-				logger.Float32("max_discharge", maxDischarge))
+				zap.Float32("requested_power", originalPower),
+				zap.Float32("limited_power", power),
+				zap.Float32("max_discharge", maxDischarge))
 		}
 	}
 
 	l.log.Info("Executing manual power command",
-		logger.Float32("requested_power", originalPower),
-		logger.Float32("final_power", power),
-		logger.Float32("current_soc", float32(bmsData.SOC)))
+		zap.Float32("requested_power", originalPower),
+		zap.Float32("final_power", power),
+		zap.Float32("current_soc", float32(bmsData.SOC)))
 
 	err := pcs1Service.SetActivePowerCommand(power)
 	if err != nil {
 		l.log.Error("Manual power command failed",
-			logger.Err(err),
-			logger.Float32("power", power))
+			zap.Error(err),
+			zap.Float32("power", power))
 		return err
 	}
 
 	l.SetActivePowerControl(power)
 
 	l.log.Info("Manual power command executed successfully",
-		logger.Float32("power", power))
+		zap.Float32("power", power))
 	return nil
 }
 
@@ -324,8 +325,8 @@ func (l *Logic) ManualPowerCommand(power float32) error {
 func (l *Logic) ManualReactivePowerCommand(power float32) error {
 	if l.GetMode() != "MANUAL" {
 		l.log.Warn("Manual reactive power command rejected - not in manual mode",
-			logger.String("current_mode", l.GetMode()),
-			logger.Float32("requested_power", power))
+			zap.String("current_mode", l.GetMode()),
+			zap.Float32("requested_power", power))
 		return fmt.Errorf("manual reactive power command only allowed in MANUAL mode")
 	}
 
@@ -338,27 +339,27 @@ func (l *Logic) ManualReactivePowerCommand(power float32) error {
 	// Safety checks even in manual mode
 	if bms.IsFaultState(bmsStatusData.SystemStatus) {
 		l.log.Error("Manual reactive power command rejected - BMS in fault state",
-			logger.Uint16("bms_state", bmsStatusData.SystemStatus),
-			logger.Float32("requested_power", power))
+			zap.Uint16("bms_state", bmsStatusData.SystemStatus),
+			zap.Float32("requested_power", power))
 		return fmt.Errorf("BMS in fault state, command rejected")
 	}
 
 	originalPower := power
 
 	l.log.Info("Executing manual reactive power command",
-		logger.Float32("requested_power", originalPower),
-		logger.Float32("final_power", power),
-		logger.Float32("current_soc", float32(bmsData.SOC)))
+		zap.Float32("requested_power", originalPower),
+		zap.Float32("final_power", power),
+		zap.Float32("current_soc", float32(bmsData.SOC)))
 
 	err := pcs1Service.SetReactivePowerCommand(power)
 	if err != nil {
 		l.log.Error("Manual reactive power command failed",
-			logger.Err(err),
-			logger.Float32("power", power))
+			zap.Error(err),
+			zap.Float32("power", power))
 		return err
 	}
 
 	l.log.Info("Manual reactive power command executed successfully",
-		logger.Float32("power", power))
+		zap.Float32("power", power))
 	return nil
 }

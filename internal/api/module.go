@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/fx"
+	"go.uber.org/zap"
 
 	"powerkonnekt/ems/internal/alarm"
 	"powerkonnekt/ems/internal/bms"
@@ -16,7 +17,6 @@ import (
 	"powerkonnekt/ems/internal/pcs"
 	"powerkonnekt/ems/internal/plc"
 	"powerkonnekt/ems/internal/windfarm"
-	"powerkonnekt/ems/pkg/logger"
 )
 
 // Module provides API server functionality to the Fx application
@@ -39,6 +39,7 @@ func ProvideHandlers(
 	alarmManager *alarm.Manager,
 	controlLogic *control.Logic,
 	healthService *health.HealthService,
+	logger *zap.Logger,
 ) *Handlers {
 	return NewHandlers(
 		config,
@@ -49,12 +50,13 @@ func ProvideHandlers(
 		alarmManager,
 		controlLogic,
 		healthService,
+		logger,
 	)
 }
 
 // ProvideRouter creates and configures the Gin router
-func ProvideRouter(handlers *Handlers) *gin.Engine {
-	return SetupRoutes(handlers)
+func ProvideRouter(handlers *Handlers, logger *zap.Logger) *gin.Engine {
+	return SetupRoutes(handlers, logger)
 }
 
 // ProvideHTTPServer creates the HTTP server
@@ -66,13 +68,13 @@ func ProvideHTTPServer(cfg *config.Config, router *gin.Engine) *http.Server {
 }
 
 // RegisterLifecycle registers lifecycle hooks for the HTTP server
-func RegisterLifecycle(lc fx.Lifecycle, server *http.Server) {
+func RegisterLifecycle(lc fx.Lifecycle, server *http.Server, logger *zap.Logger) {
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
-			logger.Info("Starting HTTP server", logger.String("addr", server.Addr))
+			logger.Info("Starting HTTP server", zap.String("addr", server.Addr))
 			go func() {
 				if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-					logger.Error("HTTP server error", logger.Err(err))
+					logger.Error("HTTP server error", zap.Error(err))
 				}
 			}()
 			return nil

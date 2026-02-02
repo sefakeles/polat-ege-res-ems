@@ -5,7 +5,7 @@ import (
 	"math"
 	"time"
 
-	"powerkonnekt/ems/pkg/logger"
+	"go.uber.org/zap"
 )
 
 // heartbeatLoop periodically updates heartbeat register in the PCS
@@ -23,7 +23,7 @@ func (s *Service) heartbeatLoop() {
 			}
 
 			if err := s.updateHeartbeat(); err != nil {
-				s.log.Error("Error updating heartbeat", logger.Err(err))
+				s.log.Error("Error updating heartbeat", zap.Error(err))
 				continue
 			}
 		}
@@ -91,8 +91,8 @@ func (s *Service) StartStopCommand(start bool) error {
 	s.mutex.Unlock()
 
 	s.log.Info("PCS command sent successfully",
-		logger.String("action", action),
-		logger.Bool("start", start))
+		zap.String("action", action),
+		zap.Bool("start", start))
 
 	return nil
 }
@@ -121,7 +121,7 @@ func (s *Service) SetActivePowerCommand(power float32) error {
 	s.mutex.Unlock()
 
 	s.log.Info("PCS active power command set to %.1f kW",
-		logger.Float32("power", power))
+		zap.Float32("power", power))
 	return nil
 }
 
@@ -149,6 +149,6 @@ func (s *Service) SetReactivePowerCommand(power float32) error {
 	s.mutex.Unlock()
 
 	s.log.Info("PCS reactive power command set to %.1f kVAr",
-		logger.Float32("power", power))
+		zap.Float32("power", power))
 	return nil
 }

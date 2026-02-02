@@ -4,11 +4,11 @@ import (
 	"context"
 
 	"go.uber.org/fx"
+	"go.uber.org/zap"
 
 	"powerkonnekt/ems/internal/alarm"
 	"powerkonnekt/ems/internal/config"
 	"powerkonnekt/ems/internal/database"
-	"powerkonnekt/ems/pkg/logger"
 )
 
 // Module provides BMS management functionality to the Fx application
@@ -21,18 +21,19 @@ var Module = fx.Module("bms",
 func ProvideManager(
 	cfg *config.Config,
 	influxDB *database.InfluxDB,
-	alarmMgr *alarm.Manager,
+	alarmManager *alarm.Manager,
+	logger *zap.Logger,
 ) *Manager {
-	return NewManager(cfg.BMS, influxDB, alarmMgr)
+	return NewManager(cfg.BMS, influxDB, alarmManager, logger)
 }
 
 // RegisterLifecycle registers lifecycle hooks for the BMS manager
-func RegisterLifecycle(lc fx.Lifecycle, mgr *Manager) {
+func RegisterLifecycle(lc fx.Lifecycle, manager *Manager, logger *zap.Logger) {
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
 			logger.Info("Starting BMS Manager")
-			if err := mgr.Start(); err != nil {
-				logger.Error("Failed to start BMS Manager", logger.Err(err))
+			if err := manager.Start(); err != nil {
+				logger.Error("Failed to start BMS Manager", zap.Error(err))
 				return err
 			}
 			logger.Info("BMS Manager started successfully")
@@ -40,7 +41,7 @@ func RegisterLifecycle(lc fx.Lifecycle, mgr *Manager) {
 		},
 		OnStop: func(ctx context.Context) error {
 			logger.Info("Stopping BMS Manager")
-			mgr.Stop()
+			manager.Stop()
 			logger.Info("BMS Manager stopped successfully")
 			return nil
 		},

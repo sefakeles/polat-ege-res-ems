@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"time"
 
-	"powerkonnekt/ems/internal/config"
-	"powerkonnekt/ems/pkg/logger"
-
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
 	"github.com/influxdata/influxdb-client-go/v2/api"
+	"go.uber.org/zap"
+
+	"powerkonnekt/ems/internal/config"
 )
 
 // InfluxDB represents the InfluxDB connection
@@ -18,17 +18,17 @@ type InfluxDB struct {
 	writeAPI api.WriteAPI
 	queryAPI api.QueryAPI
 	config   config.InfluxDBConfig
-	log      logger.Logger
+	log      *zap.Logger
 }
 
 // InitializeInfluxDB initializes the InfluxDB connection
-func InitializeInfluxDB(cfg config.InfluxDBConfig) (*InfluxDB, error) {
+func InitializeInfluxDB(cfg config.InfluxDBConfig, logger *zap.Logger) (*InfluxDB, error) {
 	// Create database-specific logger
 	dbLogger := logger.With(
-		logger.String("database", "influxdb"),
-		logger.String("url", cfg.URL),
-		logger.String("organization", cfg.Organization),
-		logger.String("bucket", cfg.Bucket),
+		zap.String("database", "influxdb"),
+		zap.String("url", cfg.URL),
+		zap.String("organization", cfg.Organization),
+		zap.String("bucket", cfg.Bucket),
 	)
 
 	dbLogger.Info("Initializing InfluxDB connection")
@@ -46,12 +46,12 @@ func InitializeInfluxDB(cfg config.InfluxDBConfig) (*InfluxDB, error) {
 
 	health, err := client.Health(ctx)
 	if err != nil {
-		dbLogger.Error("Failed to connect to InfluxDB", logger.Err(err))
+		dbLogger.Error("Failed to connect to InfluxDB", zap.Error(err))
 		return nil, fmt.Errorf("failed to connect to InfluxDB: %w", err)
 	}
 
 	if health.Status != "pass" {
-		dbLogger.Error("InfluxDB health check failed", logger.String("status", string(health.Status)))
+		dbLogger.Error("InfluxDB health check failed", zap.String("status", string(health.Status)))
 		return nil, fmt.Errorf("InfluxDB health check failed: %s", health.Status)
 	}
 
@@ -67,8 +67,8 @@ func InitializeInfluxDB(cfg config.InfluxDBConfig) (*InfluxDB, error) {
 	}
 
 	dbLogger.Info("InfluxDB connection established successfully",
-		logger.Uint("batch_size", cfg.BatchSize),
-		logger.Duration("flush_interval", cfg.FlushInterval))
+		zap.Uint("batch_size", cfg.BatchSize),
+		zap.Duration("flush_interval", cfg.FlushInterval))
 	return db, nil
 }
 
@@ -94,12 +94,12 @@ func (db *InfluxDB) HealthCheck() error {
 
 	health, err := db.client.Health(ctx)
 	if err != nil {
-		db.log.Error("InfluxDB health check failed", logger.Err(err))
+		db.log.Error("InfluxDB health check failed", zap.Error(err))
 		return err
 	}
 
 	if health.Status != "pass" {
-		db.log.Error("InfluxDB health check status failed", logger.String("status", string(health.Status)))
+		db.log.Error("InfluxDB health check status failed", zap.String("status", string(health.Status)))
 		return fmt.Errorf("InfluxDB health check failed: %s", health.Status)
 	}
 

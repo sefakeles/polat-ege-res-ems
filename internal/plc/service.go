@@ -4,10 +4,11 @@ import (
 	"context"
 	"sync"
 
+	"go.uber.org/zap"
+
 	"powerkonnekt/ems/internal/alarm"
 	"powerkonnekt/ems/internal/config"
 	"powerkonnekt/ems/internal/database"
-	"powerkonnekt/ems/pkg/logger"
 	"powerkonnekt/ems/pkg/modbus"
 )
 
@@ -21,7 +22,7 @@ type Service struct {
 	cancel       context.CancelFunc
 	wg           sync.WaitGroup
 	mutex        sync.RWMutex
-	log          logger.Logger
+	log          *zap.Logger
 
 	// Channel to signal new data availability
 	dataUpdateChan chan struct{}
@@ -34,15 +35,15 @@ type Service struct {
 }
 
 // NewService creates a new PLC service
-func NewService(cfg config.PLCConfig, influxDB *database.InfluxDB, alarmManager *alarm.Manager) *Service {
+func NewService(cfg config.PLCConfig, influxDB *database.InfluxDB, alarmManager *alarm.Manager, logger *zap.Logger) *Service {
 	client := modbus.NewClient(cfg.Host, cfg.Port, cfg.SlaveID, cfg.Timeout)
 	ctx, cancel := context.WithCancel(context.Background())
 
 	// Create service-specific logger
 	serviceLogger := logger.With(
-		logger.String("service", "plc"),
-		logger.String("host", cfg.Host),
-		logger.Int("port", cfg.Port),
+		zap.String("service", "plc"),
+		zap.String("host", cfg.Host),
+		zap.Int("port", cfg.Port),
 	)
 
 	return &Service{
@@ -61,7 +62,7 @@ func NewService(cfg config.PLCConfig, influxDB *database.InfluxDB, alarmManager 
 // Start starts the PLC service
 func (s *Service) Start() error {
 	if err := s.client.Connect(s.ctx); err != nil {
-		s.log.Warn("Initial Modbus connection failed", logger.Err(err))
+		s.log.Warn("Initial Modbus connection failed", zap.Error(err))
 	}
 
 	s.wg.Go(s.pollLoop)

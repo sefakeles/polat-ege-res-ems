@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"go.uber.org/fx"
+	"go.uber.org/zap"
 
 	"powerkonnekt/ems/internal/config"
 )
@@ -21,13 +22,13 @@ var Module = fx.Module("database",
 )
 
 // ProvideInfluxDB creates and provides an InfluxDB connection
-func ProvideInfluxDB(cfg *config.Config) (*InfluxDB, error) {
-	return InitializeInfluxDB(cfg.InfluxDB)
+func ProvideInfluxDB(cfg *config.Config, logger *zap.Logger) (*InfluxDB, error) {
+	return InitializeInfluxDB(cfg.InfluxDB, logger)
 }
 
 // ProvidePostgreSQL creates and provides a PostgreSQL connection
-func ProvidePostgreSQL(cfg *config.Config) (*PostgresDB, error) {
-	return InitializePostgreSQL(cfg.PostgreSQL)
+func ProvidePostgreSQL(cfg *config.Config, logger *zap.Logger) (*PostgresDB, error) {
+	return InitializePostgreSQL(cfg.PostgreSQL, logger)
 }
 
 // RegisterInfluxDBLifecycle registers lifecycle hooks for InfluxDB

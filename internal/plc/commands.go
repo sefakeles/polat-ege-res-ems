@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"time"
 
+	"go.uber.org/zap"
+
 	"powerkonnekt/ems/internal/database"
-	"powerkonnekt/ems/pkg/logger"
 )
 
 // ControlAuxiliaryCB controls the auxiliary circuit breaker
@@ -30,8 +31,8 @@ func (s *Service) ControlAuxiliaryCB(close bool) error {
 	}
 
 	s.log.Info("Auxiliary CB command sent successfully",
-		logger.String("action", action),
-		logger.Bool("close", close))
+		zap.String("action", action),
+		zap.Bool("close", close))
 
 	return nil
 }
@@ -58,8 +59,8 @@ func (s *Service) ControlMVAuxTransformerCB(close bool) error {
 	}
 
 	s.log.Info("MV Aux Transformer CB command sent successfully",
-		logger.String("action", action),
-		logger.Bool("close", close))
+		zap.String("action", action),
+		zap.Bool("close", close))
 
 	return nil
 }
@@ -94,9 +95,9 @@ func (s *Service) ControlTransformerCB(transformerNo uint8, close bool) error {
 	}
 
 	s.log.Info("Transformer CB command sent successfully",
-		logger.Uint8("transformer_no", transformerNo),
-		logger.String("action", action),
-		logger.Bool("close", close))
+		zap.Uint8("transformer_no", transformerNo),
+		zap.String("action", action),
+		zap.Bool("close", close))
 
 	return nil
 }
@@ -122,8 +123,8 @@ func (s *Service) ControlAutoproducerCB(close bool) error {
 	}
 
 	s.log.Info("Autoproducer CB command sent successfully",
-		logger.String("action", action),
-		logger.Bool("close", close))
+		zap.String("action", action),
+		zap.Bool("close", close))
 
 	return nil
 }
@@ -197,14 +198,14 @@ func (s *Service) ResetAllCircuitBreakers() error {
 
 	// Open auxiliary CB
 	if err := s.ControlAuxiliaryCB(false); err != nil {
-		s.log.Error("Failed to open auxiliary CB", logger.Err(err))
+		s.log.Error("Failed to open auxiliary CB", zap.Error(err))
 		lastErr = err
 	}
 	time.Sleep(100 * time.Millisecond)
 
 	// Open MV aux transformer CB
 	if err := s.ControlMVAuxTransformerCB(false); err != nil {
-		s.log.Error("Failed to open MV aux transformer CB", logger.Err(err))
+		s.log.Error("Failed to open MV aux transformer CB", zap.Error(err))
 		lastErr = err
 	}
 	time.Sleep(100 * time.Millisecond)
@@ -213,8 +214,8 @@ func (s *Service) ResetAllCircuitBreakers() error {
 	for i := uint8(1); i <= 4; i++ {
 		if err := s.ControlTransformerCB(i, false); err != nil {
 			s.log.Error("Failed to open transformer CB",
-				logger.Uint8("transformer_no", i),
-				logger.Err(err))
+				zap.Uint8("transformer_no", i),
+				zap.Error(err))
 			lastErr = err
 		}
 		time.Sleep(100 * time.Millisecond)

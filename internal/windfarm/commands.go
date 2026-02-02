@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"powerkonnekt/ems/pkg/logger"
+	"go.uber.org/zap"
 )
 
 // heartbeatLoop sends heartbeat updates
@@ -22,7 +22,7 @@ func (s *Service) heartbeatLoop() {
 			}
 
 			if err := s.sendHeartbeat(); err != nil {
-				s.log.Error("Error sending heartbeat", logger.Err(err))
+				s.log.Error("Error sending heartbeat", zap.Error(err))
 			}
 		}
 	}
@@ -39,7 +39,7 @@ func (s *Service) sendHeartbeat() error {
 		return fmt.Errorf("failed to write heartbeat: %w", err)
 	}
 
-	s.log.Debug("Heartbeat sent", logger.Uint16("counter", counter))
+	s.log.Debug("Heartbeat sent", zap.Uint16("counter", counter))
 	return nil
 }
 
@@ -61,7 +61,7 @@ func (s *Service) SetPowerSetpoint(setpoint float32) error {
 	s.commandState.LastUpdated = time.Now()
 	s.mutex.Unlock()
 
-	s.log.Info("Power setpoint set", logger.Float32("setpoint", setpoint))
+	s.log.Info("Power setpoint set", zap.Float32("setpoint", setpoint))
 	return nil
 }
 
@@ -83,7 +83,7 @@ func (s *Service) SetReactivePowerSetpoint(setpoint float32) error {
 	s.commandState.LastUpdated = time.Now()
 	s.mutex.Unlock()
 
-	s.log.Info("Reactive power setpoint set", logger.Float32("setpoint", setpoint))
+	s.log.Info("Reactive power setpoint set", zap.Float32("setpoint", setpoint))
 	return nil
 }
 
@@ -105,7 +105,7 @@ func (s *Service) SetPowerFactorSetpoint(setpoint float32) error {
 	s.commandState.LastUpdated = time.Now()
 	s.mutex.Unlock()
 
-	s.log.Info("Power factor setpoint set", logger.Float32("setpoint", setpoint))
+	s.log.Info("Power factor setpoint set", zap.Float32("setpoint", setpoint))
 	return nil
 }
 
@@ -155,6 +155,6 @@ func (s *Service) SetRapidDownwardSignal(on bool) error {
 	s.commandState.LastUpdated = time.Now()
 	s.mutex.Unlock()
 
-	s.log.Info("Rapid downward signal set", logger.Bool("on", on))
+	s.log.Info("Rapid downward signal set", zap.Bool("on", on))
 	return nil
 }

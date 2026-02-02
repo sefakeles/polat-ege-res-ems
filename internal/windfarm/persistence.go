@@ -3,7 +3,7 @@ package windfarm
 import (
 	"time"
 
-	"powerkonnekt/ems/pkg/logger"
+	"go.uber.org/zap"
 )
 
 // persistenceLoop periodically writes data to InfluxDB
@@ -17,7 +17,7 @@ func (s *Service) persistenceLoop() {
 			return
 		case <-ticker.C:
 			if err := s.persistData(); err != nil {
-				s.log.Error("Error persisting wind farm data", logger.Err(err))
+				s.log.Error("Error persisting wind farm data", zap.Error(err))
 			}
 		}
 	}
@@ -34,22 +34,22 @@ func (s *Service) persistData() error {
 
 	// Persist measuring data
 	if err := s.influxDB.WriteWindFarmMeasuringData(measuringData); err != nil {
-		s.log.Error("Failed to write measuring data", logger.Err(err))
+		s.log.Error("Failed to write measuring data", zap.Error(err))
 	}
 
 	// Persist status data
 	if err := s.influxDB.WriteWindFarmStatusData(statusData); err != nil {
-		s.log.Error("Failed to write status data", logger.Err(err))
+		s.log.Error("Failed to write status data", zap.Error(err))
 	}
 
 	// Persist setpoint data
 	if err := s.influxDB.WriteWindFarmSetpointData(setpointData); err != nil {
-		s.log.Error("Failed to write setpoint data", logger.Err(err))
+		s.log.Error("Failed to write setpoint data", zap.Error(err))
 	}
 
 	// Persist weather data
 	if err := s.influxDB.WriteWindFarmWeatherData(weatherData); err != nil {
-		s.log.Error("Failed to write weather data", logger.Err(err))
+		s.log.Error("Failed to write weather data", zap.Error(err))
 	}
 
 	return nil

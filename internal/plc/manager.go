@@ -5,22 +5,23 @@ import (
 	"maps"
 	"sync"
 
+	"go.uber.org/zap"
+
 	"powerkonnekt/ems/internal/alarm"
 	"powerkonnekt/ems/internal/config"
 	"powerkonnekt/ems/internal/database"
-	"powerkonnekt/ems/pkg/logger"
 )
 
 // Manager manages multiple PLC services
 type Manager struct {
 	services map[int]*Service
 	mutex    sync.RWMutex
-	log      logger.Logger
+	log      *zap.Logger
 }
 
 // NewManager creates a new PLC manager
-func NewManager(configs []config.PLCConfig, influxDB *database.InfluxDB, alarmManager *alarm.Manager) *Manager {
-	managerLogger := logger.With(logger.String("component", "plc_manager"))
+func NewManager(configs []config.PLCConfig, influxDB *database.InfluxDB, alarmManager *alarm.Manager, logger *zap.Logger) *Manager {
+	managerLogger := logger.With(zap.String("component", "plc_manager"))
 
 	manager := &Manager{
 		services: make(map[int]*Service),
@@ -28,7 +29,7 @@ func NewManager(configs []config.PLCConfig, influxDB *database.InfluxDB, alarmMa
 	}
 
 	for _, cfg := range configs {
-		service := NewService(cfg, influxDB, alarmManager)
+		service := NewService(cfg, influxDB, alarmManager, logger)
 		manager.services[cfg.ID] = service
 	}
 
@@ -42,10 +43,10 @@ func (m *Manager) Start() error {
 
 	for id, service := range m.services {
 		if err := service.Start(); err != nil {
-			m.log.Error("Failed to start PLC service", logger.Int("id", id), logger.Err(err))
+			m.log.Error("Failed to start PLC service", zap.Int("id", id), zap.Error(err))
 			return fmt.Errorf("failed to start PLC service %d: %w", id, err)
 		}
-		m.log.Info("PLC service started", logger.Int("id", id))
+		m.log.Info("PLC service started", zap.Int("id", id))
 	}
 
 	return nil
@@ -58,7 +59,7 @@ func (m *Manager) Stop() {
 
 	for id, service := range m.services {
 		service.Stop()
-		m.log.Info("PLC service stopped", logger.Int("id", id))
+		m.log.Info("PLC service stopped", zap.Int("id", id))
 	}
 }
 

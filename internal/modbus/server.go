@@ -10,9 +10,9 @@ import (
 	"powerkonnekt/ems/internal/config"
 	"powerkonnekt/ems/internal/control"
 	"powerkonnekt/ems/internal/pcs"
-	"powerkonnekt/ems/pkg/logger"
 
 	"github.com/simonvetter/modbus"
+	"go.uber.org/zap"
 )
 
 // Server represents the Modbus TCP server
@@ -25,7 +25,7 @@ type Server struct {
 	wg        sync.WaitGroup
 	isRunning bool
 	mutex     sync.RWMutex
-	log       logger.Logger
+	log       *zap.Logger
 }
 
 // NewServer creates a new Modbus TCP server
@@ -35,19 +35,20 @@ func NewServer(
 	pcsManager *pcs.Manager,
 	alarmManager *alarm.Manager,
 	controlLogic *control.Logic,
+	logger *zap.Logger,
 ) (*Server, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	// Create server-specific logger
 	serverLogger := logger.With(
-		logger.String("component", "modbus_server"),
-		logger.String("host", cfg.Host),
-		logger.Int("port", cfg.Port),
-		logger.Uint("max_clients", cfg.MaxClients),
+		zap.String("component", "modbus_server"),
+		zap.String("host", cfg.Host),
+		zap.Int("port", cfg.Port),
+		zap.Uint("max_clients", cfg.MaxClients),
 	)
 
 	// Create request handler
-	handler := NewRequestHandler(bmsManager, pcsManager, alarmManager, controlLogic)
+	handler := NewRequestHandler(bmsManager, pcsManager, alarmManager, controlLogic, logger)
 
 	// Create server configuration
 	serverConfig := &modbus.ServerConfiguration{
@@ -57,14 +58,14 @@ func NewServer(
 	}
 
 	serverLogger.Info("Creating Modbus TCP server",
-		logger.String("url", serverConfig.URL),
-		logger.Duration("timeout", cfg.Timeout))
+		zap.String("url", serverConfig.URL),
+		zap.Duration("timeout", cfg.Timeout))
 
 	// Create Modbus server
 	modbusServer, err := modbus.NewServer(serverConfig, handler)
 	if err != nil {
 		cancel()
-		serverLogger.Error("Failed to create Modbus server", logger.Err(err))
+		serverLogger.Error("Failed to create Modbus server", zap.Error(err))
 		return nil, fmt.Errorf("failed to create Modbus server: %w", err)
 	}
 
@@ -91,7 +92,7 @@ func (s *Server) Start() error {
 	s.log.Info("Starting Modbus TCP server")
 
 	if err := s.server.Start(); err != nil {
-		s.log.Error("Failed to start Modbus server", logger.Err(err))
+		s.log.Error("Failed to start Modbus server", zap.Error(err))
 		return fmt.Errorf("failed to start Modbus server: %w", err)
 	}
 

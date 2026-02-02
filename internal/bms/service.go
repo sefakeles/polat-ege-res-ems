@@ -4,10 +4,11 @@ import (
 	"context"
 	"sync"
 
+	"go.uber.org/zap"
+
 	"powerkonnekt/ems/internal/alarm"
 	"powerkonnekt/ems/internal/config"
 	"powerkonnekt/ems/internal/database"
-	"powerkonnekt/ems/pkg/logger"
 	"powerkonnekt/ems/pkg/modbus"
 )
 
@@ -22,7 +23,7 @@ type Service struct {
 	cancel       context.CancelFunc
 	wg           sync.WaitGroup
 	mutex        sync.RWMutex
-	log          logger.Logger
+	log          *zap.Logger
 
 	// Channels to signal new data availability
 	baseDataUpdateChan chan struct{}
@@ -41,7 +42,7 @@ type Service struct {
 }
 
 // NewService creates a new BMS service
-func NewService(cfg config.BMSConfig, influxDB *database.InfluxDB, alarmManager *alarm.Manager) *Service {
+func NewService(cfg config.BMSConfig, influxDB *database.InfluxDB, alarmManager *alarm.Manager, logger *zap.Logger) *Service {
 	baseClient := modbus.NewClient(cfg.Host, cfg.Port, cfg.SlaveID, cfg.Timeout)
 	cellClient := modbus.NewClient(cfg.Host, cfg.Port, cfg.SlaveID, cfg.Timeout)
 
@@ -49,9 +50,9 @@ func NewService(cfg config.BMSConfig, influxDB *database.InfluxDB, alarmManager 
 
 	// Create service-specific logger
 	serviceLogger := logger.With(
-		logger.String("service", "bms"),
-		logger.String("host", cfg.Host),
-		logger.Int("port", cfg.Port),
+		zap.String("service", "bms"),
+		zap.String("host", cfg.Host),
+		zap.Int("port", cfg.Port),
 	)
 
 	return &Service{
@@ -79,8 +80,8 @@ func (s *Service) Start() error {
 	s.wg.Go(s.persistenceLoop)
 
 	s.log.Info("BMS service started",
-		logger.Int("rack_count", s.config.RackCount),
-		logger.Bool("enable_cell_data", s.config.EnableCellData))
+		zap.Int("rack_count", s.config.RackCount),
+		zap.Bool("enable_cell_data", s.config.EnableCellData))
 
 	return nil
 }

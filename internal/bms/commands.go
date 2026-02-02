@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"powerkonnekt/ems/pkg/logger"
+	"go.uber.org/zap"
 )
 
 // heartbeatLoop periodically updates heartbeat register in the BMS
@@ -22,7 +22,7 @@ func (s *Service) heartbeatLoop() {
 			}
 
 			if err := s.updateHeartbeat(); err != nil {
-				s.log.Error("Error updating heartbeat", logger.Err(err))
+				s.log.Error("Error updating heartbeat", zap.Error(err))
 				continue
 			}
 		}

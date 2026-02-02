@@ -3,7 +3,7 @@ package plc
 import (
 	"time"
 
-	"powerkonnekt/ems/pkg/logger"
+	"go.uber.org/zap"
 )
 
 // persistenceLoop handles data persistence to InfluxDB
@@ -22,7 +22,7 @@ func (s *Service) persistenceLoop() {
 
 			if !plcData.Timestamp.IsZero() {
 				if err := s.influxDB.WritePLCData(plcData); err != nil {
-					s.log.Error("Failed to write PLC data to InfluxDB", logger.Err(err))
+					s.log.Error("Failed to write PLC data to InfluxDB", zap.Error(err))
 				}
 			}
 		}

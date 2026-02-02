@@ -6,6 +6,9 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
+
 	"powerkonnekt/ems/internal/alarm"
 	"powerkonnekt/ems/internal/bms"
 	"powerkonnekt/ems/internal/config"
@@ -15,9 +18,6 @@ import (
 	"powerkonnekt/ems/internal/pcs"
 	"powerkonnekt/ems/internal/plc"
 	"powerkonnekt/ems/internal/windfarm"
-	"powerkonnekt/ems/pkg/logger"
-
-	"github.com/gin-gonic/gin"
 )
 
 // Handlers contains all API handlers
@@ -30,7 +30,7 @@ type Handlers struct {
 	alarmManager    *alarm.Manager
 	controlLogic    *control.Logic
 	healthService   *health.HealthService
-	log             logger.Logger
+	log             *zap.Logger
 }
 
 // NewHandlers creates a new handlers instance
@@ -43,10 +43,11 @@ func NewHandlers(
 	alarmManager *alarm.Manager,
 	controlLogic *control.Logic,
 	healthService *health.HealthService,
+	logger *zap.Logger,
 ) *Handlers {
 	// Create handlers-specific logger
 	handlersLogger := logger.With(
-		logger.String("component", "api_handlers"),
+		zap.String("component", "api_handlers"),
 	)
 
 	return &Handlers{
@@ -78,11 +79,11 @@ func (h *Handlers) HealthCheck(c *gin.Context) {
 	case health.StatusUnhealthy:
 		statusCode = http.StatusServiceUnavailable
 		h.log.Warn("Health check failed - system unhealthy",
-			logger.String("status", string(overallStatus)))
+			zap.String("status", string(overallStatus)))
 	case health.StatusDegraded:
 		statusCode = http.StatusPartialContent
 		h.log.Warn("Health check shows degraded status",
-			logger.String("status", string(overallStatus)))
+			zap.String("status", string(overallStatus)))
 	}
 
 	c.JSON(statusCode, response)
@@ -321,9 +322,9 @@ func (h *Handlers) GetAlarms(c *gin.Context) {
 		history, err := h.alarmManager.GetAlarmHistory(limit, offset)
 		if err != nil {
 			h.log.Error("Failed to get alarm history",
-				logger.Err(err),
-				logger.Int("limit", limit),
-				logger.Int("offset", offset))
+				zap.Error(err),
+				zap.Int("limit", limit),
+				zap.Int("offset", offset))
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
@@ -363,13 +364,13 @@ func (h *Handlers) SetControlMode(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&request); err != nil {
-		h.log.Warn("Invalid control mode request", logger.Err(err))
+		h.log.Warn("Invalid control mode request", zap.Error(err))
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	h.log.Info("Control mode change requested",
-		logger.String("requested_mode", request.Mode))
+		zap.String("requested_mode", request.Mode))
 
 	// Validate mode
 	validModes := []string{"AUTO", "MANUAL", "MAINTENANCE"}
@@ -383,7 +384,7 @@ func (h *Handlers) SetControlMode(c *gin.Context) {
 
 	if !isValid {
 		h.log.Warn("Invalid control mode requested",
-			logger.String("mode", request.Mode))
+			zap.String("mode", request.Mode))
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid mode. Valid modes: AUTO, MANUAL, MAINTENANCE"})
 		return
 	}
@@ -391,7 +392,7 @@ func (h *Handlers) SetControlMode(c *gin.Context) {
 	h.controlLogic.SetMode(request.Mode)
 
 	h.log.Info("Control mode changed successfully",
-		logger.String("mode", request.Mode))
+		zap.String("mode", request.Mode))
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Control mode set successfully",
@@ -441,7 +442,7 @@ func (h *Handlers) SetPowerCommand(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&request); err != nil {
-		h.log.Warn("Invalid power command request", logger.Err(err))
+		h.log.Warn("Invalid power command request", zap.Error(err))
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -459,19 +460,19 @@ func (h *Handlers) SetPowerCommand(c *gin.Context) {
 	}
 
 	h.log.Info("Manual power command requested",
-		logger.Float32("power", *request.Power))
+		zap.Float32("power", *request.Power))
 
 	// Execute manual power command
 	if err := service.SetActivePowerCommand(*request.Power); err != nil {
 		h.log.Error("Manual power command failed",
-			logger.Err(err),
-			logger.Float32("power", *request.Power))
+			zap.Error(err),
+			zap.Float32("power", *request.Power))
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	h.log.Info("Manual power command executed successfully",
-		logger.Float32("power", *request.Power))
+		zap.Float32("power", *request.Power))
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Power command executed successfully",
@@ -487,7 +488,7 @@ func (h *Handlers) SetReactivePowerCommand(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&request); err != nil {
-		h.log.Warn("Invalid reactive power command request", logger.Err(err))
+		h.log.Warn("Invalid reactive power command request", zap.Error(err))
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -505,19 +506,19 @@ func (h *Handlers) SetReactivePowerCommand(c *gin.Context) {
 	}
 
 	h.log.Info("Manual reactive power command requested",
-		logger.Float32("power", *request.Power))
+		zap.Float32("power", *request.Power))
 
 	// Execute manual power command
 	if err := service.SetReactivePowerCommand(*request.Power); err != nil {
 		h.log.Error("Manual reactive power command failed",
-			logger.Err(err),
-			logger.Float32("power", *request.Power))
+			zap.Error(err),
+			zap.Float32("power", *request.Power))
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	h.log.Info("Manual power command executed successfully",
-		logger.Float32("power", *request.Power))
+		zap.Float32("power", *request.Power))
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Power command executed successfully",
@@ -550,7 +551,7 @@ func (h *Handlers) BMSReset(c *gin.Context) {
 	}
 
 	h.log.Info("BMS system reset executed",
-		logger.String("client_ip", c.ClientIP()))
+		zap.String("client_ip", c.ClientIP()))
 
 	c.JSON(http.StatusOK, gin.H{"message": "BMS system reset executed"})
 }
@@ -578,7 +579,7 @@ func (h *Handlers) PCSReset(c *gin.Context) {
 	}
 
 	h.log.Info("PCS system reset executed",
-		logger.String("client_ip", c.ClientIP()))
+		zap.String("client_ip", c.ClientIP()))
 
 	c.JSON(http.StatusOK, gin.H{"message": "PCS system reset executed"})
 }
@@ -618,8 +619,8 @@ func (h *Handlers) BMSBreakerControl(c *gin.Context) {
 	}
 
 	h.log.Info("BMS breaker control executed",
-		logger.String("action", request.Action),
-		logger.String("client_ip", c.ClientIP()))
+		zap.String("action", request.Action),
+		zap.String("client_ip", c.ClientIP()))
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Breaker control executed",
@@ -689,8 +690,8 @@ func (h *Handlers) ControlAuxiliaryCB(c *gin.Context) {
 	}
 
 	h.log.Info("Auxiliary CB control executed",
-		logger.String("action", action),
-		logger.String("client_ip", c.ClientIP()))
+		zap.String("action", action),
+		zap.String("client_ip", c.ClientIP()))
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": fmt.Sprintf("Auxiliary CB %s successfully", action),
@@ -727,8 +728,8 @@ func (h *Handlers) ControlMVAuxTransformerCB(c *gin.Context) {
 	}
 
 	h.log.Info("MV Aux Transformer CB control executed",
-		logger.String("action", action),
-		logger.String("client_ip", c.ClientIP()))
+		zap.String("action", action),
+		zap.String("client_ip", c.ClientIP()))
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": fmt.Sprintf("MV Aux Transformer CB %s successfully", action),
@@ -766,9 +767,9 @@ func (h *Handlers) ControlTransformerCB(c *gin.Context) {
 	}
 
 	h.log.Info("Transformer CB control executed",
-		logger.Uint8("transformer_no", request.TransformerNo),
-		logger.String("action", action),
-		logger.String("client_ip", c.ClientIP()))
+		zap.Uint8("transformer_no", request.TransformerNo),
+		zap.String("action", action),
+		zap.String("client_ip", c.ClientIP()))
 
 	c.JSON(http.StatusOK, gin.H{
 		"message":        fmt.Sprintf("Transformer %d CB %s successfully", request.TransformerNo, action),
@@ -806,8 +807,8 @@ func (h *Handlers) ControlAutoproducerCB(c *gin.Context) {
 	}
 
 	h.log.Info("Autoproducer CB control executed",
-		logger.String("action", action),
-		logger.String("client_ip", c.ClientIP()))
+		zap.String("action", action),
+		zap.String("client_ip", c.ClientIP()))
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": fmt.Sprintf("Autoproducer CB %s successfully", action),
@@ -838,7 +839,7 @@ func (h *Handlers) ResetAllCircuitBreakers(c *gin.Context) {
 	}
 
 	h.log.Warn("Emergency: All circuit breakers reset",
-		logger.String("client_ip", c.ClientIP()))
+		zap.String("client_ip", c.ClientIP()))
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "All circuit breakers opened successfully",
@@ -928,8 +929,8 @@ func (h *Handlers) StartWindFarm(c *gin.Context) {
 	}
 
 	h.log.Info("Wind farm start command executed",
-		logger.Int("id", request.ID),
-		logger.String("client_ip", c.ClientIP()))
+		zap.Int("id", request.ID),
+		zap.String("client_ip", c.ClientIP()))
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Wind farm start command sent successfully",
@@ -959,8 +960,8 @@ func (h *Handlers) StopWindFarm(c *gin.Context) {
 	}
 
 	h.log.Info("Wind farm stop command executed",
-		logger.Int("id", request.ID),
-		logger.String("client_ip", c.ClientIP()))
+		zap.Int("id", request.ID),
+		zap.String("client_ip", c.ClientIP()))
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Wind farm stop command sent successfully",
@@ -991,9 +992,9 @@ func (h *Handlers) SetWindFarmPowerSetpoint(c *gin.Context) {
 	}
 
 	h.log.Info("Wind farm power setpoint set",
-		logger.Int("id", request.ID),
-		logger.Float32("setpoint", *request.Setpoint),
-		logger.String("client_ip", c.ClientIP()))
+		zap.Int("id", request.ID),
+		zap.Float32("setpoint", *request.Setpoint),
+		zap.String("client_ip", c.ClientIP()))
 
 	c.JSON(http.StatusOK, gin.H{
 		"message":  "Power setpoint set successfully",
@@ -1025,9 +1026,9 @@ func (h *Handlers) SetWindFarmReactivePowerSetpoint(c *gin.Context) {
 	}
 
 	h.log.Info("Wind farm reactive power setpoint set",
-		logger.Int("id", request.ID),
-		logger.Float32("setpoint", *request.Setpoint),
-		logger.String("client_ip", c.ClientIP()))
+		zap.Int("id", request.ID),
+		zap.Float32("setpoint", *request.Setpoint),
+		zap.String("client_ip", c.ClientIP()))
 
 	c.JSON(http.StatusOK, gin.H{
 		"message":  "Reactive power setpoint set successfully",
@@ -1059,9 +1060,9 @@ func (h *Handlers) SetWindFarmPowerFactorSetpoint(c *gin.Context) {
 	}
 
 	h.log.Info("Wind farm power factor setpoint set",
-		logger.Int("id", request.ID),
-		logger.Float32("setpoint", *request.Setpoint),
-		logger.String("client_ip", c.ClientIP()))
+		zap.Int("id", request.ID),
+		zap.Float32("setpoint", *request.Setpoint),
+		zap.String("client_ip", c.ClientIP()))
 
 	c.JSON(http.StatusOK, gin.H{
 		"message":  "Power factor setpoint set successfully",
@@ -1098,9 +1099,9 @@ func (h *Handlers) SetWindFarmRapidDownward(c *gin.Context) {
 	}
 
 	h.log.Info("Wind farm rapid downward signal set",
-		logger.Int("id", request.ID),
-		logger.Bool("on", *request.On),
-		logger.String("client_ip", c.ClientIP()))
+		zap.Int("id", request.ID),
+		zap.Bool("on", *request.On),
+		zap.String("client_ip", c.ClientIP()))
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": fmt.Sprintf("Rapid downward signal %s successfully", status),
@@ -1225,7 +1226,7 @@ func (h *Handlers) ReceiveSchedule(c *gin.Context) {
 
 	if err := c.ShouldBindJSON(&schedule); err != nil {
 		h.log.Error("Failed to parse schedule request",
-			logger.Err(err))
+			zap.Error(err))
 
 		response := database.ScheduleResponse{
 			MsgID:         "",
@@ -1238,22 +1239,22 @@ func (h *Handlers) ReceiveSchedule(c *gin.Context) {
 
 	// Log the received schedule
 	h.log.Info("Received schedule",
-		logger.String("msg-id", schedule.MsgID),
-		logger.String("park-name", schedule.ParkName),
-		logger.String("message-version", schedule.MessageVersion),
-		logger.String("version-date", schedule.VersionDate),
-		logger.Int("sp-seconds", schedule.SPSeconds),
-		logger.Int("data-points", len(schedule.Data)))
+		zap.String("msg-id", schedule.MsgID),
+		zap.String("park-name", schedule.ParkName),
+		zap.String("message-version", schedule.MessageVersion),
+		zap.String("version-date", schedule.VersionDate),
+		zap.Int("sp-seconds", schedule.SPSeconds),
+		zap.Int("data-points", len(schedule.Data)))
 
 	// Log each data point
 	for i, dp := range schedule.Data {
 		h.log.Info("Schedule data point",
-			logger.Int("index", i),
-			logger.String("timestamp", dp.Timestamp),
-			logger.Float64("gen-p-curtailment-schedule", dp.GenPCurtailmentSchedule),
-			logger.Float64("gen-p-trade-schedule", dp.GenPTradeSchedule),
-			logger.Float64("bess-p-trade-schedule", dp.BessPTradeSchedule),
-			logger.Int("plant-mode-of-operation", dp.PlantModeOfOperation))
+			zap.Int("index", i),
+			zap.String("timestamp", dp.Timestamp),
+			zap.Float64("gen-p-curtailment-schedule", dp.GenPCurtailmentSchedule),
+			zap.Float64("gen-p-trade-schedule", dp.GenPTradeSchedule),
+			zap.Float64("bess-p-trade-schedule", dp.BessPTradeSchedule),
+			zap.Int("plant-mode-of-operation", dp.PlantModeOfOperation))
 	}
 
 	// Return success response

@@ -3,8 +3,9 @@ package bms
 import (
 	"fmt"
 
+	"go.uber.org/zap"
+
 	"powerkonnekt/ems/internal/database"
-	"powerkonnekt/ems/pkg/logger"
 	"powerkonnekt/ems/pkg/modbus"
 )
 
@@ -13,15 +14,15 @@ func (s *Service) readCellData(rackNo uint8) error {
 	// Read cell voltages
 	if err := s.readCellVoltages(rackNo); err != nil {
 		s.log.Error("Failed to read cell voltages",
-			logger.Err(err),
-			logger.Uint8("rack_no", rackNo))
+			zap.Error(err),
+			zap.Uint8("rack_no", rackNo))
 	}
 
 	// Read cell temperatures
 	if err := s.readCellTemperatures(rackNo); err != nil {
 		s.log.Error("Failed to read cell temperatures",
-			logger.Err(err),
-			logger.Uint8("rack_no", rackNo))
+			zap.Error(err),
+			zap.Uint8("rack_no", rackNo))
 	}
 
 	return nil

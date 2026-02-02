@@ -1,32 +1,31 @@
 package api
 
 import (
-	"powerkonnekt/ems/pkg/logger"
-
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 // LoggerMiddleware provides request logging using the decoupled logger
-func LoggerMiddleware() gin.HandlerFunc {
+func LoggerMiddleware(logger *zap.Logger) gin.HandlerFunc {
 	// Create middleware-specific logger
 	middlewareLogger := logger.With(
-		logger.String("component", "api_middleware"),
+		zap.String("component", "api_middleware"),
 	)
 
 	return gin.LoggerWithFormatter(func(param gin.LogFormatterParams) string {
 		// Log using our structured logger instead of gin's default
-		logFields := []logger.Field{
-			logger.String("method", param.Method),
-			logger.String("path", param.Path),
-			logger.String("protocol", param.Request.Proto),
-			logger.Int("status_code", param.StatusCode),
-			logger.Duration("latency", param.Latency),
-			logger.String("client_ip", param.ClientIP),
-			logger.String("user_agent", param.Request.UserAgent()),
+		logFields := []zap.Field{
+			zap.String("method", param.Method),
+			zap.String("path", param.Path),
+			zap.String("protocol", param.Request.Proto),
+			zap.Int("status_code", param.StatusCode),
+			zap.Duration("latency", param.Latency),
+			zap.String("client_ip", param.ClientIP),
+			zap.String("user_agent", param.Request.UserAgent()),
 		}
 
 		if param.ErrorMessage != "" {
-			logFields = append(logFields, logger.String("error", param.ErrorMessage))
+			logFields = append(logFields, zap.String("error", param.ErrorMessage))
 		}
 
 		// Log at appropriate level based on status code
@@ -61,9 +60,9 @@ func CORSMiddleware() gin.HandlerFunc {
 }
 
 // ErrorHandlerMiddleware handles errors
-func ErrorHandlerMiddleware() gin.HandlerFunc {
+func ErrorHandlerMiddleware(logger *zap.Logger) gin.HandlerFunc {
 	middlewareLogger := logger.With(
-		logger.String("component", "error_middleware"),
+		zap.String("component", "error_middleware"),
 	)
 
 	return func(c *gin.Context) {
@@ -72,10 +71,10 @@ func ErrorHandlerMiddleware() gin.HandlerFunc {
 		if len(c.Errors) > 0 {
 			err := c.Errors.Last()
 			middlewareLogger.Error("Request completed with errors",
-				logger.String("path", c.Request.URL.Path),
-				logger.String("method", c.Request.Method),
-				logger.String("error", err.Error()),
-				logger.Uint64("error_type", uint64(err.Type)))
+				zap.String("path", c.Request.URL.Path),
+				zap.String("method", c.Request.Method),
+				zap.String("error", err.Error()),
+				zap.Uint64("error_type", uint64(err.Type)))
 		}
 	}
 }

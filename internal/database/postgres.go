@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"powerkonnekt/ems/internal/config"
-	"powerkonnekt/ems/pkg/logger"
 
+	"go.uber.org/zap"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	gormLogger "gorm.io/gorm/logger"
@@ -15,7 +15,7 @@ import (
 // PostgresDB represents the PostgreSQL connection for alarms
 type PostgresDB struct {
 	db  *gorm.DB
-	log logger.Logger
+	log *zap.Logger
 }
 
 // AlarmRecord represents the alarm table structure
@@ -37,13 +37,13 @@ func (AlarmRecord) TableName() string {
 }
 
 // InitializePostgreSQL initializes the PostgreSQL connection for alarms
-func InitializePostgreSQL(cfg config.PostgreSQLConfig) (*PostgresDB, error) {
+func InitializePostgreSQL(cfg config.PostgreSQLConfig, logger *zap.Logger) (*PostgresDB, error) {
 	// Create database-specific logger
 	dbLogger := logger.With(
-		logger.String("database", "postgresql"),
-		logger.String("host", cfg.Host),
-		logger.Int("port", cfg.Port),
-		logger.String("database", cfg.Database),
+		zap.String("database", "postgresql"),
+		zap.String("host", cfg.Host),
+		zap.Int("port", cfg.Port),
+		zap.String("database", cfg.Database),
 	)
 
 	dbLogger.Info("Initializing PostgreSQL connection")
@@ -55,14 +55,14 @@ func InitializePostgreSQL(cfg config.PostgreSQLConfig) (*PostgresDB, error) {
 		Logger: gormLogger.Default.LogMode(gormLogger.Info),
 	})
 	if err != nil {
-		dbLogger.Error("Failed to connect to PostgreSQL", logger.Err(err))
+		dbLogger.Error("Failed to connect to PostgreSQL", zap.Error(err))
 		return nil, fmt.Errorf("failed to connect to PostgreSQL: %w", err)
 	}
 
 	// Configure connection pool
 	sqlDB, err := db.DB()
 	if err != nil {
-		dbLogger.Error("Failed to get underlying sql.DB", logger.Err(err))
+		dbLogger.Error("Failed to get underlying sql.DB", zap.Error(err))
 		return nil, fmt.Errorf("failed to get underlying sql.DB: %w", err)
 	}
 
@@ -72,7 +72,7 @@ func InitializePostgreSQL(cfg config.PostgreSQLConfig) (*PostgresDB, error) {
 
 	// Test connection
 	if err := sqlDB.Ping(); err != nil {
-		dbLogger.Error("Failed to ping PostgreSQL", logger.Err(err))
+		dbLogger.Error("Failed to ping PostgreSQL", zap.Error(err))
 		return nil, fmt.Errorf("failed to ping PostgreSQL: %w", err)
 	}
 
@@ -83,13 +83,13 @@ func InitializePostgreSQL(cfg config.PostgreSQLConfig) (*PostgresDB, error) {
 
 	// Auto-migrate the schema
 	if err := postgresDB.migrate(); err != nil {
-		dbLogger.Error("Failed to migrate database", logger.Err(err))
+		dbLogger.Error("Failed to migrate database", zap.Error(err))
 		return nil, fmt.Errorf("failed to migrate database: %w", err)
 	}
 
 	dbLogger.Info("PostgreSQL connection established successfully",
-		logger.Int("max_idle", cfg.MaxIdle),
-		logger.Int("max_open", cfg.MaxOpen))
+		zap.Int("max_idle", cfg.MaxIdle),
+		zap.Int("max_open", cfg.MaxOpen))
 	return postgresDB, nil
 }
 
@@ -99,7 +99,7 @@ func (p *PostgresDB) migrate() error {
 
 	err := p.db.AutoMigrate(&AlarmRecord{})
 	if err != nil {
-		p.log.Error("Database migration failed", logger.Err(err))
+		p.log.Error("Database migration failed", zap.Error(err))
 		return err
 	}
 
@@ -118,7 +118,7 @@ func (p *PostgresDB) Close() error {
 
 	err = sqlDB.Close()
 	if err != nil {
-		p.log.Error("Failed to close PostgreSQL connection", logger.Err(err))
+		p.log.Error("Failed to close PostgreSQL connection", zap.Error(err))
 	} else {
 		p.log.Info("PostgreSQL connection closed successfully")
 	}
@@ -140,9 +140,9 @@ func (p *PostgresDB) SaveAlarm(alarm BMSAlarmData) error {
 	err := p.db.Create(&record).Error
 	if err != nil {
 		p.log.Error("Failed to save alarm",
-			logger.Err(err),
-			logger.String("alarm_type", alarm.AlarmType),
-			logger.Uint16("alarm_code", alarm.AlarmCode))
+			zap.Error(err),
+			zap.String("alarm_type", alarm.AlarmType),
+			zap.Uint16("alarm_code", alarm.AlarmCode))
 		return err
 	}
 
@@ -156,7 +156,7 @@ func (p *PostgresDB) GetActiveAlarms() ([]AlarmRecord, error) {
 		Order("timestamp desc").
 		Find(&alarms).Error
 	if err != nil {
-		p.log.Error("Failed to get active alarms", logger.Err(err))
+		p.log.Error("Failed to get active alarms", zap.Error(err))
 		return nil, err
 	}
 
@@ -172,9 +172,9 @@ func (p *PostgresDB) GetAlarmHistory(limit int, offset int) ([]AlarmRecord, erro
 		Find(&alarms).Error
 	if err != nil {
 		p.log.Error("Failed to get alarm history",
-			logger.Err(err),
-			logger.Int("limit", limit),
-			logger.Int("offset", offset))
+			zap.Error(err),
+			zap.Int("limit", limit),
+			zap.Int("offset", offset))
 		return nil, err
 	}
 
@@ -191,9 +191,9 @@ func (p *PostgresDB) GetAlarmsByType(alarmType string, active bool) ([]AlarmReco
 	err := query.Order("timestamp desc").Find(&alarms).Error
 	if err != nil {
 		p.log.Error("Failed to get alarms by type",
-			logger.Err(err),
-			logger.String("alarm_type", alarmType),
-			logger.Bool("active", active))
+			zap.Error(err),
+			zap.String("alarm_type", alarmType),
+			zap.Bool("active", active))
 		return nil, err
 	}
 
@@ -210,9 +210,9 @@ func (p *PostgresDB) GetAlarmsBySeverity(severity string, active bool) ([]AlarmR
 	err := query.Order("timestamp desc").Find(&alarms).Error
 	if err != nil {
 		p.log.Error("Failed to get alarms by severity",
-			logger.Err(err),
-			logger.String("severity", severity),
-			logger.Bool("active", active))
+			zap.Error(err),
+			zap.String("severity", severity),
+			zap.Bool("active", active))
 		return nil, err
 	}
 
@@ -227,9 +227,9 @@ func (p *PostgresDB) GetAlarmsInTimeRange(start, end time.Time) ([]AlarmRecord, 
 		Find(&alarms).Error
 	if err != nil {
 		p.log.Error("Failed to get alarms in time range",
-			logger.Err(err),
-			logger.Time("start", start),
-			logger.Time("end", end))
+			zap.Error(err),
+			zap.Time("start", start),
+			zap.Time("end", end))
 		return nil, err
 	}
 
@@ -243,9 +243,9 @@ func (p *PostgresDB) UpdateAlarmStatus(id uint, active bool) error {
 		Update("active", active).Error
 	if err != nil {
 		p.log.Error("Failed to update alarm status",
-			logger.Err(err),
-			logger.Uint("id", id),
-			logger.Bool("active", active))
+			zap.Error(err),
+			zap.Uint("id", id),
+			zap.Bool("active", active))
 		return err
 	}
 
@@ -261,14 +261,14 @@ func (p *PostgresDB) DeleteOldAlarms(olderThan time.Duration) error {
 
 	if result.Error != nil {
 		p.log.Error("Failed to delete old alarms",
-			logger.Err(result.Error),
-			logger.Duration("older_than", olderThan))
+			zap.Error(result.Error),
+			zap.Duration("older_than", olderThan))
 		return result.Error
 	}
 
 	p.log.Info("Old alarms deleted",
-		logger.Int64("deleted_count", result.RowsAffected),
-		logger.Duration("older_than", olderThan))
+		zap.Int64("deleted_count", result.RowsAffected),
+		zap.Duration("older_than", olderThan))
 
 	return nil
 }
@@ -288,23 +288,23 @@ func (p *PostgresDB) GetAlarmCount(active *bool, severity string) (int64, error)
 	var count int64
 	err := query.Count(&count).Error
 	if err != nil {
-		logFields := []logger.Field{logger.Err(err)}
+		logFields := []zap.Field{zap.Error(err)}
 		if active != nil {
-			logFields = append(logFields, logger.Bool("active", *active))
+			logFields = append(logFields, zap.Bool("active", *active))
 		}
 		if severity != "" {
-			logFields = append(logFields, logger.String("severity", severity))
+			logFields = append(logFields, zap.String("severity", severity))
 		}
 		p.log.Error("Failed to get alarm count", logFields...)
 		return 0, err
 	}
 
-	logFields := []logger.Field{logger.Int64("count", count)}
+	logFields := []zap.Field{zap.Int64("count", count)}
 	if active != nil {
-		logFields = append(logFields, logger.Bool("active", *active))
+		logFields = append(logFields, zap.Bool("active", *active))
 	}
 	if severity != "" {
-		logFields = append(logFields, logger.String("severity", severity))
+		logFields = append(logFields, zap.String("severity", severity))
 	}
 
 	return count, nil
@@ -314,13 +314,13 @@ func (p *PostgresDB) GetAlarmCount(active *bool, severity string) (int64, error)
 func (p *PostgresDB) HealthCheck() error {
 	sqlDB, err := p.db.DB()
 	if err != nil {
-		p.log.Error("Failed to get database connection for health check", logger.Err(err))
+		p.log.Error("Failed to get database connection for health check", zap.Error(err))
 		return err
 	}
 
 	err = sqlDB.Ping()
 	if err != nil {
-		p.log.Error("PostgreSQL health check failed", logger.Err(err))
+		p.log.Error("PostgreSQL health check failed", zap.Error(err))
 	}
 
 	return err

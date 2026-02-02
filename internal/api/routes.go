@@ -2,17 +2,18 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 // SetupRoutes configures all API routes
-func SetupRoutes(handlers *Handlers) *gin.Engine {
+func SetupRoutes(handlers *Handlers, logger *zap.Logger) *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.New()
 
 	// Middleware
-	router.Use(LoggerMiddleware())
+	router.Use(LoggerMiddleware(logger))
 	router.Use(CORSMiddleware())
-	router.Use(ErrorHandlerMiddleware())
+	router.Use(ErrorHandlerMiddleware(logger))
 	router.Use(gin.Recovery())
 
 	// Health check

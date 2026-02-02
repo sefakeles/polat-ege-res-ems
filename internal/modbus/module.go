@@ -4,13 +4,13 @@ import (
 	"context"
 
 	"go.uber.org/fx"
+	"go.uber.org/zap"
 
 	"powerkonnekt/ems/internal/alarm"
 	"powerkonnekt/ems/internal/bms"
 	"powerkonnekt/ems/internal/config"
 	"powerkonnekt/ems/internal/control"
 	"powerkonnekt/ems/internal/pcs"
-	"powerkonnekt/ems/pkg/logger"
 )
 
 // Module provides Modbus server functionality to the Fx application
@@ -26,17 +26,18 @@ func ProvideServer(
 	pcsMgr *pcs.Manager,
 	alarmMgr *alarm.Manager,
 	controlLogic *control.Logic,
+	logger *zap.Logger,
 ) (*Server, error) {
-	return NewServer(cfg.ModbusServer, bmsMgr, pcsMgr, alarmMgr, controlLogic)
+	return NewServer(cfg.ModbusServer, bmsMgr, pcsMgr, alarmMgr, controlLogic, logger)
 }
 
 // RegisterLifecycle registers lifecycle hooks for the Modbus server
-func RegisterLifecycle(lc fx.Lifecycle, server *Server) {
+func RegisterLifecycle(lc fx.Lifecycle, server *Server, logger *zap.Logger) {
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
 			logger.Info("Starting Modbus Server")
 			if err := server.Start(); err != nil {
-				logger.Error("Failed to start Modbus Server", logger.Err(err))
+				logger.Error("Failed to start Modbus Server", zap.Error(err))
 				return err
 			}
 			logger.Info("Modbus Server started successfully")

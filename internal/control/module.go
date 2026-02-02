@@ -2,6 +2,7 @@ package control
 
 import (
 	"go.uber.org/fx"
+	"go.uber.org/zap"
 
 	"powerkonnekt/ems/internal/bms"
 	"powerkonnekt/ems/internal/config"
@@ -15,9 +16,10 @@ var Module = fx.Module("control",
 
 // ProvideLogic creates and provides a control logic instance
 func ProvideLogic(
-	bmsMgr *bms.Manager,
-	pcsMgr *pcs.Manager,
 	cfg *config.Config,
+	bmsManager *bms.Manager,
+	pcsManager *pcs.Manager,
+	logger *zap.Logger,
 ) *Logic {
-	return NewLogic(bmsMgr, pcsMgr, cfg.EMS)
+	return NewLogic(cfg.EMS, bmsManager, pcsManager, logger)
 }

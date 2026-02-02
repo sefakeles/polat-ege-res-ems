@@ -5,21 +5,22 @@ import (
 	"maps"
 	"sync"
 
+	"go.uber.org/zap"
+
 	"powerkonnekt/ems/internal/config"
 	"powerkonnekt/ems/internal/database"
-	"powerkonnekt/ems/pkg/logger"
 )
 
 // Manager manages multiple Wind Farm services
 type Manager struct {
 	services map[int]*Service
 	mutex    sync.RWMutex
-	log      logger.Logger
+	log      *zap.Logger
 }
 
 // NewManager creates a new Wind Farm manager
-func NewManager(configs []config.WindFarmConfig, influxDB *database.InfluxDB) *Manager {
-	managerLogger := logger.With(logger.String("component", "windfarm_manager"))
+func NewManager(configs []config.WindFarmConfig, influxDB *database.InfluxDB, logger *zap.Logger) *Manager {
+	managerLogger := logger.With(zap.String("component", "windfarm_manager"))
 
 	manager := &Manager{
 		services: make(map[int]*Service),
@@ -27,7 +28,7 @@ func NewManager(configs []config.WindFarmConfig, influxDB *database.InfluxDB) *M
 	}
 
 	for _, cfg := range configs {
-		service := NewService(cfg, influxDB)
+		service := NewService(cfg, influxDB, logger)
 		manager.services[cfg.ID] = service
 	}
 
@@ -41,10 +42,10 @@ func (m *Manager) Start() error {
 
 	for id, service := range m.services {
 		if err := service.Start(); err != nil {
-			m.log.Error("Failed to start Wind Farm service", logger.Int("id", id), logger.Err(err))
+			m.log.Error("Failed to start Wind Farm service", zap.Int("id", id), zap.Error(err))
 			return fmt.Errorf("failed to start Wind Farm service %d: %w", id, err)
 		}
-		m.log.Info("Wind Farm service started", logger.Int("id", id))
+		m.log.Info("Wind Farm service started", zap.Int("id", id))
 	}
 
 	return nil
@@ -57,7 +58,7 @@ func (m *Manager) Stop() {
 
 	for id, service := range m.services {
 		service.Stop()
-		m.log.Info("Wind Farm service stopped", logger.Int("id", id))
+		m.log.Info("Wind Farm service stopped", zap.Int("id", id))
 	}
 }
 
