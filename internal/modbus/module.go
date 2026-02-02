@@ -31,22 +31,14 @@ func ProvideServer(
 	return NewServer(cfg.ModbusServer, bmsManager, pcsManager, alarmManager, controlLogic, logger)
 }
 
-// RegisterLifecycle registers lifecycle hooks for the Modbus server
-func RegisterLifecycle(lc fx.Lifecycle, server *Server, logger *zap.Logger) {
+// RegisterLifecycle registers the Modbus server lifecycle hooks with Fx
+func RegisterLifecycle(lc fx.Lifecycle, server *Server) {
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
-			logger.Info("Starting Modbus Server")
-			if err := server.Start(); err != nil {
-				logger.Error("Failed to start Modbus Server", zap.Error(err))
-				return err
-			}
-			logger.Info("Modbus Server started successfully")
-			return nil
+			return server.Start()
 		},
 		OnStop: func(ctx context.Context) error {
-			logger.Info("Stopping Modbus Server")
 			server.Stop()
-			logger.Info("Modbus Server stopped successfully")
 			return nil
 		},
 	})
