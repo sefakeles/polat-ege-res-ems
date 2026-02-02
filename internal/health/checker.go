@@ -29,9 +29,10 @@ type Checker interface {
 }
 
 type HealthService struct {
-	checkers []Checker
+	timeout time.Duration
+
 	mutex    sync.RWMutex
-	timeout  time.Duration
+	checkers []Checker
 }
 
 func NewHealthService() *HealthService {
