@@ -16,11 +16,11 @@ import (
 
 // Manager handles metrics collection and storage
 type Manager struct {
-	db     *database.InfluxDB
-	ctx    context.Context
-	cancel context.CancelFunc
-	wg     sync.WaitGroup
-	log    *zap.Logger
+	influxDB *database.InfluxDB
+	ctx      context.Context
+	cancel   context.CancelFunc
+	wg       sync.WaitGroup
+	log      *zap.Logger
 
 	mutex     sync.RWMutex
 	startTime time.Time
@@ -29,7 +29,7 @@ type Manager struct {
 }
 
 // NewManager creates a new metrics manager
-func NewManager(db *database.InfluxDB, logger *zap.Logger) *Manager {
+func NewManager(influxDB *database.InfluxDB, logger *zap.Logger) *Manager {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	// Create component-specific logger
@@ -38,7 +38,7 @@ func NewManager(db *database.InfluxDB, logger *zap.Logger) *Manager {
 	)
 
 	return &Manager{
-		db:        db,
+		influxDB:  influxDB,
 		ctx:       ctx,
 		cancel:    cancel,
 		startTime: time.Now(),
@@ -130,7 +130,7 @@ func (m *Manager) collectSystemMetrics() {
 	}
 
 	// Save to InfluxDB
-	if err := m.db.WriteSystemMetrics(metrics); err != nil {
+	if err := m.influxDB.WriteSystemMetrics(metrics); err != nil {
 		m.log.Error("Failed to save system metrics to InfluxDB", zap.Error(err))
 	}
 }
@@ -190,7 +190,7 @@ func (m *Manager) collectRuntimeMetrics() {
 	}
 
 	// Save to InfluxDB
-	if err := m.db.WriteRuntimeMetrics(runtimeMetrics); err != nil {
+	if err := m.influxDB.WriteRuntimeMetrics(runtimeMetrics); err != nil {
 		m.log.Error("Failed to save runtime metrics to InfluxDB", zap.Error(err))
 	}
 }
