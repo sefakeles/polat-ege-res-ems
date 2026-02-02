@@ -22,10 +22,10 @@ type Logic struct {
 	config     config.EMSConfig
 	bmsManager *bms.Manager
 	pcsManager *pcs.Manager
-	mode       string // "AUTO", "MANUAL", "MAINTENANCE"
-	mutex      sync.RWMutex
 	log        *zap.Logger
 
+	mutex              sync.RWMutex
+	mode               string             // "AUTO", "MANUAL", "MAINTENANCE"
 	activePowerControl ActivePowerControl // Active power control state
 }
 
