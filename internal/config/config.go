@@ -19,7 +19,7 @@ type Config struct {
 	InfluxDB     InfluxDBConfig     `mapstructure:"influxdb" validate:"required"`
 	PostgreSQL   PostgreSQLConfig   `mapstructure:"postgresql" validate:"required"`
 	ModbusServer ModbusServerConfig `mapstructure:"modbus_server" validate:"required"`
-	Logger       LoggerConfig       `mapstructure:"logger" validate:"required"`
+	Logging      LoggingConfig      `mapstructure:"logging" validate:"required"`
 }
 
 // PCSConfig contains PCS-specific configuration
@@ -30,9 +30,9 @@ type PCSConfig struct {
 	SlaveID           byte          `mapstructure:"slave_id" validate:"required,min=1,max=255"`
 	Timeout           time.Duration `mapstructure:"timeout" validate:"required"`
 	ReconnectDelay    time.Duration `mapstructure:"reconnect_delay" validate:"required"`
-	PollInterval      time.Duration `mapstructure:"poll_interval" validate:"required"`
-	HeartbeatInterval time.Duration `mapstructure:"heartbeat_interval" validate:"required"`
-	PersistInterval   time.Duration `mapstructure:"persist_interval" validate:"required"`
+	PollInterval      time.Duration `mapstructure:"poll_interval" validate:"required,aligned_interval"`
+	HeartbeatInterval time.Duration `mapstructure:"heartbeat_interval" validate:"required,aligned_interval"`
+	PersistInterval   time.Duration `mapstructure:"persist_interval" validate:"required,aligned_interval"`
 }
 
 // BMSConfig contains BMS-specific configuration
@@ -43,10 +43,10 @@ type BMSConfig struct {
 	SlaveID           byte          `mapstructure:"slave_id" validate:"required,min=1,max=255"`
 	Timeout           time.Duration `mapstructure:"timeout" validate:"required"`
 	ReconnectDelay    time.Duration `mapstructure:"reconnect_delay" validate:"required"`
-	PollInterval      time.Duration `mapstructure:"poll_interval" validate:"required"`
-	CellDataInterval  time.Duration `mapstructure:"cell_data_interval" validate:"required"`
-	HeartbeatInterval time.Duration `mapstructure:"heartbeat_interval" validate:"required"`
-	PersistInterval   time.Duration `mapstructure:"persist_interval" validate:"required"`
+	PollInterval      time.Duration `mapstructure:"poll_interval" validate:"required,aligned_interval"`
+	CellDataInterval  time.Duration `mapstructure:"cell_data_interval" validate:"required,aligned_interval"`
+	HeartbeatInterval time.Duration `mapstructure:"heartbeat_interval" validate:"required,aligned_interval"`
+	PersistInterval   time.Duration `mapstructure:"persist_interval" validate:"required,aligned_interval"`
 	RackCount         int           `mapstructure:"rack_count" validate:"required,min=1,max=20"`
 	ModulesPerRack    int           `mapstructure:"modules_per_rack" validate:"required,min=1,max=8"`
 	EnableCellData    bool          `mapstructure:"enable_cell_data"`
@@ -60,8 +60,8 @@ type PLCConfig struct {
 	SlaveID         byte          `mapstructure:"slave_id" validate:"required,min=1,max=255"`
 	Timeout         time.Duration `mapstructure:"timeout" validate:"required"`
 	ReconnectDelay  time.Duration `mapstructure:"reconnect_delay" validate:"required"`
-	PollInterval    time.Duration `mapstructure:"poll_interval" validate:"required"`
-	PersistInterval time.Duration `mapstructure:"persist_interval" validate:"required"`
+	PollInterval    time.Duration `mapstructure:"poll_interval" validate:"required,aligned_interval"`
+	PersistInterval time.Duration `mapstructure:"persist_interval" validate:"required,aligned_interval"`
 }
 
 // WindFarmConfig contains Wind Farm (ENERCON FCU) specific configuration
@@ -72,9 +72,9 @@ type WindFarmConfig struct {
 	SlaveID           byte          `mapstructure:"slave_id" validate:"required,min=1,max=255"`
 	Timeout           time.Duration `mapstructure:"timeout" validate:"required"`
 	ReconnectDelay    time.Duration `mapstructure:"reconnect_delay" validate:"required"`
-	PollInterval      time.Duration `mapstructure:"poll_interval" validate:"required"`
-	HeartbeatInterval time.Duration `mapstructure:"heartbeat_interval" validate:"required"`
-	PersistInterval   time.Duration `mapstructure:"persist_interval" validate:"required"`
+	PollInterval      time.Duration `mapstructure:"poll_interval" validate:"required,aligned_interval"`
+	HeartbeatInterval time.Duration `mapstructure:"heartbeat_interval" validate:"required,aligned_interval"`
+	PersistInterval   time.Duration `mapstructure:"persist_interval" validate:"required,aligned_interval"`
 }
 
 // EMSConfig contains EMS-specific configuration
@@ -117,31 +117,23 @@ type ModbusServerConfig struct {
 	MaxClients uint          `mapstructure:"max_clients" validate:"required,min=1,max=100"`
 }
 
-// LoggerConfig contains logger-specific configuration
-type LoggerConfig struct {
-	Level  string `mapstructure:"level" validate:"required,oneof=DEBUG INFO WARN ERROR FATAL"`
-	Format string `mapstructure:"format" validate:"required,oneof=json console"`
+// LoggingConfig contains logging configuration
+type LoggingConfig struct {
+	Level            string   `mapstructure:"level" validate:"required,oneof=DEBUG INFO WARN ERROR FATAL debug info warn error fatal"`
+	Encoding         string   `mapstructure:"encoding" validate:"required,oneof=json console"`
+	TimeEncoder      string   `mapstructure:"time_encoder" validate:"required,oneof=epoch iso8601"`
+	OutputPaths      []string `mapstructure:"outputPaths" validate:"required,min=1,dive,logpath"`
+	ErrorOutputPaths []string `mapstructure:"errorOutputPaths" validate:"required,min=1,dive,logpath"`
 }
 
-var validate *validator.Validate
-
-func init() {
-	validate = validator.New()
-}
-
-// Load loads configuration from the specified file path
-func Load(configPath string) (*Config, error) {
+// NewConfig creates a new configuration instance by loading and validating configuration data
+func NewConfig(validate *validator.Validate) (*Config, error) {
 	v := viper.New()
 
 	// Set configuration file path and name
-	if configPath != "" {
-		v.SetConfigFile(configPath)
-	} else {
-		v.SetConfigName("config")
-		v.SetConfigType("json")
-		v.AddConfigPath("./configs")
-		v.AddConfigPath(".")
-	}
+	v.SetConfigName("config")
+	v.AddConfigPath("./configs")
+	v.AddConfigPath(".")
 
 	// Set default values
 	setDefaults(v)
@@ -149,16 +141,11 @@ func Load(configPath string) (*Config, error) {
 	// Enable environment variable support
 	v.AutomaticEnv()
 	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
-	v.SetEnvPrefix("EMS")
-
-	// Explicitly bind all config keys for env variable support
-	bindEnvVariables(v)
+	v.SetEnvPrefix("ems")
 
 	// Read configuration file
 	if err := v.ReadInConfig(); err != nil {
-		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
-			return nil, fmt.Errorf("failed to read config file: %w", err)
-		}
+		return nil, fmt.Errorf("failed to read config file: %w", err)
 	}
 
 	// Unmarshal configuration
@@ -168,50 +155,11 @@ func Load(configPath string) (*Config, error) {
 	}
 
 	// Validate configuration
-	if err := config.Validate(); err != nil {
+	if err := validate.Struct(&config); err != nil {
 		return nil, fmt.Errorf("config validation failed: %w", err)
 	}
 
 	return &config, nil
-}
-
-// bindEnvVariables explicitly binds all configuration keys to environment variables
-func bindEnvVariables(v *viper.Viper) {
-	// EMS
-	v.BindEnv("ems.park_name")
-	v.BindEnv("ems.http_port")
-	v.BindEnv("ems.max_soc")
-	v.BindEnv("ems.min_soc")
-	v.BindEnv("ems.max_charge_power")
-	v.BindEnv("ems.max_discharge_power")
-
-	// InfluxDB
-	v.BindEnv("influxdb.url")
-	v.BindEnv("influxdb.token")
-	v.BindEnv("influxdb.organization")
-	v.BindEnv("influxdb.bucket")
-	v.BindEnv("influxdb.batch_size")
-	v.BindEnv("influxdb.flush_interval")
-
-	// PostgreSQL
-	v.BindEnv("postgresql.host")
-	v.BindEnv("postgresql.port")
-	v.BindEnv("postgresql.username")
-	v.BindEnv("postgresql.password")
-	v.BindEnv("postgresql.database")
-	v.BindEnv("postgresql.ssl_mode")
-	v.BindEnv("postgresql.max_idle_connections")
-	v.BindEnv("postgresql.max_open_connections")
-
-	// Modbus Server
-	v.BindEnv("modbus_server.host")
-	v.BindEnv("modbus_server.port")
-	v.BindEnv("modbus_server.timeout")
-	v.BindEnv("modbus_server.max_clients")
-
-	// Logger
-	v.BindEnv("logger.level")
-	v.BindEnv("logger.format")
 }
 
 // setDefaults sets default configuration values
@@ -225,11 +173,19 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("ems.max_discharge_power", 100.0)
 
 	// InfluxDB defaults
+	v.SetDefault("influxdb.url", "http://localhost:8086")
+	v.SetDefault("influxdb.token", "ems_token")
+	v.SetDefault("influxdb.organization", "ems_org")
+	v.SetDefault("influxdb.bucket", "ems_data")
 	v.SetDefault("influxdb.batch_size", 100)
 	v.SetDefault("influxdb.flush_interval", 5*time.Second)
 
 	// PostgreSQL defaults
+	v.SetDefault("postgresql.host", "localhost")
 	v.SetDefault("postgresql.port", 5432)
+	v.SetDefault("postgresql.username", "ems_user")
+	v.SetDefault("postgresql.password", "ems_password")
+	v.SetDefault("postgresql.database", "ems_db")
 	v.SetDefault("postgresql.ssl_mode", "disable")
 	v.SetDefault("postgresql.max_idle_connections", 5)
 	v.SetDefault("postgresql.max_open_connections", 10)
@@ -240,12 +196,10 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("modbus_server.timeout", 30*time.Second)
 	v.SetDefault("modbus_server.max_clients", 10)
 
-	// Logger defaults
-	v.SetDefault("logger.level", "INFO")
-	v.SetDefault("logger.format", "json")
-}
-
-// Validate validates the configuration
-func (c *Config) Validate() error {
-	return validate.Struct(c)
+	// Logging defaults
+	v.SetDefault("logging.level", "info")
+	v.SetDefault("logging.encoding", "json")
+	v.SetDefault("logging.time_encoder", "iso8601")
+	v.SetDefault("logging.outputPaths", []string{"stderr"})
+	v.SetDefault("logging.errorOutputPaths", []string{"stderr"})
 }

@@ -11,19 +11,22 @@ import (
 	"powerkonnekt/ems/internal/database"
 	"powerkonnekt/ems/internal/ems"
 	"powerkonnekt/ems/internal/health"
+	"powerkonnekt/ems/internal/logger"
 	"powerkonnekt/ems/internal/metrics"
 	"powerkonnekt/ems/internal/modbus"
 	"powerkonnekt/ems/internal/pcs"
 	"powerkonnekt/ems/internal/plc"
 	"powerkonnekt/ems/internal/windfarm"
-	"powerkonnekt/ems/pkg/logger"
 )
 
 func main() {
 	app := fx.New(
-		// Configuration and Logger
+		// Configuration
 		config.Module,
+
+		// Logging
 		logger.Module,
+		logger.FxLogger,
 
 		// Database connections
 		database.Module,
