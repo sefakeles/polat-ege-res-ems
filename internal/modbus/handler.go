@@ -18,9 +18,10 @@ type RequestHandler struct {
 	pcsManager   *pcs.Manager
 	alarmManager *alarm.Manager
 	controlLogic *control.Logic
-	registers    *RegisterMap
-	mutex        sync.RWMutex
 	log          *zap.Logger
+
+	mutex     sync.RWMutex
+	registers *RegisterMap
 }
 
 // NewRequestHandler creates a new Modbus request handler
