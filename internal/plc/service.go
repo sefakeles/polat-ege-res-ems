@@ -57,10 +57,6 @@ func NewService(cfg config.PLCConfig, influxDB *database.InfluxDB, alarmManager 
 
 // Start starts the PLC service
 func (s *Service) Start() error {
-	if err := s.client.Connect(s.ctx); err != nil {
-		s.log.Warn("Initial Modbus connection failed", zap.Error(err))
-	}
-
 	s.wg.Go(s.pollLoop)
 	s.wg.Go(s.persistenceLoop)
 
