@@ -29,6 +29,7 @@ func NewClient(host string, port int, slaveID byte, timeout time.Duration) *Clie
 	handler := modbus.NewTCPClientHandler(fmt.Sprintf("%s:%d", host, port))
 	handler.SlaveID = slaveID
 	handler.Timeout = timeout
+	handler.ConnectDelay = 100 * time.Millisecond
 
 	client := modbus.NewClient(handler)
 
