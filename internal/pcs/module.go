@@ -31,18 +31,10 @@ func ProvideManager(
 func RegisterLifecycle(lc fx.Lifecycle, manager *Manager, logger *zap.Logger) {
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
-			logger.Info("Starting PCS Manager")
-			if err := manager.Start(); err != nil {
-				logger.Error("Failed to start PCS Manager", zap.Error(err))
-				return err
-			}
-			logger.Info("PCS Manager started successfully")
-			return nil
+			return manager.Start()
 		},
 		OnStop: func(ctx context.Context) error {
-			logger.Info("Stopping PCS Manager")
 			manager.Stop()
-			logger.Info("PCS Manager stopped successfully")
 			return nil
 		},
 	})

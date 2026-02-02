@@ -31,18 +31,10 @@ func ProvideManager(
 func RegisterLifecycle(lc fx.Lifecycle, manager *Manager, logger *zap.Logger) {
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
-			logger.Info("Starting BMS Manager")
-			if err := manager.Start(); err != nil {
-				logger.Error("Failed to start BMS Manager", zap.Error(err))
-				return err
-			}
-			logger.Info("BMS Manager started successfully")
-			return nil
+			return manager.Start()
 		},
 		OnStop: func(ctx context.Context) error {
-			logger.Info("Stopping BMS Manager")
 			manager.Stop()
-			logger.Info("BMS Manager stopped successfully")
 			return nil
 		},
 	})

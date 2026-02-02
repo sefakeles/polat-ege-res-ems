@@ -29,18 +29,10 @@ func ProvideManager(
 func RegisterLifecycle(lc fx.Lifecycle, manager *Manager, logger *zap.Logger) {
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
-			logger.Info("Starting WindFarm Manager")
-			if err := manager.Start(); err != nil {
-				logger.Error("Failed to start WindFarm Manager", zap.Error(err))
-				return err
-			}
-			logger.Info("WindFarm Manager started successfully")
-			return nil
+			return manager.Start()
 		},
 		OnStop: func(ctx context.Context) error {
-			logger.Info("Stopping WindFarm Manager")
 			manager.Stop()
-			logger.Info("WindFarm Manager stopped successfully")
 			return nil
 		},
 	})
