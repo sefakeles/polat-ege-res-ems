@@ -65,7 +65,7 @@ func (s *Service) readAlarms() error {
 	/*for rackNo := uint8(1); rackNo <= uint8(s.config.RackCount); rackNo++ {
 		startAddr := GetRackAlarmStartAddr(rackNo)
 
-		rackAlarmData, err := s.baseClient.ReadHoldingRegisters(s.ctx, startAddr, BMSRackAlarmLength)
+		rackAlarmData, err := s.systemClient.ReadHoldingRegisters(s.ctx, startAddr, BMSRackAlarmLength)
 		if err != nil {
 			s.log.Info("Failed to read alarms",
 				logger.Err(err),

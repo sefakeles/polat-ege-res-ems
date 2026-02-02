@@ -26,7 +26,7 @@ func (s *Service) systemDataPollLoop() {
 			return
 		case <-timer.C:
 			if !s.systemClient.IsConnected() {
-				s.handleBaseClientConnectionError()
+				s.handleSystemClientConnectionError()
 			} else {
 				startTime := time.Now()
 				if err := s.readSystemData(); err != nil {
@@ -101,8 +101,8 @@ func (s *Service) cellDataPollLoop() {
 	}
 }
 
-// handleBaseClientConnectionError attempts to reconnect to the BMS
-func (s *Service) handleBaseClientConnectionError() {
+// handleSystemClientConnectionError attempts to reconnect to the BMS
+func (s *Service) handleSystemClientConnectionError() {
 	s.log.Warn("BMS connection lost, attempting reconnection (system client)")
 	s.systemClient.Disconnect()
 
