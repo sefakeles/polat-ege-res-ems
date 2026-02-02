@@ -22,14 +22,12 @@ type Service struct {
 	ctx          context.Context
 	cancel       context.CancelFunc
 	wg           sync.WaitGroup
-	mutex        sync.RWMutex
 	log          *zap.Logger
 
-	// Channels to signal new data availability
 	baseDataUpdateChan chan struct{}
 	cellDataUpdateChan chan struct{}
 
-	// Data storage
+	mutex                sync.RWMutex
 	lastBMSData          database.BMSData
 	lastBMSStatusData    database.BMSStatusData
 	lastBMSRackData      []database.BMSRackData
