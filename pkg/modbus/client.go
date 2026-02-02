@@ -17,8 +17,9 @@ const (
 
 // Client represents a MODBUS TCP client
 type Client struct {
-	client      modbus.Client
-	handler     *modbus.TCPClientHandler
+	client  modbus.Client
+	handler *modbus.TCPClientHandler
+
 	mutex       sync.RWMutex
 	isConnected bool
 }
