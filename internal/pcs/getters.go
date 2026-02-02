@@ -7,8 +7,8 @@ func (s *Service) IsConnected() bool {
 	return s.client.IsConnected()
 }
 
-// GetBaseDataUpdateChannel returns the channel that signals when new base data is available
-func (s *Service) GetBaseDataUpdateChannel() <-chan struct{} {
+// GetDataUpdateChannel returns the channel that signals when new data is available
+func (s *Service) GetDataUpdateChannel() <-chan struct{} {
 	return s.dataUpdateChan
 }
 
