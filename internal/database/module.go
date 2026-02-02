@@ -27,7 +27,7 @@ func ProvideInfluxDB(cfg *config.Config, logger *zap.Logger) (*InfluxDB, error) 
 }
 
 // ProvidePostgreSQL creates and provides a PostgreSQL connection
-func ProvidePostgreSQL(cfg *config.Config, logger *zap.Logger) (*PostgresDB, error) {
+func ProvidePostgreSQL(cfg *config.Config, logger *zap.Logger) (*PostgreSQL, error) {
 	return InitializePostgreSQL(cfg.PostgreSQL, logger)
 }
 
@@ -41,7 +41,7 @@ func RegisterInfluxDBLifecycle(lc fx.Lifecycle, influxDB *InfluxDB) {
 }
 
 // RegisterPostgreSQLLifecycle registers lifecycle hooks for PostgreSQL
-func RegisterPostgreSQLLifecycle(lc fx.Lifecycle, postgreSQL *PostgresDB) {
+func RegisterPostgreSQLLifecycle(lc fx.Lifecycle, postgreSQL *PostgreSQL) {
 	lc.Append(fx.Hook{
 		OnStop: func(ctx context.Context) error {
 			return postgreSQL.Close()

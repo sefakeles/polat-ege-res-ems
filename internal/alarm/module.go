@@ -19,7 +19,7 @@ var Module = fx.Module("alarm",
 // ProvideManager creates and provides an alarm manager instance
 func ProvideManager(
 	cfg *config.Config,
-	postgreSQL *database.PostgresDB,
+	postgreSQL *database.PostgreSQL,
 	logger *zap.Logger,
 ) *Manager {
 	return NewManager(cfg.Alarm, postgreSQL, logger)

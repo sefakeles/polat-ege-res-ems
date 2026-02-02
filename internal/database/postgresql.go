@@ -12,8 +12,8 @@ import (
 	"powerkonnekt/ems/internal/config"
 )
 
-// PostgresDB represents the PostgreSQL connection for alarms
-type PostgresDB struct {
+// PostgreSQL represents the PostgreSQL connection for alarms
+type PostgreSQL struct {
 	db  *gorm.DB
 	log *zap.Logger
 }
@@ -37,7 +37,7 @@ func (AlarmRecord) TableName() string {
 }
 
 // InitializePostgreSQL initializes the PostgreSQL connection for alarms
-func InitializePostgreSQL(cfg config.PostgreSQLConfig, logger *zap.Logger) (*PostgresDB, error) {
+func InitializePostgreSQL(cfg config.PostgreSQLConfig, logger *zap.Logger) (*PostgreSQL, error) {
 	// Create database-specific logger
 	dbLogger := logger.With(
 		zap.String("database", "postgresql"),
@@ -76,13 +76,13 @@ func InitializePostgreSQL(cfg config.PostgreSQLConfig, logger *zap.Logger) (*Pos
 		return nil, fmt.Errorf("failed to ping PostgreSQL: %w", err)
 	}
 
-	postgresDB := &PostgresDB{
+	postgreSQL := &PostgreSQL{
 		db:  db,
 		log: dbLogger,
 	}
 
 	// Auto-migrate the schema
-	if err := postgresDB.migrate(); err != nil {
+	if err := postgreSQL.migrate(); err != nil {
 		dbLogger.Error("Failed to migrate database", zap.Error(err))
 		return nil, fmt.Errorf("failed to migrate database: %w", err)
 	}
@@ -90,11 +90,11 @@ func InitializePostgreSQL(cfg config.PostgreSQLConfig, logger *zap.Logger) (*Pos
 	dbLogger.Info("PostgreSQL connection established successfully",
 		zap.Int("max_idle", cfg.MaxIdle),
 		zap.Int("max_open", cfg.MaxOpen))
-	return postgresDB, nil
+	return postgreSQL, nil
 }
 
 // migrate creates or updates the database schema
-func (p *PostgresDB) migrate() error {
+func (p *PostgreSQL) migrate() error {
 	p.log.Info("Running database migration")
 
 	err := p.db.AutoMigrate(&AlarmRecord{})
@@ -108,7 +108,7 @@ func (p *PostgresDB) migrate() error {
 }
 
 // Close closes the PostgreSQL connection
-func (p *PostgresDB) Close() error {
+func (p *PostgreSQL) Close() error {
 	p.log.Info("Closing PostgreSQL connection")
 
 	sqlDB, err := p.db.DB()
@@ -127,7 +127,7 @@ func (p *PostgresDB) Close() error {
 }
 
 // SaveAlarm saves an alarm to PostgreSQL
-func (p *PostgresDB) SaveAlarm(alarm BMSAlarmData) error {
+func (p *PostgreSQL) SaveAlarm(alarm BMSAlarmData) error {
 	record := AlarmRecord{
 		Timestamp: alarm.Timestamp,
 		AlarmType: alarm.AlarmType,
@@ -150,7 +150,7 @@ func (p *PostgresDB) SaveAlarm(alarm BMSAlarmData) error {
 }
 
 // GetActiveAlarms retrieves all active alarms
-func (p *PostgresDB) GetActiveAlarms() ([]AlarmRecord, error) {
+func (p *PostgreSQL) GetActiveAlarms() ([]AlarmRecord, error) {
 	var alarms []AlarmRecord
 	err := p.db.Where("active = ?", true).
 		Order("timestamp desc").
@@ -164,7 +164,7 @@ func (p *PostgresDB) GetActiveAlarms() ([]AlarmRecord, error) {
 }
 
 // GetAlarmHistory retrieves alarm history with pagination
-func (p *PostgresDB) GetAlarmHistory(limit int, offset int) ([]AlarmRecord, error) {
+func (p *PostgreSQL) GetAlarmHistory(limit int, offset int) ([]AlarmRecord, error) {
 	var alarms []AlarmRecord
 	err := p.db.Order("timestamp desc").
 		Limit(limit).
@@ -182,7 +182,7 @@ func (p *PostgresDB) GetAlarmHistory(limit int, offset int) ([]AlarmRecord, erro
 }
 
 // GetAlarmsByType retrieves alarms by type
-func (p *PostgresDB) GetAlarmsByType(alarmType string, active bool) ([]AlarmRecord, error) {
+func (p *PostgreSQL) GetAlarmsByType(alarmType string, active bool) ([]AlarmRecord, error) {
 	var alarms []AlarmRecord
 	query := p.db.Where("alarm_type = ?", alarmType)
 	if active {
@@ -201,7 +201,7 @@ func (p *PostgresDB) GetAlarmsByType(alarmType string, active bool) ([]AlarmReco
 }
 
 // GetAlarmsBySeverity retrieves alarms by severity
-func (p *PostgresDB) GetAlarmsBySeverity(severity string, active bool) ([]AlarmRecord, error) {
+func (p *PostgreSQL) GetAlarmsBySeverity(severity string, active bool) ([]AlarmRecord, error) {
 	var alarms []AlarmRecord
 	query := p.db.Where("severity = ?", severity)
 	if active {
@@ -220,7 +220,7 @@ func (p *PostgresDB) GetAlarmsBySeverity(severity string, active bool) ([]AlarmR
 }
 
 // GetAlarmsInTimeRange retrieves alarms within a time range
-func (p *PostgresDB) GetAlarmsInTimeRange(start, end time.Time) ([]AlarmRecord, error) {
+func (p *PostgreSQL) GetAlarmsInTimeRange(start, end time.Time) ([]AlarmRecord, error) {
 	var alarms []AlarmRecord
 	err := p.db.Where("timestamp BETWEEN ? AND ?", start, end).
 		Order("timestamp desc").
@@ -237,7 +237,7 @@ func (p *PostgresDB) GetAlarmsInTimeRange(start, end time.Time) ([]AlarmRecord, 
 }
 
 // UpdateAlarmStatus updates the active status of an alarm
-func (p *PostgresDB) UpdateAlarmStatus(id uint, active bool) error {
+func (p *PostgreSQL) UpdateAlarmStatus(id uint, active bool) error {
 	err := p.db.Model(&AlarmRecord{}).
 		Where("id = ?", id).
 		Update("active", active).Error
@@ -253,7 +253,7 @@ func (p *PostgresDB) UpdateAlarmStatus(id uint, active bool) error {
 }
 
 // DeactivateAllAlarms deactivates all active alarms in a single query
-func (p *PostgresDB) DeactivateAllAlarms() (int64, error) {
+func (p *PostgreSQL) DeactivateAllAlarms() (int64, error) {
 	result := p.db.Model(&AlarmRecord{}).
 		Where("active = ?", true).
 		Update("active", false)
@@ -268,7 +268,7 @@ func (p *PostgresDB) DeactivateAllAlarms() (int64, error) {
 }
 
 // DeleteOldAlarms deletes alarms older than the specified duration
-func (p *PostgresDB) DeleteOldAlarms(olderThan time.Duration) error {
+func (p *PostgreSQL) DeleteOldAlarms(olderThan time.Duration) error {
 	cutoffTime := time.Now().Add(-olderThan)
 
 	result := p.db.Where("timestamp < ? AND active = ?", cutoffTime, false).
@@ -289,7 +289,7 @@ func (p *PostgresDB) DeleteOldAlarms(olderThan time.Duration) error {
 }
 
 // GetAlarmCount returns the count of alarms based on criteria
-func (p *PostgresDB) GetAlarmCount(active *bool, severity string) (int64, error) {
+func (p *PostgreSQL) GetAlarmCount(active *bool, severity string) (int64, error) {
 	query := p.db.Model(&AlarmRecord{})
 
 	if active != nil {
@@ -326,7 +326,7 @@ func (p *PostgresDB) GetAlarmCount(active *bool, severity string) (int64, error)
 }
 
 // HealthCheck checks if PostgreSQL is accessible
-func (p *PostgresDB) HealthCheck() error {
+func (p *PostgreSQL) HealthCheck() error {
 	sqlDB, err := p.db.DB()
 	if err != nil {
 		p.log.Error("Failed to get database connection for health check", zap.Error(err))

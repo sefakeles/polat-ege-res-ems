@@ -15,7 +15,7 @@ import (
 // Manager handles alarm processing and management
 type Manager struct {
 	config     config.AlarmConfig
-	postgreSQL *database.PostgresDB
+	postgreSQL *database.PostgreSQL
 	alarmQueue chan database.BMSAlarmData
 	ctx        context.Context
 	cancel     context.CancelFunc
@@ -27,7 +27,7 @@ type Manager struct {
 }
 
 // NewManager creates a new alarm manager
-func NewManager(cfg config.AlarmConfig, postgreSQL *database.PostgresDB, logger *zap.Logger) *Manager {
+func NewManager(cfg config.AlarmConfig, postgreSQL *database.PostgreSQL, logger *zap.Logger) *Manager {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	// Create component-specific logger
