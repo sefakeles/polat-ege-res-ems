@@ -22,13 +22,13 @@ var Module = fx.Module("modbus",
 // ProvideServer creates and provides a Modbus server instance
 func ProvideServer(
 	cfg *config.Config,
-	bmsMgr *bms.Manager,
-	pcsMgr *pcs.Manager,
-	alarmMgr *alarm.Manager,
+	bmsManager *bms.Manager,
+	pcsManager *pcs.Manager,
+	alarmManager *alarm.Manager,
 	controlLogic *control.Logic,
 	logger *zap.Logger,
 ) (*Server, error) {
-	return NewServer(cfg.ModbusServer, bmsMgr, pcsMgr, alarmMgr, controlLogic, logger)
+	return NewServer(cfg.ModbusServer, bmsManager, pcsManager, alarmManager, controlLogic, logger)
 }
 
 // RegisterLifecycle registers lifecycle hooks for the Modbus server
