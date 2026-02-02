@@ -30,7 +30,7 @@ func (s *Service) dataPollLoop() {
 			} else {
 				startTime := time.Now()
 				if err := s.readAllData(); err != nil {
-					s.log.Error("Error reading wind farm data", zap.Error(err))
+					s.log.Error("Error reading data", zap.Error(err))
 				} else {
 					// Signal that new data is available
 					select {
