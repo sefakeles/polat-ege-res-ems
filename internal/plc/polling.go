@@ -32,7 +32,7 @@ func (s *Service) pollLoop() {
 			} else {
 				startTime := time.Now()
 				if err := s.readPLCData(); err != nil {
-					s.log.Error("Error reading PLC data", zap.Error(err))
+					s.log.Error("Error reading data", zap.Error(err))
 				} else {
 					// Signal that new data is available
 					select {
