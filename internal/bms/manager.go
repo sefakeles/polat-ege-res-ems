@@ -14,9 +14,10 @@ import (
 
 // Manager manages multiple BMS services
 type Manager struct {
-	services map[int]*Service
+	log *zap.Logger
+
 	mutex    sync.RWMutex
-	log      *zap.Logger
+	services map[int]*Service
 }
 
 // NewManager creates a new BMS manager
