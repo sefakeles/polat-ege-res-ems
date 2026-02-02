@@ -5,8 +5,8 @@ import (
 	"go.uber.org/zap"
 )
 
-// SetupRoutes configures all API routes
-func SetupRoutes(handlers *Handlers, logger *zap.Logger) *gin.Engine {
+// NewRouter sets up the Gin router with all routes and middleware
+func NewRouter(handlers *Handlers, logger *zap.Logger) *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.New()
 

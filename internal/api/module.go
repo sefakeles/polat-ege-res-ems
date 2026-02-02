@@ -56,7 +56,7 @@ func ProvideHandlers(
 
 // ProvideRouter creates and configures the Gin router
 func ProvideRouter(handlers *Handlers, logger *zap.Logger) *gin.Engine {
-	return SetupRoutes(handlers, logger)
+	return NewRouter(handlers, logger)
 }
 
 // ProvideHTTPServer creates the HTTP server
