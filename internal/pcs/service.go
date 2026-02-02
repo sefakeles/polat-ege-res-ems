@@ -45,6 +45,7 @@ func NewService(cfg config.PCSConfig, influxDB *database.InfluxDB, alarmManager 
 	// Create service-specific logger
 	serviceLogger := logger.With(
 		zap.String("service", "pcs"),
+		zap.Int("id", cfg.ID),
 		zap.String("host", cfg.Host),
 		zap.Int("port", cfg.Port),
 	)

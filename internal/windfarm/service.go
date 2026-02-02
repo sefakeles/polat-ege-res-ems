@@ -40,6 +40,7 @@ func NewService(cfg config.WindFarmConfig, influxDB *database.InfluxDB, logger *
 	// Create service-specific logger
 	serviceLogger := logger.With(
 		zap.String("service", "windfarm"),
+		zap.Int("id", cfg.ID),
 		zap.String("host", cfg.Host),
 		zap.Int("port", cfg.Port),
 	)
@@ -61,9 +62,7 @@ func (s *Service) Start() error {
 	s.wg.Go(s.heartbeatLoop)
 	s.wg.Go(s.persistenceLoop)
 
-	s.log.Info("Wind Farm service started",
-		zap.Int("id", s.config.ID),
-		zap.String("host", s.config.Host))
+	s.log.Info("Wind Farm service started")
 
 	return nil
 }

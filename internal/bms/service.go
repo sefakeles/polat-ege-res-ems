@@ -48,6 +48,7 @@ func NewService(cfg config.BMSConfig, influxDB *database.InfluxDB, alarmManager 
 	// Create service-specific logger
 	serviceLogger := logger.With(
 		zap.String("service", "bms"),
+		zap.Int("id", cfg.ID),
 		zap.String("host", cfg.Host),
 		zap.Int("port", cfg.Port),
 	)
