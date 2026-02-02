@@ -46,7 +46,6 @@ func (m *Manager) Start() error {
 			m.log.Error("Failed to start BMS service", zap.Int("id", id), zap.Error(err))
 			return fmt.Errorf("failed to start BMS service %d: %w", id, err)
 		}
-		m.log.Info("BMS service started", zap.Int("id", id))
 	}
 
 	return nil

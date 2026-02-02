@@ -45,7 +45,6 @@ func (m *Manager) Start() error {
 			m.log.Error("Failed to start Wind Farm service", zap.Int("id", id), zap.Error(err))
 			return fmt.Errorf("failed to start Wind Farm service %d: %w", id, err)
 		}
-		m.log.Info("Wind Farm service started", zap.Int("id", id))
 	}
 
 	return nil

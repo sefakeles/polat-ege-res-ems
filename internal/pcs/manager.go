@@ -46,7 +46,6 @@ func (m *Manager) Start() error {
 			m.log.Error("Failed to start PCS service", zap.Int("id", id), zap.Error(err))
 			return fmt.Errorf("failed to start PCS service %d: %w", id, err)
 		}
-		m.log.Info("PCS service started", zap.Int("id", id))
 	}
 
 	return nil

@@ -46,7 +46,6 @@ func (m *Manager) Start() error {
 			m.log.Error("Failed to start PLC service", zap.Int("id", id), zap.Error(err))
 			return fmt.Errorf("failed to start PLC service %d: %w", id, err)
 		}
-		m.log.Info("PLC service started", zap.Int("id", id))
 	}
 
 	return nil
