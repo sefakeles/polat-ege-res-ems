@@ -9,29 +9,47 @@ import (
 
 // dataPollLoop periodically reads data from the Wind Farm FCU
 func (s *Service) dataPollLoop() {
-	ticker := time.NewTicker(s.config.PollInterval)
-	defer ticker.Stop()
+	if err := s.client.Connect(s.ctx); err != nil {
+		s.log.Warn("Initial Modbus connection failed", zap.Error(err))
+	}
+
+	interval := s.config.PollInterval
+
+	// Calculate first aligned time and create timer
+	nextTick := time.Now().Truncate(interval).Add(interval)
+	timer := time.NewTimer(time.Until(nextTick))
+	defer timer.Stop()
 
 	for {
 		select {
 		case <-s.ctx.Done():
 			return
-		case <-ticker.C:
+		case <-timer.C:
 			if !s.client.IsConnected() {
 				s.handleConnectionError()
+			} else {
+				startTime := time.Now()
+				if err := s.readAllData(); err != nil {
+					s.log.Error("Error reading wind farm data", zap.Error(err))
+				} else {
+					// Signal that new data is available
+					select {
+					case s.dataUpdateChan <- struct{}{}:
+					default:
+						// Channel full, skip signal
+					}
+				}
+
+				if duration := time.Since(startTime); duration > interval {
+					s.log.Warn("Data read exceeded poll interval",
+						zap.Duration("read_duration", duration),
+						zap.Duration("interval", interval))
+				}
 			}
 
-			if err := s.readAllData(); err != nil {
-				s.log.Error("Error reading wind farm data", zap.Error(err))
-				continue
-			}
-
-			// Signal that new data is available
-			select {
-			case s.dataUpdateChan <- struct{}{}:
-			default:
-				// Channel full, skip signal
-			}
+			// Calculate next aligned time and reset timer
+			nextTick = time.Now().Truncate(interval).Add(interval)
+			timer.Reset(time.Until(nextTick))
 		}
 	}
 }
@@ -42,17 +60,21 @@ func (s *Service) handleConnectionError() {
 	s.client.Disconnect()
 
 	reconnectAttempts := 0
+	timer := time.NewTimer(s.config.ReconnectDelay)
+	defer timer.Stop()
+
 	for !s.client.IsConnected() {
 		select {
 		case <-s.ctx.Done():
 			return
-		case <-time.After(s.config.ReconnectDelay):
+		case <-timer.C:
 			reconnectAttempts++
 			if err := s.client.Connect(s.ctx); err != nil {
 				s.log.Error("Failed to reconnect to Wind Farm FCU",
 					zap.Error(err),
 					zap.Int("attempt", reconnectAttempts),
 					zap.Duration("retry_delay", s.config.ReconnectDelay))
+				timer.Reset(s.config.ReconnectDelay)
 			} else {
 				s.log.Info("Successfully reconnected to Wind Farm FCU",
 					zap.Int("total_attempts", reconnectAttempts),
