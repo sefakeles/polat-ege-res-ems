@@ -21,8 +21,8 @@ type InfluxDB struct {
 	log      *zap.Logger
 }
 
-// InitializeInfluxDB initializes the InfluxDB connection
-func InitializeInfluxDB(cfg config.InfluxDBConfig, logger *zap.Logger) (*InfluxDB, error) {
+// NewInfluxDB initializes the InfluxDB connection
+func NewInfluxDB(cfg config.InfluxDBConfig, logger *zap.Logger) (*InfluxDB, error) {
 	// Create database-specific logger
 	dbLogger := logger.With(
 		zap.String("database", "influxdb"),

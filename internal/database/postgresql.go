@@ -36,8 +36,8 @@ func (AlarmRecord) TableName() string {
 	return "alarms"
 }
 
-// InitializePostgreSQL initializes the PostgreSQL connection for alarms
-func InitializePostgreSQL(cfg config.PostgreSQLConfig, logger *zap.Logger) (*PostgreSQL, error) {
+// NewPostgreSQL initializes the PostgreSQL connection for alarms
+func NewPostgreSQL(cfg config.PostgreSQLConfig, logger *zap.Logger) (*PostgreSQL, error) {
 	// Create database-specific logger
 	dbLogger := logger.With(
 		zap.String("database", "postgresql"),
