@@ -1,9 +1,9 @@
 package modbus
 
 import (
-	"powerkonnekt/ems/internal/database"
-
 	"github.com/simonvetter/modbus"
+
+	"powerkonnekt/ems/internal/database"
 )
 
 // RegisterMap holds the register mapping information

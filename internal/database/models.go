@@ -1,8 +1,6 @@
 package database
 
-import (
-	"time"
-)
+import "time"
 
 // BMSData represents BMS data
 type BMSData struct {

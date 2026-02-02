@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"time"
 
-	"powerkonnekt/ems/internal/config"
-
 	"go.uber.org/zap"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	gormLogger "gorm.io/gorm/logger"
+
+	"powerkonnekt/ems/internal/config"
 )
 
 // PostgresDB represents the PostgreSQL connection for alarms

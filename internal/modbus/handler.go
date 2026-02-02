@@ -3,13 +3,13 @@ package modbus
 import (
 	"sync"
 
+	"github.com/simonvetter/modbus"
+	"go.uber.org/zap"
+
 	"powerkonnekt/ems/internal/alarm"
 	"powerkonnekt/ems/internal/bms"
 	"powerkonnekt/ems/internal/control"
 	"powerkonnekt/ems/internal/pcs"
-
-	"github.com/simonvetter/modbus"
-	"go.uber.org/zap"
 )
 
 // RequestHandler implements the modbus.RequestHandler interface

@@ -1,8 +1,6 @@
 package utils
 
-import (
-	"encoding/binary"
-)
+import "encoding/binary"
 
 // Integer constraint for supported integer types
 type Integer interface {

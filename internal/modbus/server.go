@@ -5,14 +5,14 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/simonvetter/modbus"
+	"go.uber.org/zap"
+
 	"powerkonnekt/ems/internal/alarm"
 	"powerkonnekt/ems/internal/bms"
 	"powerkonnekt/ems/internal/config"
 	"powerkonnekt/ems/internal/control"
 	"powerkonnekt/ems/internal/pcs"
-
-	"github.com/simonvetter/modbus"
-	"go.uber.org/zap"
 )
 
 // Server represents the Modbus TCP server

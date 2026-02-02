@@ -1,8 +1,6 @@
 package bms
 
-import (
-	"fmt"
-)
+import "fmt"
 
 // readBMSData reads BMS data
 func (s *Service) readBMSData() error {
