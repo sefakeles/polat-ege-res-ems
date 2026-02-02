@@ -28,7 +28,7 @@ func main() {
 		logger.Module,
 		logger.FxLogger,
 
-		// Database connections
+		// Database
 		database.Module,
 
 		// Core services
