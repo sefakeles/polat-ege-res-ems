@@ -537,10 +537,6 @@ func (db *InfluxDB) WriteION7400Data(data AnalyzerData) error {
 		AddField("reactive_power_l2", data.ReactivePowerL2).
 		AddField("reactive_power_l3", data.ReactivePowerL3).
 		AddField("reactive_power_sum", data.ReactivePowerSum).
-		AddField("power_factor_l1", data.PowerFactorL1).
-		AddField("power_factor_l2", data.PowerFactorL2).
-		AddField("power_factor_l3", data.PowerFactorL3).
-		AddField("power_factor_avg", data.PowerFactorAvg).
 		AddField("frequency", data.Frequency).
 		SetTime(data.Timestamp)
 
