@@ -178,6 +178,7 @@ func (db *InfluxDB) WriteBMSRackData(data BMSRackData) error {
 	point := influxdb2.NewPointWithMeasurement("bms_rack").
 		AddTag("id", fmt.Sprintf("%d", data.ID)).
 		AddTag("number", fmt.Sprintf("%d", data.Number)).
+		AddField("voltage_out", data.VoltageOut).
 		AddField("voltage", data.Voltage).
 		AddField("current", data.Current).
 		AddField("soc", data.SOC).
