@@ -157,7 +157,7 @@ func (db *InfluxDB) WriteBMSData(data BMSData) error {
 
 // WriteBMSRackStatusData writes BMS rack status data to InfluxDB
 func (db *InfluxDB) WriteBMSRackStatusData(data BMSRackStatusData) error {
-	point := influxdb2.NewPointWithMeasurement("bms_rack_status").
+	point := influxdb2.NewPointWithMeasurement("bms_rack").
 		AddTag("id", fmt.Sprintf("%d", data.ID)).
 		AddTag("number", fmt.Sprintf("%d", data.Number)).
 		AddField("pre_charge_relay_status", data.PreChargeRelayStatus).
