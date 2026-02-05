@@ -44,7 +44,7 @@ func (s *Service) pollLoop() {
 
 				if duration := time.Since(startTime); duration > interval {
 					s.log.Warn("Data read exceeded poll interval",
-						zap.Duration("read_duration", duration),
+						zap.Duration("duration", duration),
 						zap.Duration("interval", interval))
 				}
 			}

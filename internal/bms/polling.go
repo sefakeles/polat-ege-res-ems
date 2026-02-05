@@ -42,7 +42,7 @@ func (s *Service) systemDataPollLoop() {
 
 				if duration := time.Since(startTime); duration > interval {
 					s.log.Warn("Data read exceeded poll interval (system client)",
-						zap.Duration("read_duration", duration),
+						zap.Duration("duration", duration),
 						zap.Duration("interval", interval))
 				}
 			}
