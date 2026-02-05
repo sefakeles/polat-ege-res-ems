@@ -20,9 +20,7 @@ func (s *Service) persistenceLoop() {
 		case <-s.ctx.Done():
 			return
 		case <-timer.C:
-			if err := s.persistData(); err != nil {
-				s.log.Error("Error persisting wind farm data", zap.Error(err))
-			}
+			s.persistData()
 
 			// Calculate next aligned time and reset timer
 			nextTick = time.Now().Truncate(interval).Add(interval)
@@ -31,7 +29,7 @@ func (s *Service) persistenceLoop() {
 	}
 }
 
-// persistData writes all wind farm data to InfluxDB
+// persistData writes all data to InfluxDB
 func (s *Service) persistData() error {
 	s.mutex.RLock()
 	measuringData := s.lastMeasuringData

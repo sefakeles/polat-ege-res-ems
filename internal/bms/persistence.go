@@ -8,7 +8,7 @@ import (
 	"powerkonnekt/ems/internal/database"
 )
 
-// persistenceLoop handles data persistence
+// persistenceLoop periodically writes data to InfluxDB
 func (s *Service) persistenceLoop() {
 	interval := s.config.PersistInterval
 
@@ -22,7 +22,7 @@ func (s *Service) persistenceLoop() {
 		case <-s.ctx.Done():
 			return
 		case <-timer.C:
-			s.persistLatestData()
+			s.persistData()
 
 			// Calculate next aligned time and reset timer
 			nextTick = time.Now().Truncate(interval).Add(interval)
@@ -31,8 +31,8 @@ func (s *Service) persistenceLoop() {
 	}
 }
 
-// persistLatestData saves current data to InfluxDB
-func (s *Service) persistLatestData() {
+// persistData writes all data to InfluxDB
+func (s *Service) persistData() {
 	s.mutex.RLock()
 	bmsData := s.lastBMSData
 	bmsStatusData := s.lastBMSStatusData
