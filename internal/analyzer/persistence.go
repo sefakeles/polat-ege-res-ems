@@ -39,14 +39,12 @@ func (s *Service) persistenceLoop() {
 // persistData saves current data to InfluxDB
 func (s *Service) persistData() {
 	s.mutex.RLock()
-	dataToSave := s.lastData
+	analyzerData := s.lastData
 	s.mutex.RUnlock()
 
-	if dataToSave.Timestamp.IsZero() {
-		return
-	}
-
-	if err := s.influxDB.WriteAnalyzerData(dataToSave); err != nil {
-		s.log.Error("Failed to save energy analyzer data to InfluxDB", zap.Error(err))
+	if !analyzerData.Timestamp.IsZero() {
+		if err := s.influxDB.WriteAnalyzerData(analyzerData); err != nil {
+			s.log.Error("Failed to save energy analyzer data to InfluxDB", zap.Error(err))
+		}
 	}
 }
