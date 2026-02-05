@@ -77,7 +77,7 @@ func ParseBMSRackStatusData(data []byte, id int, rackNo uint8) database.BMSRackS
 		MasterPositiveRelayStatus:    utils.FromBytes[uint16](data[2:4]),   // 1041 - Master positive relay status
 		MasterNegativeRelayStatus:    utils.FromBytes[uint16](data[4:6]),   // 1042 - Master negative relay status
 		HighVoltageOnlineStatus:      utils.FromBytes[uint16](data[6:8]),   // 1043 - High voltage online status
-		SOCMaintenanceRequiredStatus: utils.FromBytes[uint16](data[8:10]),  // 1044 - BAT SOC Maintenance Required ST
+		SOCMaintenanceRequiredStatus: utils.FromBytes[uint16](data[8:10]),  // 1044 - SOC maintenance required status
 		StepChargeStatus:             utils.FromBytes[uint16](data[10:12]), // 1045 - Step charge status
 	}
 }
