@@ -1,6 +1,10 @@
 package bms
 
-import "fmt"
+import (
+	"fmt"
+
+	"go.uber.org/zap"
+)
 
 // readBMSStatusData reads BMS status data
 func (s *Service) readBMSStatusData() error {
@@ -79,20 +83,20 @@ func (s *Service) readAlarms() error {
 
 	s.processAlarms(data)
 
-	// !Read alarms for each rack
-	/*for rackNo := uint8(1); rackNo <= uint8(s.config.RackCount); rackNo++ {
+	// Read alarms for each rack
+	for rackNo := uint8(1); rackNo <= uint8(s.config.RackCount); rackNo++ {
 		startAddr := GetRackAlarmStartAddr(rackNo)
 
 		rackAlarmData, err := s.systemClient.ReadHoldingRegisters(s.ctx, startAddr, BMSRackAlarmLength)
 		if err != nil {
-			s.log.Info("Failed to read alarms",
-				logger.Err(err),
-				logger.Uint8("rack_no", rackNo))
+			s.log.Error("Failed to read rack alarms",
+				zap.Error(err),
+				zap.Uint8("rack_no", rackNo))
 			continue
 		}
 
 		s.processRackAlarms(rackAlarmData, rackNo)
-	}*/
+	}
 
 	return nil
 }

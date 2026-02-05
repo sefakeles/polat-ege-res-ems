@@ -61,6 +61,11 @@ func (s *Service) processRackAlarms(data []byte, rackNo uint8) {
 	baseCode := BMSRackAlarmStartAddr + uint16(rackNo-1)*BMSRackAlarmOffset
 	timestamp := time.Now()
 
+	// Reverse byte order for every word (2 bytes)
+	for i := 0; i < len(data)-1; i += 2 {
+		data[i], data[i+1] = data[i+1], data[i]
+	}
+
 	for byteIdx, b := range data {
 		for bitIdx := range 8 {
 			relativeCode := uint16(byteIdx*8 + bitIdx)
@@ -70,6 +75,10 @@ func (s *Service) processRackAlarms(data []byte, rackNo uint8) {
 			alarmCode := baseCode + relativeCode
 			message := GetRackAlarmMessage(relativeCode)
 			severity := GetRackAlarmSeverity(relativeCode)
+
+			if message == "Unknown alarm" {
+				continue
+			}
 
 			// Create unique alarm key
 			alarmKey := fmt.Sprintf("%s_%d", alarmType, alarmCode)
