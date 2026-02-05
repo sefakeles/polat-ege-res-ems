@@ -4,14 +4,14 @@ import "time"
 
 // BMSStatusData represents BMS status data
 type BMSStatusData struct {
-	Timestamp      time.Time `json:"timestamp"`
-	ID             int       `json:"id"`
-	Heartbeat      uint16    `json:"heartbeat"`
-	HVStatus       uint16    `json:"hv_status"`
-	SystemStatus   uint16    `json:"system_status"`
-	ConnectedRacks uint16    `json:"connected_racks"`
-	TotalRacks     uint16    `json:"total_racks"`
-	StepChargeMode uint16    `json:"step_charge_mode"`
+	Timestamp        time.Time `json:"timestamp"`
+	ID               int       `json:"id"`
+	Heartbeat        uint16    `json:"heartbeat"`
+	HVStatus         uint16    `json:"hv_status"`
+	SystemStatus     uint16    `json:"system_status"`
+	ConnectedRacks   uint16    `json:"connected_racks"`
+	TotalRacks       uint16    `json:"total_racks"`
+	StepChargeStatus uint16    `json:"step_charge_status"`
 }
 
 // BMSData represents BMS data

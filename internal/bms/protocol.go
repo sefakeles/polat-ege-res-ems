@@ -71,12 +71,12 @@ const (
 	StateFault         = 5
 )
 
-// Step Charge Modes
+// Step Charge Status
 const (
-	StepChargeModeDisable  = 0
-	StepChargeModeEnable   = 1
-	StepChargeModeConflict = 2
-	StepChargeModeDefault  = 3
+	StepChargeStatusDisable  = 0
+	StepChargeStatusEnable   = 1
+	StepChargeStatusConflict = 2
+	StepChargeStatusDefault  = 3
 )
 
 // Insulation Detection Status
@@ -327,16 +327,16 @@ func GetStateDescription(state uint16) string {
 	}
 }
 
-// GetStepChargeModeDescription returns human-readable step charge mode description
-func GetStepChargeModeDescription(mode uint16) string {
-	switch mode {
-	case StepChargeModeDisable:
+// GetStepChargeStatusDescription returns human-readable step charge status description
+func GetStepChargeStatusDescription(status uint16) string {
+	switch status {
+	case StepChargeStatusDisable:
 		return "Disable"
-	case StepChargeModeEnable:
+	case StepChargeStatusEnable:
 		return "Enable"
-	case StepChargeModeConflict:
+	case StepChargeStatusConflict:
 		return "Conflict"
-	case StepChargeModeDefault:
+	case StepChargeStatusDefault:
 		return "Default"
 	default:
 		return "Unknown"

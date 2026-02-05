@@ -114,7 +114,7 @@ func (db *InfluxDB) WriteBMSStatusData(data BMSStatusData) error {
 		AddField("system_status", data.SystemStatus).
 		AddField("connected_racks", data.ConnectedRacks).
 		AddField("total_racks", data.TotalRacks).
-		AddField("step_charge_mode", data.StepChargeMode).
+		AddField("step_charge_status", data.StepChargeStatus).
 		SetTime(data.Timestamp)
 
 	db.writeAPI.WritePoint(point)
