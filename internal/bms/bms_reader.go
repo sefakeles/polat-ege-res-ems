@@ -34,6 +34,24 @@ func (s *Service) readBMSData() error {
 	return nil
 }
 
+// readBMSRackStatusData reads BMS rack status data
+func (s *Service) readBMSRackStatusData(rackNo uint8) error {
+	startAddr := GetRackStatusDataStartAddr(rackNo)
+
+	data, err := s.systemClient.ReadHoldingRegisters(s.ctx, startAddr, BMSRackStatusDataLength)
+	if err != nil {
+		return fmt.Errorf("failed to read registers: %w", err)
+	}
+
+	bmsRackStatusData := ParseBMSRackStatusData(data, s.config.ID, rackNo)
+
+	s.mutex.Lock()
+	s.lastBMSRackStatusData[rackNo-1] = bmsRackStatusData
+	s.mutex.Unlock()
+
+	return nil
+}
+
 // readBMSRackData reads BMS rack data
 func (s *Service) readBMSRackData(rackNo uint8) error {
 	startAddr := GetRackDataStartAddr(rackNo)

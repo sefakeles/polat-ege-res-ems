@@ -27,15 +27,16 @@ type Service struct {
 	systemDataUpdateChan chan struct{}
 	cellDataUpdateChan   chan struct{}
 
-	mutex                sync.RWMutex
-	lastBMSData          database.BMSData
-	lastBMSStatusData    database.BMSStatusData
-	lastBMSRackData      []database.BMSRackData
-	lastCellVoltages     [][]database.BMSCellVoltageData
-	lastCellTemperatures [][]database.BMSCellTemperatureData
-	commandState         database.BMSCommandState
-	previousAlarmStates  map[string]bool
-	heartbeatCount       uint16
+	mutex                 sync.RWMutex
+	lastBMSData           database.BMSData
+	lastBMSStatusData     database.BMSStatusData
+	lastBMSRackData       []database.BMSRackData
+	lastBMSRackStatusData []database.BMSRackStatusData
+	lastCellVoltages      [][]database.BMSCellVoltageData
+	lastCellTemperatures  [][]database.BMSCellTemperatureData
+	commandState          database.BMSCommandState
+	previousAlarmStates   map[string]bool
+	heartbeatCount        uint16
 }
 
 // NewService creates a new BMS service
@@ -54,20 +55,21 @@ func NewService(cfg config.BMSConfig, influxDB *database.InfluxDB, alarmManager 
 	)
 
 	return &Service{
-		config:               cfg,
-		influxDB:             influxDB,
-		alarmManager:         alarmManager,
-		systemClient:         systemClient,
-		cellClient:           cellClient,
-		ctx:                  ctx,
-		cancel:               cancel,
-		log:                  serviceLogger,
-		systemDataUpdateChan: make(chan struct{}, 1),
-		cellDataUpdateChan:   make(chan struct{}, 1),
-		lastBMSRackData:      make([]database.BMSRackData, cfg.RackCount),
-		lastCellVoltages:     make([][]database.BMSCellVoltageData, cfg.RackCount),
-		lastCellTemperatures: make([][]database.BMSCellTemperatureData, cfg.RackCount),
-		previousAlarmStates:  make(map[string]bool),
+		config:                cfg,
+		influxDB:              influxDB,
+		alarmManager:          alarmManager,
+		systemClient:          systemClient,
+		cellClient:            cellClient,
+		ctx:                   ctx,
+		cancel:                cancel,
+		log:                   serviceLogger,
+		systemDataUpdateChan:  make(chan struct{}, 1),
+		cellDataUpdateChan:    make(chan struct{}, 1),
+		lastBMSRackData:       make([]database.BMSRackData, cfg.RackCount),
+		lastBMSRackStatusData: make([]database.BMSRackStatusData, cfg.RackCount),
+		lastCellVoltages:      make([][]database.BMSCellVoltageData, cfg.RackCount),
+		lastCellTemperatures:  make([][]database.BMSCellTemperatureData, cfg.RackCount),
+		previousAlarmStates:   make(map[string]bool),
 	}
 }
 

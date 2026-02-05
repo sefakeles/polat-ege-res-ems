@@ -155,6 +155,24 @@ func (db *InfluxDB) WriteBMSData(data BMSData) error {
 	return nil
 }
 
+// WriteBMSRackStatusData writes BMS rack status data to InfluxDB
+func (db *InfluxDB) WriteBMSRackStatusData(data BMSRackStatusData) error {
+	point := influxdb2.NewPointWithMeasurement("bms_rack_status").
+		AddTag("id", fmt.Sprintf("%d", data.ID)).
+		AddTag("number", fmt.Sprintf("%d", data.Number)).
+		AddField("pre_charge_relay_status", data.PreChargeRelayStatus).
+		AddField("master_positive_relay_status", data.MasterPositiveRelayStatus).
+		AddField("master_negative_relay_status", data.MasterNegativeRelayStatus).
+		AddField("high_voltage_online_status", data.HighVoltageOnlineStatus).
+		AddField("soc_maintenance_required_status", data.SOCMaintenanceRequiredStatus).
+		AddField("step_charge_status", data.StepChargeStatus).
+		SetTime(data.Timestamp)
+
+	db.writeAPI.WritePoint(point)
+
+	return nil
+}
+
 // WriteBMSRackData writes BMS rack data to InfluxDB
 func (db *InfluxDB) WriteBMSRackData(data BMSRackData) error {
 	point := influxdb2.NewPointWithMeasurement("bms_rack").

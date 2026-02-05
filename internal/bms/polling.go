@@ -185,6 +185,13 @@ func (s *Service) readSystemData() error {
 		default:
 		}
 
+		// Read BMS rack status data
+		if err := s.readBMSRackStatusData(rackNo); err != nil {
+			s.log.Error("Failed to read BMS rack status data",
+				zap.Error(err),
+				zap.Uint8("rack_no", rackNo))
+		}
+
 		// Read BMS rack data
 		if err := s.readBMSRackData(rackNo); err != nil {
 			s.log.Error("Failed to read BMS rack data",

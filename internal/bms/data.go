@@ -59,6 +59,29 @@ func ParseBMSData(data []byte, id int) database.BMSData {
 	}
 }
 
+// ParseBMSRackStatusData converts raw MODBUS data to BMSRackStatusData structure
+func ParseBMSRackStatusData(data []byte, id int, rackNo uint8) database.BMSRackStatusData {
+	if len(data) < BMSRackStatusDataLength*2 {
+		return database.BMSRackStatusData{
+			Timestamp: time.Now(),
+			ID:        id,
+			Number:    rackNo,
+		}
+	}
+
+	return database.BMSRackStatusData{
+		Timestamp:                    time.Now(),
+		ID:                           id,
+		Number:                       rackNo,
+		PreChargeRelayStatus:         utils.FromBytes[uint16](data[0:2]),   // 1040 - Pre charge relay status (0: Open, 1: Close)
+		MasterPositiveRelayStatus:    utils.FromBytes[uint16](data[2:4]),   // 1041 - Master positive relay status (0: Open, 1: Close)
+		MasterNegativeRelayStatus:    utils.FromBytes[uint16](data[4:6]),   // 1042 - Master negative relay status (0: Open, 1: Close)
+		HighVoltageOnlineStatus:      utils.FromBytes[uint16](data[6:8]),   // 1043 - High voltage online status (0: Off, 1: On)
+		SOCMaintenanceRequiredStatus: utils.FromBytes[uint16](data[8:10]),  // 1044 - BAT SOC Maintenance Required ST (0: No request, 1: Request maintenance)
+		StepChargeStatus:             utils.FromBytes[uint16](data[10:12]), // 1045 - Step-Charge status (0: Disable, 1: Enable)
+	}
+}
+
 // ParseBMSRackData converts raw MODBUS data to BMSRackData structure
 func ParseBMSRackData(data []byte, id int, rackNo uint8) database.BMSRackData {
 	if len(data) < BMSRackDataLength*2 {

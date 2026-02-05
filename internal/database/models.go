@@ -42,6 +42,19 @@ type BMSData struct {
 	InsulationResistanceNeg   uint16    `json:"insulation_resistance_neg"`
 }
 
+// BMSRackStatusData represents BMS rack status information
+type BMSRackStatusData struct {
+	Timestamp                    time.Time `json:"timestamp"`
+	ID                           int       `json:"id"`
+	Number                       uint8     `json:"number"`
+	PreChargeRelayStatus         uint16    `json:"pre_charge_relay_status"`
+	MasterPositiveRelayStatus    uint16    `json:"master_positive_relay_status"`
+	MasterNegativeRelayStatus    uint16    `json:"master_negative_relay_status"`
+	HighVoltageOnlineStatus      uint16    `json:"high_voltage_online_status"`
+	SOCMaintenanceRequiredStatus uint16    `json:"soc_maintenance_required_status"`
+	StepChargeStatus             uint16    `json:"step_charge_status"`
+}
+
 // BMSRackData represents BMS rack-level data
 type BMSRackData struct {
 	Timestamp            time.Time `json:"timestamp"`

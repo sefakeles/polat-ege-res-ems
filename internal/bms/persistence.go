@@ -30,6 +30,8 @@ func (s *Service) persistLatestData() {
 	bmsStatusData := s.lastBMSStatusData
 	bmsRackData := make([]database.BMSRackData, len(s.lastBMSRackData))
 	copy(bmsRackData, s.lastBMSRackData)
+	bmsRackStatusData := make([]database.BMSRackStatusData, len(s.lastBMSRackStatusData))
+	copy(bmsRackStatusData, s.lastBMSRackStatusData)
 
 	// Copy cell data
 	cellVoltages := make([][]database.BMSCellVoltageData, len(s.lastCellVoltages))
@@ -65,6 +67,17 @@ func (s *Service) persistLatestData() {
 				s.log.Error("Failed to save BMS rack data to InfluxDB",
 					zap.Error(err),
 					zap.Uint8("rack_no", rack.Number))
+			}
+		}
+	}
+
+	// Save rack status data to InfluxDB
+	for _, rackStatus := range bmsRackStatusData {
+		if !rackStatus.Timestamp.IsZero() {
+			if err := s.influxDB.WriteBMSRackStatusData(rackStatus); err != nil {
+				s.log.Error("Failed to save BMS rack status data to InfluxDB",
+					zap.Error(err),
+					zap.Uint8("rack_no", rackStatus.Number))
 			}
 		}
 	}

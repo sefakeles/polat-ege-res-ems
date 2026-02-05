@@ -48,6 +48,13 @@ func (s *Service) GetLatestBMSRackData() []database.BMSRackData {
 	return append([]database.BMSRackData(nil), s.lastBMSRackData...)
 }
 
+// GetLatestBMSRackStatusData returns the latest BMS rack status data
+func (s *Service) GetLatestBMSRackStatusData() []database.BMSRackStatusData {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
+	return append([]database.BMSRackStatusData(nil), s.lastBMSRackStatusData...)
+}
+
 // GetLatestCellVoltageData returns the latest cell voltage data for a specific rack
 func (s *Service) GetLatestCellVoltageData(rackNo uint8) []database.BMSCellVoltageData {
 	s.mutex.RLock()
