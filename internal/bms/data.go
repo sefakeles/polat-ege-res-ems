@@ -17,7 +17,7 @@ func ParseBMSStatusData(data []byte, id int) database.BMSStatusData {
 		Timestamp:        time.Now(),
 		ID:               id,
 		Heartbeat:        utils.FromBytes[uint16](data[0:2]),   // 768 - Heartbeat
-		HVStatus:         utils.FromBytes[uint16](data[2:4]),   // 769 - HV status
+		HVStatus:         utils.FromBytes[uint16](data[2:4]),   // 769 - High voltage status
 		SystemStatus:     utils.FromBytes[uint16](data[4:6]),   // 770 - System status
 		ConnectedRacks:   utils.FromBytes[uint16](data[8:10]),  // 772 - Connected racks
 		TotalRacks:       utils.FromBytes[uint16](data[10:12]), // 773 - Total racks
@@ -70,15 +70,15 @@ func ParseBMSRackStatusData(data []byte, id int, rackNo uint8) database.BMSRackS
 	}
 
 	return database.BMSRackStatusData{
-		Timestamp:                    time.Now(),
-		ID:                           id,
-		Number:                       rackNo,
-		PreChargeRelayStatus:         utils.FromBytes[uint16](data[0:2]),   // 1040 - Pre charge relay status
-		MasterPositiveRelayStatus:    utils.FromBytes[uint16](data[2:4]),   // 1041 - Master positive relay status
-		MasterNegativeRelayStatus:    utils.FromBytes[uint16](data[4:6]),   // 1042 - Master negative relay status
-		HighVoltageOnlineStatus:      utils.FromBytes[uint16](data[6:8]),   // 1043 - High voltage online status
-		SOCMaintenanceRequiredStatus: utils.FromBytes[uint16](data[8:10]),  // 1044 - SOC maintenance required status
-		StepChargeStatus:             utils.FromBytes[uint16](data[10:12]), // 1045 - Step charge status
+		Timestamp:            time.Now(),
+		ID:                   id,
+		Number:               rackNo,
+		PreChargeRelayStatus: utils.FromBytes[uint16](data[0:2]),   // 1040 - Pre charge relay status
+		PositiveRelayStatus:  utils.FromBytes[uint16](data[2:4]),   // 1041 - Positive relay status
+		NegativeRelayStatus:  utils.FromBytes[uint16](data[4:6]),   // 1042 - Negative relay status
+		HVStatus:             utils.FromBytes[uint16](data[6:8]),   // 1043 - High voltage status
+		SOCMaintenanceStatus: utils.FromBytes[uint16](data[8:10]),  // 1044 - SOC maintenance status
+		StepChargeStatus:     utils.FromBytes[uint16](data[10:12]), // 1045 - Step charge status
 	}
 }
 

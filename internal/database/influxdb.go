@@ -161,10 +161,10 @@ func (db *InfluxDB) WriteBMSRackStatusData(data BMSRackStatusData) error {
 		AddTag("id", fmt.Sprintf("%d", data.ID)).
 		AddTag("number", fmt.Sprintf("%d", data.Number)).
 		AddField("pre_charge_relay_status", data.PreChargeRelayStatus).
-		AddField("master_positive_relay_status", data.MasterPositiveRelayStatus).
-		AddField("master_negative_relay_status", data.MasterNegativeRelayStatus).
-		AddField("high_voltage_online_status", data.HighVoltageOnlineStatus).
-		AddField("soc_maintenance_required_status", data.SOCMaintenanceRequiredStatus).
+		AddField("positive_relay_status", data.PositiveRelayStatus).
+		AddField("negative_relay_status", data.NegativeRelayStatus).
+		AddField("hv_status", data.HVStatus).
+		AddField("soc_maintenance_status", data.SOCMaintenanceStatus).
 		AddField("step_charge_status", data.StepChargeStatus).
 		SetTime(data.Timestamp)
 
