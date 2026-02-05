@@ -17,12 +17,10 @@ func (s *Service) heartbeatLoop() {
 		case <-s.ctx.Done():
 			return
 		case <-ticker.C:
-			if !s.client.IsConnected() {
-				continue
-			}
-
-			if err := s.sendHeartbeat(); err != nil {
-				s.log.Error("Error sending heartbeat", zap.Error(err))
+			if s.client.IsConnected() {
+				if err := s.sendHeartbeat(); err != nil {
+					s.log.Error("Error sending heartbeat", zap.Error(err))
+				}
 			}
 		}
 	}
