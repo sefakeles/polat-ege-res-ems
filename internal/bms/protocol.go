@@ -53,6 +53,14 @@ const (
 	ControlOff         = 3
 )
 
+// High Voltage Status
+const (
+	HVStatusPowerOffReady = 0
+	HVStatusPowerOnReady  = 1
+	HVStatusPowerOnFault  = 2
+	HVStatusPowerOffFault = 3
+)
+
 // State Codes
 const (
 	StateInitial       = 0
@@ -61,6 +69,14 @@ const (
 	StateFullDischarge = 3
 	StateWarning       = 4
 	StateFault         = 5
+)
+
+// Step Charge Modes
+const (
+	StepChargeModeDisable  = 0
+	StepChargeModeEnable   = 1
+	StepChargeModeConflict = 2
+	StepChargeModeDefault  = 3
 )
 
 // AlarmDefinition defines the properties of an alarm
@@ -268,6 +284,22 @@ func GetRackAlarmSeverity(relativeCode uint16) string {
 	return "LOW"
 }
 
+// GetHVStatusDescription returns human-readable high voltage status description
+func GetHVStatusDescription(status uint16) string {
+	switch status {
+	case HVStatusPowerOffReady:
+		return "Power Off Ready"
+	case HVStatusPowerOnReady:
+		return "Power On Ready"
+	case HVStatusPowerOnFault:
+		return "Power On Fault"
+	case HVStatusPowerOffFault:
+		return "Power Off Fault"
+	default:
+		return "Unknown"
+	}
+}
+
 // GetStateDescription returns human-readable state description
 func GetStateDescription(state uint16) string {
 	switch state {
@@ -283,6 +315,22 @@ func GetStateDescription(state uint16) string {
 		return "Warning"
 	case StateFault:
 		return "Fault"
+	default:
+		return "Unknown"
+	}
+}
+
+// GetStepChargeModeDescription returns human-readable step charge mode description
+func GetStepChargeModeDescription(mode uint16) string {
+	switch mode {
+	case StepChargeModeDisable:
+		return "Disable"
+	case StepChargeModeEnable:
+		return "Enable"
+	case StepChargeModeConflict:
+		return "Conflict"
+	case StepChargeModeDefault:
+		return "Default"
 	default:
 		return "Unknown"
 	}
