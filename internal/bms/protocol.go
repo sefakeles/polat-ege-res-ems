@@ -13,7 +13,6 @@ const (
 
 	// Rack Status Data
 	BMSRackStatusDataStartAddr = 1040
-	BMSRackStatusDataOffset    = 1024
 	BMSRackStatusDataLength    = 6
 
 	// Rack Data
@@ -389,7 +388,7 @@ func IsFaultState(state uint16) bool {
 
 // GetRackStatusDataStartAddr returns the starting address for status data of a specific rack
 func GetRackStatusDataStartAddr(rackNo uint8) uint16 {
-	return BMSRackStatusDataStartAddr + uint16(rackNo-1)*BMSRackStatusDataOffset
+	return BMSRackStatusDataStartAddr + uint16(rackNo-1)*BMSRackDataOffset
 }
 
 // GetRackDataStartAddr returns the starting address for data of a specific rack
