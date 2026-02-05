@@ -510,9 +510,9 @@ func (db *InfluxDB) WriteWindFarmWeatherData(data WindFarmWeatherData) error {
 	return nil
 }
 
-// WriteAnalyzerData writes energy analyzer data to InfluxDB
-func (db *InfluxDB) WriteAnalyzerData(data AnalyzerData) error {
-	point := influxdb2.NewPointWithMeasurement("energy_analyzer").
+// WriteION7400Data writes ION7400 energy analyzer data to InfluxDB
+func (db *InfluxDB) WriteION7400Data(data AnalyzerData) error {
+	point := influxdb2.NewPointWithMeasurement("ion7400").
 		AddField("voltage_l1", data.VoltageL1).
 		AddField("voltage_l2", data.VoltageL2).
 		AddField("voltage_l3", data.VoltageL3).

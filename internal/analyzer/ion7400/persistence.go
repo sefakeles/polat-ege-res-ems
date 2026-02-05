@@ -43,7 +43,7 @@ func (s *Service) persistData() {
 	s.mutex.RUnlock()
 
 	if !analyzerData.Timestamp.IsZero() {
-		if err := s.influxDB.WriteAnalyzerData(analyzerData); err != nil {
+		if err := s.influxDB.WriteION7400Data(analyzerData); err != nil {
 			s.log.Error("Failed to save energy analyzer data to InfluxDB", zap.Error(err))
 		}
 	}
