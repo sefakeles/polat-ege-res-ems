@@ -163,6 +163,15 @@ windfarm:
     heartbeat_interval: "1s"
     persist_interval: "5s"
 
+analyzer:
+  host: "192.168.0.81"
+  port: 502
+  slave_id: 1
+  timeout: "1s"
+  reconnect_delay: "5s"
+  poll_interval: "1s"
+  persist_interval: "5s"
+
 ems:
   park_name: "polat-ege-res"
   http_port: 8080

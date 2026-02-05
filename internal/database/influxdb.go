@@ -418,49 +418,6 @@ func boolToInt(b bool) int {
 	return 0
 }
 
-// WriteSystemMetrics writes system metrics to InfluxDB
-func (db *InfluxDB) WriteSystemMetrics(data SystemMetrics) error {
-	point := influxdb2.NewPointWithMeasurement("system_metrics").
-		AddField("cpu_usage", data.CPUUsage).
-		AddField("memory_usage", data.MemoryUsage).
-		AddField("disk_usage", data.DiskUsage).
-		AddField("network_rx", data.NetworkRx).
-		AddField("network_tx", data.NetworkTx).
-		SetTime(data.Timestamp)
-
-	db.writeAPI.WritePoint(point)
-
-	return nil
-}
-
-// WriteRuntimeMetrics writes runtime metrics to InfluxDB
-func (db *InfluxDB) WriteRuntimeMetrics(data RuntimeMetrics) error {
-	point := influxdb2.NewPointWithMeasurement("runtime_metrics").
-		AddField("uptime_seconds", data.UptimeSeconds).
-		AddField("goroutines", data.Goroutines).
-		AddField("heap_alloc_mb", data.HeapAllocMB).
-		AddField("heap_sys_mb", data.HeapSysMB).
-		AddField("heap_idle_mb", data.HeapIdleMB).
-		AddField("heap_in_use_mb", data.HeapInUseMB).
-		AddField("heap_released_mb", data.HeapReleasedMB).
-		AddField("stack_in_use_mb", data.StackInUseMB).
-		AddField("stack_sys_mb", data.StackSysMB).
-		AddField("gc_runs", data.GCRuns).
-		AddField("gc_pause_total_ns", data.GCPauseTotalNs).
-		AddField("gc_cpu_fraction", data.GCCPUFraction).
-		AddField("next_gc_mb", data.NextGCMB).
-		AddField("last_gc_time", data.LastGCTime).
-		AddField("mallocs_total", data.MallocsTotal).
-		AddField("frees_total", data.FreesTotal).
-		AddField("total_alloc_mb", data.TotalAllocMB).
-		AddField("lookups_total", data.LookupsTotal).
-		SetTime(data.Timestamp)
-
-	db.writeAPI.WritePoint(point)
-
-	return nil
-}
-
 // WriteWindFarmMeasuringData writes wind farm measuring data to InfluxDB
 func (db *InfluxDB) WriteWindFarmMeasuringData(data WindFarmMeasuringData) error {
 	point := influxdb2.NewPointWithMeasurement("windfarm_measuring").
@@ -546,6 +503,88 @@ func (db *InfluxDB) WriteWindFarmWeatherData(data WindFarmWeatherData) error {
 		AddField("solar_radiation", data.SolarRadiation).
 		AddField("wind_farm_communication", data.WindFarmCommunication).
 		AddField("weather_measurements_count", data.WeatherMeasurementsCount).
+		SetTime(data.Timestamp)
+
+	db.writeAPI.WritePoint(point)
+
+	return nil
+}
+
+// WriteAnalyzerData writes energy analyzer data to InfluxDB
+func (db *InfluxDB) WriteAnalyzerData(data AnalyzerData) error {
+	point := influxdb2.NewPointWithMeasurement("energy_analyzer").
+		AddField("voltage_l1", data.VoltageL1).
+		AddField("voltage_l2", data.VoltageL2).
+		AddField("voltage_l3", data.VoltageL3).
+		AddField("voltage_ln_avg", data.VoltageLNAvg).
+		AddField("voltage_l1l2", data.VoltageL1L2).
+		AddField("voltage_l2l3", data.VoltageL2L3).
+		AddField("voltage_l3l1", data.VoltageL3L1).
+		AddField("voltage_ll_avg", data.VoltageLLAvg).
+		AddField("current_l1", data.CurrentL1).
+		AddField("current_l2", data.CurrentL2).
+		AddField("current_l3", data.CurrentL3).
+		AddField("current_n", data.CurrentN).
+		AddField("active_power_l1", data.ActivePowerL1).
+		AddField("active_power_l2", data.ActivePowerL2).
+		AddField("active_power_l3", data.ActivePowerL3).
+		AddField("active_power_sum", data.ActivePowerSum).
+		AddField("apparent_power_l1", data.ApparentPowerL1).
+		AddField("apparent_power_l2", data.ApparentPowerL2).
+		AddField("apparent_power_l3", data.ApparentPowerL3).
+		AddField("apparent_power_sum", data.ApparentPowerSum).
+		AddField("reactive_power_l1", data.ReactivePowerL1).
+		AddField("reactive_power_l2", data.ReactivePowerL2).
+		AddField("reactive_power_l3", data.ReactivePowerL3).
+		AddField("reactive_power_sum", data.ReactivePowerSum).
+		AddField("power_factor_l1", data.PowerFactorL1).
+		AddField("power_factor_l2", data.PowerFactorL2).
+		AddField("power_factor_l3", data.PowerFactorL3).
+		AddField("power_factor_avg", data.PowerFactorAvg).
+		AddField("frequency", data.Frequency).
+		SetTime(data.Timestamp)
+
+	db.writeAPI.WritePoint(point)
+
+	return nil
+}
+
+// WriteSystemMetrics writes system metrics to InfluxDB
+func (db *InfluxDB) WriteSystemMetrics(data SystemMetrics) error {
+	point := influxdb2.NewPointWithMeasurement("system_metrics").
+		AddField("cpu_usage", data.CPUUsage).
+		AddField("memory_usage", data.MemoryUsage).
+		AddField("disk_usage", data.DiskUsage).
+		AddField("network_rx", data.NetworkRx).
+		AddField("network_tx", data.NetworkTx).
+		SetTime(data.Timestamp)
+
+	db.writeAPI.WritePoint(point)
+
+	return nil
+}
+
+// WriteRuntimeMetrics writes runtime metrics to InfluxDB
+func (db *InfluxDB) WriteRuntimeMetrics(data RuntimeMetrics) error {
+	point := influxdb2.NewPointWithMeasurement("runtime_metrics").
+		AddField("uptime_seconds", data.UptimeSeconds).
+		AddField("goroutines", data.Goroutines).
+		AddField("heap_alloc_mb", data.HeapAllocMB).
+		AddField("heap_sys_mb", data.HeapSysMB).
+		AddField("heap_idle_mb", data.HeapIdleMB).
+		AddField("heap_in_use_mb", data.HeapInUseMB).
+		AddField("heap_released_mb", data.HeapReleasedMB).
+		AddField("stack_in_use_mb", data.StackInUseMB).
+		AddField("stack_sys_mb", data.StackSysMB).
+		AddField("gc_runs", data.GCRuns).
+		AddField("gc_pause_total_ns", data.GCPauseTotalNs).
+		AddField("gc_cpu_fraction", data.GCCPUFraction).
+		AddField("next_gc_mb", data.NextGCMB).
+		AddField("last_gc_time", data.LastGCTime).
+		AddField("mallocs_total", data.MallocsTotal).
+		AddField("frees_total", data.FreesTotal).
+		AddField("total_alloc_mb", data.TotalAllocMB).
+		AddField("lookups_total", data.LookupsTotal).
 		SetTime(data.Timestamp)
 
 	db.writeAPI.WritePoint(point)

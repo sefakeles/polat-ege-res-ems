@@ -271,47 +271,6 @@ type ProtectionRelayStatus struct {
 	Transformer4Fault   bool `json:"transformer4_fault"`
 }
 
-// SystemMetrics represents system performance metrics
-type SystemMetrics struct {
-	Timestamp   time.Time `json:"timestamp"`
-	CPUUsage    float32   `json:"cpu_usage"`
-	MemoryUsage float32   `json:"memory_usage"`
-	DiskUsage   float32   `json:"disk_usage"`
-	NetworkRx   uint64    `json:"network_rx"`
-	NetworkTx   uint64    `json:"network_tx"`
-}
-
-// RuntimeMetrics represents application runtime performance metrics
-type RuntimeMetrics struct {
-	Timestamp time.Time `json:"timestamp"`
-
-	// General metrics
-	UptimeSeconds float64 `json:"uptime_seconds"`
-	Goroutines    int     `json:"goroutines"`
-
-	// Memory metrics (in MB)
-	HeapAllocMB    float64 `json:"heap_alloc_mb"`
-	HeapSysMB      float64 `json:"heap_sys_mb"`
-	HeapIdleMB     float64 `json:"heap_idle_mb"`
-	HeapInUseMB    float64 `json:"heap_in_use_mb"`
-	HeapReleasedMB float64 `json:"heap_released_mb"`
-	StackInUseMB   float64 `json:"stack_in_use_mb"`
-	StackSysMB     float64 `json:"stack_sys_mb"`
-
-	// GC metrics
-	GCRuns         uint32  `json:"gc_runs"`
-	GCPauseTotalNs uint64  `json:"gc_pause_total_ns"`
-	GCCPUFraction  float64 `json:"gc_cpu_fraction"`
-	NextGCMB       float64 `json:"next_gc_mb"`
-	LastGCTime     int64   `json:"last_gc_time"`
-
-	// Allocation metrics
-	MallocsTotal uint64  `json:"mallocs_total"`
-	FreesTotal   uint64  `json:"frees_total"`
-	TotalAllocMB float64 `json:"total_alloc_mb"`
-	LookupsTotal uint64  `json:"lookups_total"`
-}
-
 // =============================================================================
 // Wind Farm (ENERCON FCU) Data Models
 // =============================================================================
@@ -410,6 +369,81 @@ type WindFarmCommandState struct {
 	USetpoint                float32   `json:"u_setpoint"`
 	WindFarmStartStop        uint16    `json:"wind_farm_start_stop"`
 	RapidDownwardSignal      uint16    `json:"rapid_downward_signal"`
+}
+
+// AnalyzerData represents energy analyzer data
+type AnalyzerData struct {
+	Timestamp        time.Time `json:"timestamp"`
+	VoltageL1        float32   `json:"voltage_l1"`
+	VoltageL2        float32   `json:"voltage_l2"`
+	VoltageL3        float32   `json:"voltage_l3"`
+	VoltageLNAvg     float32   `json:"voltage_ln_avg"`
+	VoltageL1L2      float32   `json:"voltage_l1l2"`
+	VoltageL2L3      float32   `json:"voltage_l2l3"`
+	VoltageL3L1      float32   `json:"voltage_l3l1"`
+	VoltageLLAvg     float32   `json:"voltage_ll_avg"`
+	CurrentL1        float32   `json:"current_l1"`
+	CurrentL2        float32   `json:"current_l2"`
+	CurrentL3        float32   `json:"current_l3"`
+	CurrentN         float32   `json:"current_n"`
+	ActivePowerL1    float32   `json:"active_power_l1"`
+	ActivePowerL2    float32   `json:"active_power_l2"`
+	ActivePowerL3    float32   `json:"active_power_l3"`
+	ActivePowerSum   float32   `json:"active_power_sum"`
+	ApparentPowerL1  float32   `json:"apparent_power_l1"`
+	ApparentPowerL2  float32   `json:"apparent_power_l2"`
+	ApparentPowerL3  float32   `json:"apparent_power_l3"`
+	ApparentPowerSum float32   `json:"apparent_power_sum"`
+	ReactivePowerL1  float32   `json:"reactive_power_l1"`
+	ReactivePowerL2  float32   `json:"reactive_power_l2"`
+	ReactivePowerL3  float32   `json:"reactive_power_l3"`
+	ReactivePowerSum float32   `json:"reactive_power_sum"`
+	PowerFactorL1    float32   `json:"power_factor_l1"`
+	PowerFactorL2    float32   `json:"power_factor_l2"`
+	PowerFactorL3    float32   `json:"power_factor_l3"`
+	PowerFactorAvg   float32   `json:"power_factor_avg"`
+	Frequency        float32   `json:"frequency"`
+}
+
+// SystemMetrics represents system performance metrics
+type SystemMetrics struct {
+	Timestamp   time.Time `json:"timestamp"`
+	CPUUsage    float32   `json:"cpu_usage"`
+	MemoryUsage float32   `json:"memory_usage"`
+	DiskUsage   float32   `json:"disk_usage"`
+	NetworkRx   uint64    `json:"network_rx"`
+	NetworkTx   uint64    `json:"network_tx"`
+}
+
+// RuntimeMetrics represents application runtime performance metrics
+type RuntimeMetrics struct {
+	Timestamp time.Time `json:"timestamp"`
+
+	// General metrics
+	UptimeSeconds float64 `json:"uptime_seconds"`
+	Goroutines    int     `json:"goroutines"`
+
+	// Memory metrics (in MB)
+	HeapAllocMB    float64 `json:"heap_alloc_mb"`
+	HeapSysMB      float64 `json:"heap_sys_mb"`
+	HeapIdleMB     float64 `json:"heap_idle_mb"`
+	HeapInUseMB    float64 `json:"heap_in_use_mb"`
+	HeapReleasedMB float64 `json:"heap_released_mb"`
+	StackInUseMB   float64 `json:"stack_in_use_mb"`
+	StackSysMB     float64 `json:"stack_sys_mb"`
+
+	// GC metrics
+	GCRuns         uint32  `json:"gc_runs"`
+	GCPauseTotalNs uint64  `json:"gc_pause_total_ns"`
+	GCCPUFraction  float64 `json:"gc_cpu_fraction"`
+	NextGCMB       float64 `json:"next_gc_mb"`
+	LastGCTime     int64   `json:"last_gc_time"`
+
+	// Allocation metrics
+	MallocsTotal uint64  `json:"mallocs_total"`
+	FreesTotal   uint64  `json:"frees_total"`
+	TotalAllocMB float64 `json:"total_alloc_mb"`
+	LookupsTotal uint64  `json:"lookups_total"`
 }
 
 // TelemetryResponse represents the complete telemetry response
