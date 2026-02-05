@@ -106,6 +106,22 @@ func (db *InfluxDB) HealthCheck() error {
 	return nil
 }
 
+// WriteBMSStatusData writes BMS status data to InfluxDB
+func (db *InfluxDB) WriteBMSStatusData(data BMSStatusData) error {
+	point := influxdb2.NewPointWithMeasurement("bms").
+		AddTag("id", fmt.Sprintf("%d", data.ID)).
+		AddField("hv_status", data.HVStatus).
+		AddField("system_status", data.SystemStatus).
+		AddField("connected_racks", data.ConnectedRacks).
+		AddField("total_racks", data.TotalRacks).
+		AddField("step_charge_mode", data.StepChargeMode).
+		SetTime(data.Timestamp)
+
+	db.writeAPI.WritePoint(point)
+
+	return nil
+}
+
 // WriteBMSData writes BMS data to InfluxDB
 func (db *InfluxDB) WriteBMSData(data BMSData) error {
 	point := influxdb2.NewPointWithMeasurement("bms").
@@ -131,21 +147,6 @@ func (db *InfluxDB) WriteBMSData(data BMSData) error {
 		AddField("min_discharge_voltage", data.MinDischargeVoltage).
 		AddField("insulation_resistance_pos", data.InsulationResistancePos).
 		AddField("insulation_resistance_neg", data.InsulationResistanceNeg).
-		SetTime(data.Timestamp)
-
-	db.writeAPI.WritePoint(point)
-
-	return nil
-}
-
-// WriteBMSStatusData writes BMS status data to InfluxDB
-func (db *InfluxDB) WriteBMSStatusData(data BMSStatusData) error {
-	point := influxdb2.NewPointWithMeasurement("bms").
-		AddTag("id", fmt.Sprintf("%d", data.ID)).
-		AddField("hv_status", data.HVStatus).
-		AddField("system_status", data.SystemStatus).
-		AddField("connected_racks", data.ConnectedRacks).
-		AddField("total_racks", data.TotalRacks).
 		SetTime(data.Timestamp)
 
 	db.writeAPI.WritePoint(point)

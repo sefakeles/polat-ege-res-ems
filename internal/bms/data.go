@@ -21,6 +21,7 @@ func ParseBMSStatusData(data []byte, id int) database.BMSStatusData {
 		SystemStatus:   utils.FromBytes[uint16](data[4:6]),   // 770 - System Status
 		ConnectedRacks: utils.FromBytes[uint16](data[8:10]),  // 772 - Connected Racks
 		TotalRacks:     utils.FromBytes[uint16](data[10:12]), // 773 - Total Racks
+		StepChargeMode: utils.FromBytes[uint16](data[12:14]), // 774 - Step Charge Mode
 	}
 }
 

@@ -11,6 +11,7 @@ type BMSStatusData struct {
 	SystemStatus   uint16    `json:"system_status"`
 	ConnectedRacks uint16    `json:"connected_racks"`
 	TotalRacks     uint16    `json:"total_racks"`
+	StepChargeMode uint16    `json:"step_charge_mode"`
 }
 
 // BMSData represents BMS data
