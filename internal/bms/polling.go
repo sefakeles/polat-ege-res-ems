@@ -163,14 +163,14 @@ func (s *Service) handleCellClientConnectionError() {
 
 // readSystemData reads system data
 func (s *Service) readSystemData() error {
-	// Read BMS data
-	if err := s.readBMSData(); err != nil {
-		return fmt.Errorf("failed to read BMS data: %w", err)
-	}
-
 	// Read BMS status data
 	if err := s.readBMSStatusData(); err != nil {
 		return fmt.Errorf("failed to read BMS status data: %w", err)
+	}
+
+	// Read BMS data
+	if err := s.readBMSData(); err != nil {
+		return fmt.Errorf("failed to read BMS data: %w", err)
 	}
 
 	// Read alarms

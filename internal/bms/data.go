@@ -7,6 +7,23 @@ import (
 	"powerkonnekt/ems/pkg/utils"
 )
 
+// ParseBMSStatusData converts raw MODBUS data to BMSStatusData structure
+func ParseBMSStatusData(data []byte, id int) database.BMSStatusData {
+	if len(data) < BMSStatusDataLength*2 {
+		return database.BMSStatusData{Timestamp: time.Now(), ID: id}
+	}
+
+	return database.BMSStatusData{
+		Timestamp:      time.Now(),
+		ID:             id,
+		Heartbeat:      utils.FromBytes[uint16](data[0:2]),   // 768 - Heartbeat
+		HVStatus:       utils.FromBytes[uint16](data[2:4]),   // 769 - HV Status
+		SystemStatus:   utils.FromBytes[uint16](data[4:6]),   // 770 - System Status
+		ConnectedRacks: utils.FromBytes[uint16](data[8:10]),  // 772 - Connected Racks
+		TotalRacks:     utils.FromBytes[uint16](data[10:12]), // 773 - Total Racks
+	}
+}
+
 // ParseBMSData converts raw MODBUS data to BMSData structure
 func ParseBMSData(data []byte, id int) database.BMSData {
 	if len(data) < BMSDataLength*2 {
@@ -37,23 +54,6 @@ func ParseBMSData(data []byte, id int) database.BMSData {
 		MinDischargeVoltage:     utils.Scale(utils.FromBytes[uint16](data[40:42]), float32(0.1)),   // 52 - Min discharge voltage (0.1V)
 		InsulationResistancePos: utils.FromBytes[uint16](data[44:46]),                              // 54 - Insulation resistance positive (kΩ)
 		InsulationResistanceNeg: utils.FromBytes[uint16](data[46:48]),                              // 55 - Insulation resistance negative (kΩ)
-	}
-}
-
-// ParseBMSStatusData converts raw MODBUS data to BMSStatusData structure
-func ParseBMSStatusData(data []byte, id int) database.BMSStatusData {
-	if len(data) < BMSStatusDataLength*2 {
-		return database.BMSStatusData{Timestamp: time.Now(), ID: id}
-	}
-
-	return database.BMSStatusData{
-		Timestamp:      time.Now(),
-		ID:             id,
-		Heartbeat:      utils.FromBytes[uint16](data[0:2]),   // 768 - Heartbeat
-		HVStatus:       utils.FromBytes[uint16](data[2:4]),   // 769 - HV Status
-		SystemStatus:   utils.FromBytes[uint16](data[4:6]),   // 770 - System Status
-		ConnectedRacks: utils.FromBytes[uint16](data[8:10]),  // 772 - Connected Racks
-		TotalRacks:     utils.FromBytes[uint16](data[10:12]), // 773 - Total Racks
 	}
 }
 

@@ -2,6 +2,17 @@ package database
 
 import "time"
 
+// BMSStatusData represents BMS status data
+type BMSStatusData struct {
+	Timestamp      time.Time `json:"timestamp"`
+	ID             int       `json:"id"`
+	Heartbeat      uint16    `json:"heartbeat"`
+	HVStatus       uint16    `json:"hv_status"`
+	SystemStatus   uint16    `json:"system_status"`
+	ConnectedRacks uint16    `json:"connected_racks"`
+	TotalRacks     uint16    `json:"total_racks"`
+}
+
 // BMSData represents BMS data
 type BMSData struct {
 	Timestamp               time.Time `json:"timestamp"`
@@ -27,17 +38,6 @@ type BMSData struct {
 	MinDischargeVoltage     float32   `json:"min_discharge_voltage"`
 	InsulationResistancePos uint16    `json:"insulation_resistance_pos"`
 	InsulationResistanceNeg uint16    `json:"insulation_resistance_neg"`
-}
-
-// BMSStatusData represents BMS status data
-type BMSStatusData struct {
-	Timestamp      time.Time `json:"timestamp"`
-	ID             int       `json:"id"`
-	Heartbeat      uint16    `json:"heartbeat"`
-	HVStatus       uint16    `json:"hv_status"`
-	SystemStatus   uint16    `json:"system_status"`
-	ConnectedRacks uint16    `json:"connected_racks"`
-	TotalRacks     uint16    `json:"total_racks"`
 }
 
 // BMSRackData represents BMS rack-level data

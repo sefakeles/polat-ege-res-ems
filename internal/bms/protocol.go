@@ -1,14 +1,15 @@
 package bms
 
-// MODBUS Register addresses for Jinko
-const (
-	// BMS Data
-	BMSDataStartAddr = 32
-	BMSDataLength    = 24
+// CATL EnerC
 
+const (
 	// BMS Status Data
 	BMSStatusDataStartAddr = 768
 	BMSStatusDataLength    = 7
+
+	// BMS Data
+	BMSDataStartAddr = 32
+	BMSDataLength    = 24
 
 	// Rack Data
 	BMSRackDataStartAddr = 100

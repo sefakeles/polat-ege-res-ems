@@ -2,22 +2,6 @@ package bms
 
 import "fmt"
 
-// readBMSData reads BMS data
-func (s *Service) readBMSData() error {
-	data, err := s.systemClient.ReadHoldingRegisters(s.ctx, BMSDataStartAddr, BMSDataLength)
-	if err != nil {
-		return fmt.Errorf("failed to read registers: %w", err)
-	}
-
-	bmsData := ParseBMSData(data, s.config.ID)
-
-	s.mutex.Lock()
-	s.lastBMSData = bmsData
-	s.mutex.Unlock()
-
-	return nil
-}
-
 // readBMSStatusData reads BMS status data
 func (s *Service) readBMSStatusData() error {
 	data, err := s.systemClient.ReadHoldingRegisters(s.ctx, BMSStatusDataStartAddr, BMSStatusDataLength)
@@ -29,6 +13,22 @@ func (s *Service) readBMSStatusData() error {
 
 	s.mutex.Lock()
 	s.lastBMSStatusData = bmsStatusData
+	s.mutex.Unlock()
+
+	return nil
+}
+
+// readBMSData reads BMS data
+func (s *Service) readBMSData() error {
+	data, err := s.systemClient.ReadHoldingRegisters(s.ctx, BMSDataStartAddr, BMSDataLength)
+	if err != nil {
+		return fmt.Errorf("failed to read registers: %w", err)
+	}
+
+	bmsData := ParseBMSData(data, s.config.ID)
+
+	s.mutex.Lock()
+	s.lastBMSData = bmsData
 	s.mutex.Unlock()
 
 	return nil
