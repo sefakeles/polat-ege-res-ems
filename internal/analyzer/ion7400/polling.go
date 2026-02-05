@@ -10,7 +10,7 @@ import (
 // pollLoop handles continuous data polling
 func (s *Service) pollLoop() {
 	if err := s.client.Connect(s.ctx); err != nil {
-		s.log.Error("Initial energy analyzer connection failed", zap.Error(err))
+		s.log.Error("Initial ION7400 connection failed", zap.Error(err))
 	}
 
 	interval := s.config.PollInterval
@@ -54,9 +54,9 @@ func (s *Service) pollLoop() {
 	}
 }
 
-// handleConnectionError attempts to reconnect to the energy analyzer
+// handleConnectionError attempts to reconnect to the ION7400
 func (s *Service) handleConnectionError() {
-	s.log.Warn("Energy analyzer connection lost, attempting reconnection")
+	s.log.Warn("ION7400 connection lost, attempting reconnection")
 	s.client.Disconnect()
 
 	reconnectAttempts := 0
@@ -70,12 +70,12 @@ func (s *Service) handleConnectionError() {
 		case <-timer.C:
 			reconnectAttempts++
 			if err := s.client.Connect(s.ctx); err != nil {
-				s.log.Error("Failed to reconnect to energy analyzer",
+				s.log.Error("Failed to reconnect to ION7400",
 					zap.Error(err),
 					zap.Int("attempt", reconnectAttempts))
 				timer.Reset(s.config.ReconnectDelay)
 			} else {
-				s.log.Info("Successfully reconnected to energy analyzer",
+				s.log.Info("Successfully reconnected to ION7400",
 					zap.Int("total_attempts", reconnectAttempts),
 					zap.Duration("total_downtime", time.Duration(reconnectAttempts)*s.config.ReconnectDelay))
 			}
@@ -83,7 +83,7 @@ func (s *Service) handleConnectionError() {
 	}
 }
 
-// readAllData reads all necessary data from the energy analyzer
+// readAllData reads all necessary data from the ION7400
 func (s *Service) readAllData() error {
 	if err := s.readBaseData(); err != nil {
 		return fmt.Errorf("failed to read base data: %w", err)

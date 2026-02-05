@@ -44,7 +44,7 @@ func (s *Service) persistData() {
 
 	if !analyzerData.Timestamp.IsZero() {
 		if err := s.influxDB.WriteION7400Data(analyzerData); err != nil {
-			s.log.Error("Failed to save energy analyzer data to InfluxDB", zap.Error(err))
+			s.log.Error("Failed to save ION7400 data to InfluxDB", zap.Error(err))
 		}
 	}
 }

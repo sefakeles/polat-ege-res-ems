@@ -11,7 +11,7 @@ import (
 	"powerkonnekt/ems/pkg/modbus"
 )
 
-// Service represents the energy analyzer service
+// Service represents the ION7400 service
 type Service struct {
 	config   config.AnalyzerConfig
 	influxDB *database.InfluxDB
@@ -27,7 +27,7 @@ type Service struct {
 	lastData database.AnalyzerData
 }
 
-// NewService creates a new energy analyzer service
+// NewService creates a new ION7400 service
 func NewService(cfg config.AnalyzerConfig, influxDB *database.InfluxDB, logger *zap.Logger) *Service {
 	client := modbus.NewClient(cfg.Host, cfg.Port, cfg.SlaveID, cfg.Timeout)
 	ctx, cancel := context.WithCancel(context.Background())
@@ -48,24 +48,24 @@ func NewService(cfg config.AnalyzerConfig, influxDB *database.InfluxDB, logger *
 	}
 }
 
-// Start starts the energy analyzer service
+// Start starts the ION7400 service
 func (s *Service) Start() error {
 	s.wg.Go(s.pollLoop)
 	s.wg.Go(s.persistenceLoop)
 
-	s.log.Info("Energy analyzer service started",
+	s.log.Info("ION7400 service started",
 		zap.Duration("poll_interval", s.config.PollInterval),
 		zap.Duration("persist_interval", s.config.PersistInterval))
 
 	return nil
 }
 
-// Stop stops the energy analyzer service
+// Stop stops the ION7400 service
 func (s *Service) Stop() {
 	s.cancel()
 	s.wg.Wait()
 	s.client.Disconnect()
-	s.log.Info("Energy analyzer service stopped")
+	s.log.Info("ION7400 service stopped")
 }
 
 // IsConnected returns the connection status
@@ -78,7 +78,7 @@ func (s *Service) GetDataUpdateChannel() <-chan struct{} {
 	return s.dataUpdateChan
 }
 
-// GetLatestData returns the latest energy analyzer data
+// GetLatestData returns the latest ION7400 data
 func (s *Service) GetLatestData() database.AnalyzerData {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
