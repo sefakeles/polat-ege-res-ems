@@ -18,13 +18,10 @@ func (s *Service) heartbeatLoop() {
 		case <-s.ctx.Done():
 			return
 		case <-ticker.C:
-			if !s.client.IsConnected() {
-				continue
-			}
-
-			if err := s.updateHeartbeat(); err != nil {
-				s.log.Error("Error updating heartbeat", zap.Error(err))
-				continue
+			if s.client.IsConnected() {
+				if err := s.updateHeartbeat(); err != nil {
+					s.log.Error("Error updating heartbeat", zap.Error(err))
+				}
 			}
 		}
 	}
