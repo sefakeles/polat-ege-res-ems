@@ -178,33 +178,29 @@ func (db *InfluxDB) WriteBMSRackData(data BMSRackData) error {
 	point := influxdb2.NewPointWithMeasurement("bms_rack").
 		AddTag("id", fmt.Sprintf("%d", data.ID)).
 		AddTag("number", fmt.Sprintf("%d", data.Number)).
-		AddField("state", data.State).
-		AddField("max_charge_power", data.MaxChargePower).
-		AddField("max_discharge_power", data.MaxDischargePower).
-		AddField("max_charge_voltage", data.MaxChargeVoltage).
-		AddField("min_discharge_voltage", data.MinDischargeVoltage).
-		AddField("max_charge_current", data.MaxChargeCurrent).
-		AddField("max_discharge_current", data.MaxDischargeCurrent).
 		AddField("voltage", data.Voltage).
 		AddField("current", data.Current).
-		AddField("temperature", data.Temperature).
 		AddField("soc", data.SOC).
 		AddField("soh", data.SOH).
-		AddField("insulation_resistance", data.InsulationResistance).
-		AddField("avg_cell_voltage", data.AvgCellVoltage).
-		AddField("avg_cell_temperature", data.AvgCellTemperature).
 		AddField("max_cell_voltage", data.MaxCellVoltage).
-		AddField("max_voltage_cell_no", data.MaxVoltageCellNo).
 		AddField("min_cell_voltage", data.MinCellVoltage).
-		AddField("min_voltage_cell_no", data.MinVoltageCellNo).
+		AddField("avg_cell_voltage", data.AvgCellVoltage).
 		AddField("max_cell_temperature", data.MaxCellTemperature).
-		AddField("max_temp_cell_no", data.MaxTempCellNo).
 		AddField("min_cell_temperature", data.MinCellTemperature).
+		AddField("avg_cell_temperature", data.AvgCellTemperature).
+		AddField("max_charge_current", data.MaxChargeCurrent).
+		AddField("max_discharge_current", data.MaxDischargeCurrent).
+		AddField("max_charge_power", data.MaxChargePower).
+		AddField("max_discharge_power", data.MaxDischargePower).
+		AddField("power", data.Power).
+		AddField("max_voltage_cell_no", data.MaxVoltageCellNo).
+		AddField("min_voltage_cell_no", data.MinVoltageCellNo).
+		AddField("max_temp_cell_no", data.MaxTempCellNo).
 		AddField("min_temp_cell_no", data.MinTempCellNo).
-		AddField("total_charge_energy", data.TotalChargeEnergy).
-		AddField("total_discharge_energy", data.TotalDischargeEnergy).
 		AddField("charge_capacity", data.ChargeCapacity).
 		AddField("discharge_capacity", data.DischargeCapacity).
+		AddField("max_charge_voltage", data.MaxChargeVoltage).
+		AddField("min_discharge_voltage", data.MinDischargeVoltage).
 		SetTime(data.Timestamp)
 
 	db.writeAPI.WritePoint(point)

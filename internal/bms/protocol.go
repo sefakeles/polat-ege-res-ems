@@ -17,9 +17,9 @@ const (
 	BMSRackStatusDataLength    = 6
 
 	// Rack Data
-	BMSRackDataStartAddr = 100
-	BMSRackDataOffset    = 3000
-	BMSRackDataLength    = 51
+	BMSRackDataStartAddr = 1056
+	BMSRackDataOffset    = 1024
+	BMSRackDataLength    = 61
 
 	// Alarms
 	BMSAlarmStartAddr     = 0

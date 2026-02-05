@@ -93,36 +93,33 @@ func ParseBMSRackData(data []byte, id int, rackNo uint8) database.BMSRackData {
 	}
 
 	return database.BMSRackData{
-		Timestamp:            time.Now(),
-		ID:                   id,
-		Number:               rackNo,
-		State:                utils.FromBytes[uint16](data[0:2]),                                       // 100 - State
-		MaxChargePower:       utils.Scale(utils.FromBytes[uint16](data[2:4]), float32(0.1)),            // 101 - Max charge power (0.1kW)
-		MaxDischargePower:    utils.Scale(utils.FromBytes[uint16](data[4:6]), float32(0.1)),            // 102 - Max discharge power (0.1kW)
-		MaxChargeVoltage:     utils.Scale(utils.FromBytes[uint16](data[6:8]), float32(0.1)),            // 103 - Max charge voltage (0.1V)
-		MinDischargeVoltage:  utils.Scale(utils.FromBytes[uint16](data[8:10]), float32(0.1)),           // 104 - Min discharge voltage (0.1V)
-		MaxChargeCurrent:     utils.Scale(utils.FromBytes[uint16](data[10:12]), float32(0.1)),          // 105 - Max charge current (0.1A)
-		MaxDischargeCurrent:  utils.Scale(utils.FromBytes[uint16](data[12:14]), float32(0.1)),          // 106 - Max discharge current (0.1A)
-		Voltage:              utils.Scale(utils.FromBytes[uint16](data[30:32]), float32(0.1)),          // 115 - Voltage (0.1V)
-		Current:              utils.Scale(utils.FromBytes[uint16](data[32:34]), float32(0.1)) - 1600.0, // 116 - Current (0.1A, offset -1600)
-		Temperature:          utils.FromBytes[int16](data[34:36]) - 40,                                 // 117 - Temperature (°C, offset -40)
-		SOC:                  utils.FromBytes[uint16](data[36:38]),                                     // 118 - SOC (%)
-		SOH:                  utils.FromBytes[uint16](data[38:40]),                                     // 119 - SOH (%)
-		InsulationResistance: utils.FromBytes[uint16](data[40:42]),                                     // 120 - Insulation resistance (kΩ)
-		AvgCellVoltage:       utils.Scale(utils.FromBytes[uint16](data[42:44]), float32(0.001)),        // 121 - Average cell voltage (0.001V)
-		AvgCellTemperature:   utils.FromBytes[int16](data[44:46]) - 40,                                 // 122 - Average cell temperature (°C, offset -40)
-		MaxCellVoltage:       utils.Scale(utils.FromBytes[uint16](data[46:48]), float32(0.001)),        // 123 - Max cell voltage (0.001V)
-		MaxVoltageCellNo:     utils.FromBytes[uint16](data[48:50]),                                     // 124 - Max voltage cell number
-		MinCellVoltage:       utils.Scale(utils.FromBytes[uint16](data[50:52]), float32(0.001)),        // 125 - Min cell voltage (0.001V)
-		MinVoltageCellNo:     utils.FromBytes[uint16](data[52:54]),                                     // 126 - Min voltage cell number
-		MaxCellTemperature:   utils.FromBytes[int16](data[54:56]) - 40,                                 // 127 - Max cell temperature (°C, offset -40)
-		MaxTempCellNo:        utils.FromBytes[uint16](data[56:58]),                                     // 128 - Max temperature cell number
-		MinCellTemperature:   utils.FromBytes[int16](data[58:60]) - 40,                                 // 129 - Min cell temperature (°C, offset -40)
-		MinTempCellNo:        utils.FromBytes[uint16](data[60:62]),                                     // 130 - Min temperature cell number
-		TotalChargeEnergy:    utils.Scale(utils.FromBytes[uint32](data[78:82]), float32(0.1)),          // 139-140 - Total charge energy (0.1kWh)
-		TotalDischargeEnergy: utils.Scale(utils.FromBytes[uint32](data[82:86]), float32(0.1)),          // 141-142 - Total discharge energy (0.1kWh)
-		ChargeCapacity:       utils.Scale(utils.FromBytes[uint32](data[94:98]), float32(0.1)),          // 147-148 - Charge capacity (0.1kWh)
-		DischargeCapacity:    utils.Scale(utils.FromBytes[uint32](data[98:102]), float32(0.1)),         // 149-150 - Discharge capacity (0.1kWh)
+		Timestamp:           time.Now(),
+		ID:                  id,
+		Number:              rackNo,
+		VoltageOut:          utils.Scale(utils.FromBytes[uint16](data[0:2]), float32(0.1)),        // 1056 - Voltage outside (0.1V)
+		Voltage:             utils.Scale(utils.FromBytes[uint16](data[2:4]), float32(0.1)),        // 1057 - Voltage inside (0.1V)
+		Current:             utils.Scale(utils.FromBytes[int16](data[4:6])-20000, float32(0.1)),   // 1058 - Current (0.1A, offset -20000)
+		SOC:                 utils.Scale(utils.FromBytes[uint16](data[6:8]), float32(0.1)),        // 1059 - SOC (0.1%)
+		SOH:                 utils.Scale(utils.FromBytes[uint16](data[8:10]), float32(0.1)),       // 1060 - SOH (0.1%)
+		MaxCellVoltage:      utils.Scale(utils.FromBytes[uint16](data[10:12]), float32(0.001)),    // 1061 - Max cell voltage (0.001V)
+		MinCellVoltage:      utils.Scale(utils.FromBytes[uint16](data[12:14]), float32(0.001)),    // 1062 - Min cell voltage (0.001V)
+		AvgCellVoltage:      utils.Scale(utils.FromBytes[uint16](data[14:16]), float32(0.001)),    // 1063 - Average cell voltage (0.001V)
+		MaxCellTemperature:  utils.FromBytes[int16](data[16:18]) - 50,                             // 1064 - Max cell temperature (°C, offset -50)
+		MinCellTemperature:  utils.FromBytes[int16](data[18:20]) - 50,                             // 1065 - Min cell temperature (°C, offset -50)
+		AvgCellTemperature:  utils.FromBytes[int16](data[20:22]) - 50,                             // 1066 - Average cell temperature (°C, offset -50)
+		MaxChargeCurrent:    utils.Scale(utils.FromBytes[int16](data[22:24])-20000, float32(0.1)), // 1067 - Max charge current (A, offset -20000)
+		MaxDischargeCurrent: utils.Scale(utils.FromBytes[int16](data[24:26])-20000, float32(0.1)), // 1068 - Max discharge current (A, offset -20000)
+		MaxChargePower:      utils.Scale(utils.FromBytes[int16](data[26:28])-20000, float32(0.1)), // 1069 - Max charge power (kW, offset -20000)
+		MaxDischargePower:   utils.Scale(utils.FromBytes[int16](data[28:30])-20000, float32(0.1)), // 1070 - Max discharge power (kW, offset -20000)
+		Power:               utils.Scale(utils.FromBytes[int16](data[30:32])-20000, float32(0.1)), // 1071 - Power (kW, offset -20000)
+		MaxVoltageCellNo:    utils.FromBytes[uint16](data[32:34]),                                 // 1072 - Max voltage cell number
+		MinVoltageCellNo:    utils.FromBytes[uint16](data[34:36]),                                 // 1073 - Min voltage cell number
+		MaxTempCellNo:       utils.FromBytes[uint16](data[36:38]),                                 // 1074 - Max temperature cell number
+		MinTempCellNo:       utils.FromBytes[uint16](data[38:40]),                                 // 1075 - Min temperature cell number
+		ChargeCapacity:      utils.FromBytes[uint16](data[40:42]),                                 // 1076 - Charge capacity (kWh)
+		DischargeCapacity:   utils.FromBytes[uint16](data[42:44]),                                 // 1077 - Discharge capacity (kWh)
+		MaxChargeVoltage:    utils.Scale(utils.FromBytes[uint16](data[44:46]), float32(0.1)),      // 1078 - Max charge voltage (0.1V)
+		MinDischargeVoltage: utils.Scale(utils.FromBytes[uint16](data[46:48]), float32(0.1)),      // 1079 - Min discharge voltage (0.1V)
 	}
 }
 
