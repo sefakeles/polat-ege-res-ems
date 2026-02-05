@@ -17,11 +17,11 @@ func ParseBMSStatusData(data []byte, id int) database.BMSStatusData {
 		Timestamp:      time.Now(),
 		ID:             id,
 		Heartbeat:      utils.FromBytes[uint16](data[0:2]),   // 768 - Heartbeat
-		HVStatus:       utils.FromBytes[uint16](data[2:4]),   // 769 - HV Status
-		SystemStatus:   utils.FromBytes[uint16](data[4:6]),   // 770 - System Status
-		ConnectedRacks: utils.FromBytes[uint16](data[8:10]),  // 772 - Connected Racks
-		TotalRacks:     utils.FromBytes[uint16](data[10:12]), // 773 - Total Racks
-		StepChargeMode: utils.FromBytes[uint16](data[12:14]), // 774 - Step Charge Mode
+		HVStatus:       utils.FromBytes[uint16](data[2:4]),   // 769 - HV status
+		SystemStatus:   utils.FromBytes[uint16](data[4:6]),   // 770 - System status
+		ConnectedRacks: utils.FromBytes[uint16](data[8:10]),  // 772 - Connected racks
+		TotalRacks:     utils.FromBytes[uint16](data[10:12]), // 773 - Total racks
+		StepChargeMode: utils.FromBytes[uint16](data[12:14]), // 774 - Step charge mode
 	}
 }
 
