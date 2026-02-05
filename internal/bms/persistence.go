@@ -10,15 +10,23 @@ import (
 
 // persistenceLoop handles data persistence
 func (s *Service) persistenceLoop() {
-	ticker := time.NewTicker(s.config.PersistInterval)
-	defer ticker.Stop()
+	interval := s.config.PersistInterval
+
+	// Calculate first aligned time and create timer
+	nextTick := time.Now().Truncate(interval).Add(interval)
+	timer := time.NewTimer(time.Until(nextTick))
+	defer timer.Stop()
 
 	for {
 		select {
 		case <-s.ctx.Done():
 			return
-		case <-ticker.C:
+		case <-timer.C:
 			s.persistLatestData()
+
+			// Calculate next aligned time and reset timer
+			nextTick = time.Now().Truncate(interval).Add(interval)
+			timer.Reset(time.Until(nextTick))
 		}
 	}
 }

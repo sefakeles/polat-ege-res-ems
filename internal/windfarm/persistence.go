@@ -8,17 +8,25 @@ import (
 
 // persistenceLoop periodically writes data to InfluxDB
 func (s *Service) persistenceLoop() {
-	ticker := time.NewTicker(s.config.PersistInterval)
-	defer ticker.Stop()
+	interval := s.config.PersistInterval
+
+	// Calculate first aligned time and create timer
+	nextTick := time.Now().Truncate(interval).Add(interval)
+	timer := time.NewTimer(time.Until(nextTick))
+	defer timer.Stop()
 
 	for {
 		select {
 		case <-s.ctx.Done():
 			return
-		case <-ticker.C:
+		case <-timer.C:
 			if err := s.persistData(); err != nil {
 				s.log.Error("Error persisting wind farm data", zap.Error(err))
 			}
+
+			// Calculate next aligned time and reset timer
+			nextTick = time.Now().Truncate(interval).Add(interval)
+			timer.Reset(time.Until(nextTick))
 		}
 	}
 }
