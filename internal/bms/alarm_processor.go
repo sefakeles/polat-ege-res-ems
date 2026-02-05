@@ -11,6 +11,18 @@ import (
 func (s *Service) processAlarms(data []byte) {
 	timestamp := time.Now()
 
+	// Reverse byte order for every word (2 bytes)
+	swappedData := make([]byte, len(data))
+	for i := 0; i < len(data); i += 2 {
+		if i+1 < len(data) {
+			swappedData[i] = data[i+1]
+			swappedData[i+1] = data[i]
+		} else {
+			swappedData[i] = data[i]
+		}
+	}
+	data = swappedData
+
 	for byteIdx, b := range data {
 		for bitIdx := range 8 {
 			relativeCode := uint16(byteIdx*8 + bitIdx)
