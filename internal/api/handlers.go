@@ -159,7 +159,6 @@ func (h *Handlers) GetBMSData(c *gin.Context) {
 	for i, rackData := range bmsRackData {
 		bmsRackDataResponse[i] = BMSRackDataResponse{
 			BMSRackData: rackData,
-			State:       bms.GetStateDescription(rackData.State),
 		}
 	}
 

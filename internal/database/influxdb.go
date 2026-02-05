@@ -193,14 +193,14 @@ func (db *InfluxDB) WriteBMSRackData(data BMSRackData) error {
 		AddField("max_charge_power", data.MaxChargePower).
 		AddField("max_discharge_power", data.MaxDischargePower).
 		AddField("power", data.Power).
+		AddField("max_voltage_module_no", data.MaxVoltageModuleNo).
 		AddField("max_voltage_cell_no", data.MaxVoltageCellNo).
+		AddField("min_voltage_module_no", data.MinVoltageModuleNo).
 		AddField("min_voltage_cell_no", data.MinVoltageCellNo).
-		AddField("max_temp_cell_no", data.MaxTempCellNo).
-		AddField("min_temp_cell_no", data.MinTempCellNo).
+		AddField("max_temp_sensor_no", data.MaxTempSensorNo).
+		AddField("min_temp_sensor_no", data.MinTempSensorNo).
 		AddField("charge_capacity", data.ChargeCapacity).
 		AddField("discharge_capacity", data.DischargeCapacity).
-		AddField("max_charge_voltage", data.MaxChargeVoltage).
-		AddField("min_discharge_voltage", data.MinDischargeVoltage).
 		SetTime(data.Timestamp)
 
 	db.writeAPI.WritePoint(point)

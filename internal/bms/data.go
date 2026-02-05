@@ -112,14 +112,14 @@ func ParseBMSRackData(data []byte, id int, rackNo uint8) database.BMSRackData {
 		MaxChargePower:      utils.Scale(utils.FromBytes[int16](data[26:28])-20000, float32(0.1)), // 1069 - Max charge power (kW, offset -20000)
 		MaxDischargePower:   utils.Scale(utils.FromBytes[int16](data[28:30])-20000, float32(0.1)), // 1070 - Max discharge power (kW, offset -20000)
 		Power:               utils.Scale(utils.FromBytes[int16](data[30:32])-20000, float32(0.1)), // 1071 - Power (kW, offset -20000)
-		MaxVoltageCellNo:    utils.FromBytes[uint16](data[32:34]),                                 // 1072 - Max voltage cell number
-		MinVoltageCellNo:    utils.FromBytes[uint16](data[34:36]),                                 // 1073 - Min voltage cell number
-		MaxTempCellNo:       utils.FromBytes[uint16](data[36:38]),                                 // 1074 - Max temperature cell number
-		MinTempCellNo:       utils.FromBytes[uint16](data[38:40]),                                 // 1075 - Min temperature cell number
-		ChargeCapacity:      utils.FromBytes[uint16](data[40:42]),                                 // 1076 - Charge capacity (kWh)
-		DischargeCapacity:   utils.FromBytes[uint16](data[42:44]),                                 // 1077 - Discharge capacity (kWh)
-		MaxChargeVoltage:    utils.Scale(utils.FromBytes[uint16](data[44:46]), float32(0.1)),      // 1078 - Max charge voltage (0.1V)
-		MinDischargeVoltage: utils.Scale(utils.FromBytes[uint16](data[46:48]), float32(0.1)),      // 1079 - Min discharge voltage (0.1V)
+		MaxVoltageModuleNo:  data[33],                                                             // 1072 - Max voltage module number (high byte)
+		MaxVoltageCellNo:    data[32],                                                             // 1072 - Max voltage cell number (low byte)
+		MinVoltageModuleNo:  data[35],                                                             // 1073 - Min voltage module number (high byte)
+		MinVoltageCellNo:    data[34],                                                             // 1073 - Min voltage cell number (low byte)
+		MaxTempSensorNo:     utils.FromBytes[uint16](data[36:38]),                                 // 1074 - Max temperature sensor number
+		MinTempSensorNo:     utils.FromBytes[uint16](data[38:40]),                                 // 1075 - Min temperature sensor number
+		ChargeCapacity:      utils.Scale(utils.FromBytes[uint16](data[40:42]), float32(0.1)),      // 1076 - Charge capacity (kWh)
+		DischargeCapacity:   utils.Scale(utils.FromBytes[uint16](data[42:44]), float32(0.1)),      // 1077 - Discharge capacity (kWh)
 	}
 }
 

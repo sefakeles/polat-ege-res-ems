@@ -76,14 +76,14 @@ type BMSRackData struct {
 	MaxChargePower      float32   `json:"max_charge_power"`
 	MaxDischargePower   float32   `json:"max_discharge_power"`
 	Power               float32   `json:"power"`
-	MaxVoltageCellNo    uint16    `json:"max_voltage_cell_no"`
-	MinVoltageCellNo    uint16    `json:"min_voltage_cell_no"`
-	MaxTempCellNo       uint16    `json:"max_temp_cell_no"`
-	MinTempCellNo       uint16    `json:"min_temp_cell_no"`
-	ChargeCapacity      uint16    `json:"charge_capacity"`
-	DischargeCapacity   uint16    `json:"discharge_capacity"`
-	MaxChargeVoltage    float32   `json:"max_charge_voltage"`
-	MinDischargeVoltage float32   `json:"min_discharge_voltage"`
+	MaxVoltageModuleNo  uint8     `json:"max_voltage_module_no"`
+	MaxVoltageCellNo    uint8     `json:"max_voltage_cell_no"`
+	MinVoltageModuleNo  uint8     `json:"min_voltage_module_no"`
+	MinVoltageCellNo    uint8     `json:"min_voltage_cell_no"`
+	MaxTempSensorNo     uint16    `json:"max_temp_sensor_no"`
+	MinTempSensorNo     uint16    `json:"min_temp_sensor_no"`
+	ChargeCapacity      float32   `json:"charge_capacity"`
+	DischargeCapacity   float32   `json:"discharge_capacity"`
 }
 
 // BMSCellVoltageData represents individual cell voltage data
