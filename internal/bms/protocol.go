@@ -39,7 +39,7 @@ const (
 
 	// Cell organization constants
 	CellsPerModule       = 52
-	TempSensorsPerModule = 12
+	TempSensorsPerModule = 4
 )
 
 // Run Commands
