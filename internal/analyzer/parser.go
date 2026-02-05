@@ -50,7 +50,7 @@ func float32FromBytes(data []byte, offset int) float32 {
 		return 0.0
 	}
 
-	// Convert 4 bytes to uint32 (big-endian)
+	// Convert 4 bytes to uint32
 	bits := binary.BigEndian.Uint32(data[offset : offset+4])
 
 	// Convert uint32 bits to float32
