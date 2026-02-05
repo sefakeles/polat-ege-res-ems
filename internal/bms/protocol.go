@@ -38,7 +38,7 @@ const (
 	SystemResetRegister    = 908
 
 	// Cell organization constants
-	CellsPerModule       = 48
+	CellsPerModule       = 52
 	TempSensorsPerModule = 12
 )
 
