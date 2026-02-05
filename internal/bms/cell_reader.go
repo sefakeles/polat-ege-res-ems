@@ -46,7 +46,7 @@ func (s *Service) readCellVoltages(rackNo uint8) error {
 	for chunk := range chunks {
 		select {
 		case <-s.ctx.Done():
-			return s.ctx.Err()
+			return nil
 		default:
 		}
 
@@ -100,7 +100,7 @@ func (s *Service) readCellTemperatures(rackNo uint8) error {
 	for chunk := range chunks {
 		select {
 		case <-s.ctx.Done():
-			return s.ctx.Err()
+			return nil
 		default:
 		}
 

@@ -181,7 +181,7 @@ func (s *Service) readSystemData() error {
 	for rackNo := uint8(1); rackNo <= uint8(s.config.RackCount); rackNo++ {
 		select {
 		case <-s.ctx.Done():
-			return s.ctx.Err()
+			return nil
 		default:
 		}
 
@@ -209,7 +209,7 @@ func (s *Service) readCellDataForAllRacks() error {
 		// Check if context is cancelled before reading each rack
 		select {
 		case <-s.ctx.Done():
-			return s.ctx.Err()
+			return nil
 		default:
 		}
 
