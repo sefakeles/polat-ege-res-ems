@@ -207,7 +207,7 @@ func (db *InfluxDB) WriteBMSRackData(data BMSRackData) error {
 		AddField("avg_self_discharge_rate", data.AvgSelfDischargeRate).
 		AddField("total_charge_energy", data.TotalChargeEnergy).
 		AddField("total_discharge_energy", data.TotalDischargeEnergy).
-		AddField("charge_discharge_cycles", data.ChargeDischargeCycles).
+		AddField("cycle_count", data.CycleCount).
 		SetTime(data.Timestamp)
 
 	db.writeAPI.WritePoint(point)
