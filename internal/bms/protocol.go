@@ -24,7 +24,6 @@ const (
 	BMSAlarmStartAddr     = 0
 	BMSAlarmLength        = 32
 	BMSRackAlarmStartAddr = 1024
-	BMSRackAlarmOffset    = 1024
 	BMSRackAlarmLength    = 16
 
 	// Cell Data
@@ -398,7 +397,7 @@ func GetRackDataStartAddr(rackNo uint8) uint16 {
 
 // GetRackAlarmStartAddr returns the starting address for alarm of a specific rack
 func GetRackAlarmStartAddr(rackNo uint8) uint16 {
-	return BMSRackAlarmStartAddr + uint16(rackNo-1)*BMSRackAlarmOffset
+	return BMSRackAlarmStartAddr + uint16(rackNo-1)*BMSRackDataOffset
 }
 
 // GetCellVoltageStartAddr returns the starting address for cell voltages of a specific rack

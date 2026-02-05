@@ -58,7 +58,7 @@ func (s *Service) processAlarms(data []byte) {
 
 // processRackAlarms processes rack alarm bits from the given data
 func (s *Service) processRackAlarms(data []byte, rackNo uint8) {
-	baseCode := BMSRackAlarmStartAddr + uint16(rackNo-1)*BMSRackAlarmOffset
+	baseCode := BMSRackAlarmStartAddr + uint16(rackNo-1)*BMSRackDataOffset
 	timestamp := time.Now()
 
 	// Reverse byte order for every word (2 bytes)
