@@ -5,7 +5,7 @@ pcs:
     slave_id: 1
     timeout: "1s"
     reconnect_delay: "5s"
-    poll_interval: "100ms"
+    poll_interval: "1s"
     heartbeat_interval: "1s"
     persist_interval: "5s"
   - id: 2
@@ -14,7 +14,7 @@ pcs:
     slave_id: 1
     timeout: "1s"
     reconnect_delay: "5s"
-    poll_interval: "100ms"
+    poll_interval: "1s"
     heartbeat_interval: "1s"
     persist_interval: "5s"
   - id: 3
@@ -23,7 +23,7 @@ pcs:
     slave_id: 1
     timeout: "1s"
     reconnect_delay: "5s"
-    poll_interval: "100ms"
+    poll_interval: "1s"
     heartbeat_interval: "1s"
     persist_interval: "5s"
   - id: 4
@@ -32,7 +32,7 @@ pcs:
     slave_id: 1
     timeout: "1s"
     reconnect_delay: "5s"
-    poll_interval: "100ms"
+    poll_interval: "1s"
     heartbeat_interval: "1s"
     persist_interval: "5s"
 
@@ -43,7 +43,7 @@ bms:
     slave_id: 1
     timeout: "1s"
     reconnect_delay: "5s"
-    poll_interval: "100ms"
+    poll_interval: "1s"
     cell_data_interval: "1s"
     heartbeat_interval: "1s"
     persist_interval: "5s"
@@ -56,7 +56,7 @@ bms:
     slave_id: 1
     timeout: "1s"
     reconnect_delay: "5s"
-    poll_interval: "100ms"
+    poll_interval: "1s"
     cell_data_interval: "1s"
     heartbeat_interval: "1s"
     persist_interval: "5s"
@@ -69,7 +69,7 @@ bms:
     slave_id: 1
     timeout: "1s"
     reconnect_delay: "5s"
-    poll_interval: "100ms"
+    poll_interval: "1s"
     cell_data_interval: "1s"
     heartbeat_interval: "1s"
     persist_interval: "5s"
@@ -82,7 +82,7 @@ bms:
     slave_id: 1
     timeout: "1s"
     reconnect_delay: "5s"
-    poll_interval: "100ms"
+    poll_interval: "1s"
     cell_data_interval: "1s"
     heartbeat_interval: "1s"
     persist_interval: "5s"
@@ -95,7 +95,7 @@ bms:
     slave_id: 1
     timeout: "1s"
     reconnect_delay: "5s"
-    poll_interval: "100ms"
+    poll_interval: "1s"
     cell_data_interval: "1s"
     heartbeat_interval: "1s"
     persist_interval: "5s"
@@ -108,7 +108,7 @@ bms:
     slave_id: 1
     timeout: "1s"
     reconnect_delay: "5s"
-    poll_interval: "100ms"
+    poll_interval: "1s"
     cell_data_interval: "1s"
     heartbeat_interval: "1s"
     persist_interval: "5s"
@@ -121,7 +121,7 @@ bms:
     slave_id: 1
     timeout: "1s"
     reconnect_delay: "5s"
-    poll_interval: "100ms"
+    poll_interval: "1s"
     cell_data_interval: "1s"
     heartbeat_interval: "1s"
     persist_interval: "5s"
@@ -134,7 +134,7 @@ bms:
     slave_id: 1
     timeout: "1s"
     reconnect_delay: "5s"
-    poll_interval: "100ms"
+    poll_interval: "1s"
     cell_data_interval: "1s"
     heartbeat_interval: "1s"
     persist_interval: "5s"
@@ -149,7 +149,7 @@ plc:
     slave_id: 1
     timeout: "1s"
     reconnect_delay: "5s"
-    poll_interval: "100ms"
+    poll_interval: "1s"
     persist_interval: "5s"
 
 windfarm:
