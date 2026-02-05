@@ -4,7 +4,7 @@ import (
 	"go.uber.org/fx"
 
 	"powerkonnekt/ems/internal/alarm"
-	"powerkonnekt/ems/internal/analyzer"
+	"powerkonnekt/ems/internal/analyzer/ion7400"
 	"powerkonnekt/ems/internal/api"
 	"powerkonnekt/ems/internal/bms"
 	"powerkonnekt/ems/internal/config"
@@ -41,7 +41,7 @@ func main() {
 		pcs.Module,
 		plc.Module,
 		windfarm.Module,
-		analyzer.Module,
+		ion7400.Module,
 
 		// Control logic
 		control.Module,

@@ -1,4 +1,4 @@
-package analyzer
+package ion7400
 
 import (
 	"time"

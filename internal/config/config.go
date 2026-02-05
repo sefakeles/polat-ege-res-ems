@@ -15,7 +15,7 @@ type Config struct {
 	BMS          []BMSConfig        `mapstructure:"bms" validate:"required,min=1,dive"`
 	PLC          []PLCConfig        `mapstructure:"plc" validate:"required,min=1,dive"`
 	WindFarm     []WindFarmConfig   `mapstructure:"windfarm" validate:"required,min=1,dive"`
-	Analyzer     AnalyzerConfig     `mapstructure:"analyzer" validate:"required"`
+	ION7400      AnalyzerConfig     `mapstructure:"ion7400" validate:"required"`
 	EMS          EMSConfig          `mapstructure:"ems" validate:"required"`
 	Alarm        AlarmConfig        `mapstructure:"alarm" validate:"required"`
 	InfluxDB     InfluxDBConfig     `mapstructure:"influxdb" validate:"required"`
@@ -182,6 +182,15 @@ func NewConfig(validate *validator.Validate) (*Config, error) {
 
 // setDefaults sets default configuration values
 func setDefaults(v *viper.Viper) {
+	// ION7400 analyzer defaults
+	v.SetDefault("ion7400.host", "localhost")
+	v.SetDefault("ion7400.port", 502)
+	v.SetDefault("ion7400.slave_id", 1)
+	v.SetDefault("ion7400.timeout", 3*time.Second)
+	v.SetDefault("ion7400.reconnect_delay", 5*time.Second)
+	v.SetDefault("ion7400.poll_interval", 1*time.Second)
+	v.SetDefault("ion7400.persist_interval", 5*time.Second)
+
 	// EMS defaults
 	v.SetDefault("ems.park_name", "polat-ege-res")
 	v.SetDefault("ems.http_port", 8080)

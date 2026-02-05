@@ -1,4 +1,4 @@
-package analyzer
+package ion7400
 
 import (
 	"context"
@@ -11,7 +11,7 @@ import (
 )
 
 // Module provides analyzer management functionality to the Fx application
-var Module = fx.Module("analyzer",
+var Module = fx.Module("ion7400",
 	fx.Provide(ProvideService),
 	fx.Invoke(RegisterLifecycle),
 )
@@ -22,7 +22,7 @@ func ProvideService(
 	influxDB *database.InfluxDB,
 	logger *zap.Logger,
 ) *Service {
-	return NewService(cfg.Analyzer, influxDB, logger)
+	return NewService(cfg.ION7400, influxDB, logger)
 }
 
 // RegisterLifecycle registers lifecycle hooks for the analyzer service

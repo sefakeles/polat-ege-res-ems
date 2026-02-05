@@ -1,4 +1,4 @@
-package analyzer
+package ion7400
 
 import (
 	"context"
@@ -83,37 +83,4 @@ func (s *Service) GetLatestData() database.AnalyzerData {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
 	return s.lastData
-}
-
-// GetSystemHealth returns system health information
-func (s *Service) GetSystemHealth() map[string]any {
-	s.mutex.RLock()
-	defer s.mutex.RUnlock()
-
-	health := map[string]any{
-		"connected":   s.client.IsConnected(),
-		"frequency":   s.lastData.Frequency,
-		"voltage_l1":  s.lastData.VoltageL1,
-		"voltage_l2":  s.lastData.VoltageL2,
-		"voltage_l3":  s.lastData.VoltageL3,
-		"last_update": s.lastData.Timestamp,
-	}
-
-	return health
-}
-
-// GetPowerBalance returns power balance information
-func (s *Service) GetPowerBalance() map[string]float32 {
-	s.mutex.RLock()
-	defer s.mutex.RUnlock()
-
-	balance := map[string]float32{
-		"active_power_sum":   s.lastData.ActivePowerSum,
-		"reactive_power_sum": s.lastData.ReactivePowerSum,
-		"apparent_power_sum": s.lastData.ApparentPowerSum,
-		"power_factor_avg":   s.lastData.PowerFactorAvg,
-		"frequency":          s.lastData.Frequency,
-	}
-
-	return balance
 }

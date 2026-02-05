@@ -163,7 +163,7 @@ windfarm:
     heartbeat_interval: "1s"
     persist_interval: "5s"
 
-analyzer:
+ion7400:
   host: "192.168.0.81"
   port: 502
   slave_id: 1
