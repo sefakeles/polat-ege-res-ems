@@ -80,8 +80,8 @@ type BMSRackData struct {
 	MaxVoltageCellNo    uint8     `json:"max_voltage_cell_no"`
 	MinVoltageModuleNo  uint8     `json:"min_voltage_module_no"`
 	MinVoltageCellNo    uint8     `json:"min_voltage_cell_no"`
-	MaxTempSensorNo     uint16    `json:"max_temp_sensor_no"`
-	MinTempSensorNo     uint16    `json:"min_temp_sensor_no"`
+	MaxTempCellNo       uint16    `json:"max_temp_cell_no"`
+	MinTempCellNo       uint16    `json:"min_temp_cell_no"`
 	ChargeCapacity      float32   `json:"charge_capacity"`
 	DischargeCapacity   float32   `json:"discharge_capacity"`
 }

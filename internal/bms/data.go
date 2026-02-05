@@ -116,8 +116,8 @@ func ParseBMSRackData(data []byte, id int, rackNo uint8) database.BMSRackData {
 		MaxVoltageCellNo:    data[32],                                                             // 1072 - Max voltage cell number (low byte)
 		MinVoltageModuleNo:  data[35],                                                             // 1073 - Min voltage module number (high byte)
 		MinVoltageCellNo:    data[34],                                                             // 1073 - Min voltage cell number (low byte)
-		MaxTempSensorNo:     utils.FromBytes[uint16](data[36:38]),                                 // 1074 - Max temperature sensor number
-		MinTempSensorNo:     utils.FromBytes[uint16](data[38:40]),                                 // 1075 - Min temperature sensor number
+		MaxTempCellNo:       utils.FromBytes[uint16](data[36:38]),                                 // 1074 - Max temperature cell number
+		MinTempCellNo:       utils.FromBytes[uint16](data[38:40]),                                 // 1075 - Min temperature cell number
 		ChargeCapacity:      utils.Scale(utils.FromBytes[uint16](data[40:42]), float32(0.1)),      // 1076 - Charge capacity (kWh)
 		DischargeCapacity:   utils.Scale(utils.FromBytes[uint16](data[42:44]), float32(0.1)),      // 1077 - Discharge capacity (kWh)
 	}
