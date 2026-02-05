@@ -123,9 +123,9 @@ func ParseBMSRackData(data []byte, id int, rackNo uint8) database.BMSRackData {
 		MaxSelfDischargeRate:  utils.Scale(utils.FromBytes[uint16](data[50:52]), float32(0.1)),       // 1081 - Max Cell Self Discharging rate (%)
 		MinSelfDischargeRate:  utils.Scale(utils.FromBytes[uint16](data[64:66]), float32(0.1)),       // 1088 - Min Cell Self Discharging rate (%)
 		AvgSelfDischargeRate:  utils.Scale(utils.FromBytes[uint16](data[66:68]), float32(0.1)),       // 1089 - Avg Cell Self Discharging rate (%)
-		TotalChargeEnergy:     utils.Scale(utils.FromBytesCDAB[uint32](data[104:108]), float32(0.1)), // 1108-1109 - Cumulative charge energy (kWh)
-		TotalDischargeEnergy:  utils.Scale(utils.FromBytesCDAB[uint32](data[108:112]), float32(0.1)), // 1110-1111 - Cumulative discharge energy (kWh)
-		ChargeDischargeCycles: utils.FromBytes[uint16](data[120:122]),                                // 1116 - Cumulative charge/discharge cycles
+		TotalChargeEnergy:     utils.Scale(utils.FromBytesCDAB[uint32](data[104:108]), float32(0.1)), // 1108-1109 - Total charge energy (kWh)
+		TotalDischargeEnergy:  utils.Scale(utils.FromBytesCDAB[uint32](data[108:112]), float32(0.1)), // 1110-1111 - Total discharge energy (kWh)
+		ChargeDischargeCycles: utils.FromBytes[uint16](data[120:122]),                                // 1116 - Charge/discharge cycles
 	}
 }
 
