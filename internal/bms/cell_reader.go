@@ -63,7 +63,7 @@ func (s *Service) readCellVoltages(rackNo uint8) error {
 		chunkAddr := startAddr + startCell
 
 		// Use ReadHoldingRegisters for cell voltage data
-		data, err := s.cellClient.ReadInputRegisters(s.ctx, chunkAddr, uint16(cellsInChunk))
+		data, err := s.cellClient.ReadHoldingRegisters(s.ctx, chunkAddr, uint16(cellsInChunk))
 		if err != nil {
 			return fmt.Errorf("failed to read cell voltage chunk %d: %w", chunk, err)
 		}
@@ -117,7 +117,7 @@ func (s *Service) readCellTemperatures(rackNo uint8) error {
 		chunkAddr := startAddr + startSensor
 
 		// Use ReadHoldingRegisters for cell temperature data
-		data, err := s.cellClient.ReadInputRegisters(s.ctx, chunkAddr, uint16(sensorsInChunk))
+		data, err := s.cellClient.ReadHoldingRegisters(s.ctx, chunkAddr, uint16(sensorsInChunk))
 		if err != nil {
 			return fmt.Errorf("failed to read cell temperature chunk %d: %w", chunk, err)
 		}

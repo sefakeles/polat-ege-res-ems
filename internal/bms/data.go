@@ -177,7 +177,7 @@ func ParseCellTemperatures(data []byte, id int, startSensorNo uint16, rackNo uin
 
 	for i := range sensorCount {
 		// Parse temperature with offset: Unit:°C, offset: -40°C
-		temperature := utils.FromBytes[int16](data[i*2:(i+1)*2]) - 40
+		temperature := utils.FromBytes[int16](data[i*2:(i+1)*2]) - 50
 
 		// Calculate current sensor number (1-based, 1-60 total)
 		currentSensorNo := startSensorNo + uint16(i)
