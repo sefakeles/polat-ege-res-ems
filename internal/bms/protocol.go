@@ -29,8 +29,8 @@ const (
 	BMSRackAlarmLength    = 16
 
 	// Cell Data
-	CellVoltageBaseAddr = 191
-	CellTempBaseAddr    = 891
+	CellVoltageBaseAddr = 1152
+	CellTempBaseAddr    = 1728
 
 	// Control
 	HeartbeatRegister      = 896
