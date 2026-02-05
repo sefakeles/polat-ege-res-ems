@@ -145,6 +145,7 @@ func (db *InfluxDB) WriteBMSData(data BMSData) error {
 		AddField("discharge_capacity", data.DischargeCapacity).
 		AddField("max_charge_voltage", data.MaxChargeVoltage).
 		AddField("min_discharge_voltage", data.MinDischargeVoltage).
+		AddField("insulation_detection_status", data.InsulationDetectionStatus).
 		AddField("insulation_resistance_pos", data.InsulationResistancePos).
 		AddField("insulation_resistance_neg", data.InsulationResistanceNeg).
 		SetTime(data.Timestamp)

@@ -79,6 +79,13 @@ const (
 	StepChargeModeDefault  = 3
 )
 
+// Insulation Detection Status
+const (
+	InsulationStatusInvalid = 0
+	InsulationStatusEnable  = 1
+	InsulationStatusDisable = 2
+)
+
 // AlarmDefinition defines the properties of an alarm
 type AlarmDefinition struct {
 	Message  string
@@ -331,6 +338,20 @@ func GetStepChargeModeDescription(mode uint16) string {
 		return "Conflict"
 	case StepChargeModeDefault:
 		return "Default"
+	default:
+		return "Unknown"
+	}
+}
+
+// GetInsulationDetectionStatusDescription returns human-readable insulation detection status description
+func GetInsulationDetectionStatusDescription(status uint16) string {
+	switch status {
+	case InsulationStatusInvalid:
+		return "Invalid"
+	case InsulationStatusEnable:
+		return "Enable"
+	case InsulationStatusDisable:
+		return "Disable"
 	default:
 		return "Unknown"
 	}

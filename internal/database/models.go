@@ -16,29 +16,30 @@ type BMSStatusData struct {
 
 // BMSData represents BMS data
 type BMSData struct {
-	Timestamp               time.Time `json:"timestamp"`
-	ID                      int       `json:"id"`
-	Voltage                 float32   `json:"voltage"`
-	Current                 int16     `json:"current"`
-	SOC                     float32   `json:"soc"`
-	SOH                     float32   `json:"soh"`
-	MaxCellVoltage          float32   `json:"max_cell_voltage"`
-	MinCellVoltage          float32   `json:"min_cell_voltage"`
-	AvgCellVoltage          float32   `json:"avg_cell_voltage"`
-	MaxCellTemperature      int16     `json:"max_cell_temperature"`
-	MinCellTemperature      int16     `json:"min_cell_temperature"`
-	AvgCellTemperature      int16     `json:"avg_cell_temperature"`
-	MaxChargeCurrent        int16     `json:"max_charge_current"`
-	MaxDischargeCurrent     int16     `json:"max_discharge_current"`
-	MaxChargePower          int16     `json:"max_charge_power"`
-	MaxDischargePower       int16     `json:"max_discharge_power"`
-	Power                   int16     `json:"power"`
-	ChargeCapacity          uint16    `json:"charge_capacity"`
-	DischargeCapacity       uint16    `json:"discharge_capacity"`
-	MaxChargeVoltage        float32   `json:"max_charge_voltage"`
-	MinDischargeVoltage     float32   `json:"min_discharge_voltage"`
-	InsulationResistancePos uint16    `json:"insulation_resistance_pos"`
-	InsulationResistanceNeg uint16    `json:"insulation_resistance_neg"`
+	Timestamp                 time.Time `json:"timestamp"`
+	ID                        int       `json:"id"`
+	Voltage                   float32   `json:"voltage"`
+	Current                   int16     `json:"current"`
+	SOC                       float32   `json:"soc"`
+	SOH                       float32   `json:"soh"`
+	MaxCellVoltage            float32   `json:"max_cell_voltage"`
+	MinCellVoltage            float32   `json:"min_cell_voltage"`
+	AvgCellVoltage            float32   `json:"avg_cell_voltage"`
+	MaxCellTemperature        int16     `json:"max_cell_temperature"`
+	MinCellTemperature        int16     `json:"min_cell_temperature"`
+	AvgCellTemperature        int16     `json:"avg_cell_temperature"`
+	MaxChargeCurrent          int16     `json:"max_charge_current"`
+	MaxDischargeCurrent       int16     `json:"max_discharge_current"`
+	MaxChargePower            int16     `json:"max_charge_power"`
+	MaxDischargePower         int16     `json:"max_discharge_power"`
+	Power                     int16     `json:"power"`
+	ChargeCapacity            uint16    `json:"charge_capacity"`
+	DischargeCapacity         uint16    `json:"discharge_capacity"`
+	MaxChargeVoltage          float32   `json:"max_charge_voltage"`
+	MinDischargeVoltage       float32   `json:"min_discharge_voltage"`
+	InsulationDetectionStatus uint16    `json:"insulation_detection_status"`
+	InsulationResistancePos   uint16    `json:"insulation_resistance_pos"`
+	InsulationResistanceNeg   uint16    `json:"insulation_resistance_neg"`
 }
 
 // BMSRackData represents BMS rack-level data
