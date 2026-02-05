@@ -22,7 +22,13 @@ func (s *Service) persistenceLoop() {
 		case <-s.ctx.Done():
 			return
 		case <-timer.C:
+			startTime := time.Now()
 			s.persistData()
+			if duration := time.Since(startTime); duration > interval {
+				s.log.Warn("Data persistence exceeded persist interval",
+					zap.Duration("duration", duration),
+					zap.Duration("interval", interval))
+			}
 
 			// Calculate next aligned time and reset timer
 			nextTick = time.Now().Truncate(interval).Add(interval)
