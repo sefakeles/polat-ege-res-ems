@@ -33,7 +33,7 @@ func NewService(cfg config.AnalyzerConfig, influxDB *database.InfluxDB, logger *
 	ctx, cancel := context.WithCancel(context.Background())
 
 	serviceLogger := logger.With(
-		zap.String("service", "analyzer"),
+		zap.String("service", "ion7400"),
 		zap.String("host", cfg.Host),
 		zap.Int("port", cfg.Port))
 
