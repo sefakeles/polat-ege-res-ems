@@ -73,7 +73,7 @@ func ParseBMSRackStatusData(data []byte, id int, rackNo uint8) database.BMSRackS
 		Timestamp:            time.Now(),
 		ID:                   id,
 		Number:               rackNo,
-		PreChargeRelayStatus: utils.FromBytes[uint16](data[0:2]),   // 1040 - Pre charge relay status
+		PreChargeRelayStatus: utils.FromBytes[uint16](data[0:2]),   // 1040 - Pre-charge relay status
 		PositiveRelayStatus:  utils.FromBytes[uint16](data[2:4]),   // 1041 - Positive relay status
 		NegativeRelayStatus:  utils.FromBytes[uint16](data[4:6]),   // 1042 - Negative relay status
 		HVStatus:             utils.FromBytes[uint16](data[6:8]),   // 1043 - High voltage status
