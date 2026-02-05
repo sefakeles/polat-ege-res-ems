@@ -57,9 +57,8 @@ func (m *Manager) Stop() {
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
 
-	for id, service := range m.services {
+	for _, service := range m.services {
 		service.Stop()
-		m.log.Info("PCS service stopped", zap.Int("id", id))
 	}
 }
 
