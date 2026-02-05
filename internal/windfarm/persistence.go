@@ -22,6 +22,7 @@ func (s *Service) persistenceLoop() {
 		case <-timer.C:
 			startTime := time.Now()
 			s.persistData()
+
 			if duration := time.Since(startTime); duration > interval {
 				s.log.Warn("Data persistence exceeded persist interval",
 					zap.Duration("duration", duration),
