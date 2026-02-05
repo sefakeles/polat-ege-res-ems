@@ -72,9 +72,9 @@ func (s *Service) processRackAlarms(data []byte, rackNo uint8) {
 			isActive := (b & (1 << bitIdx)) != 0
 
 			alarmType := fmt.Sprintf("BMS_%d_RACK", s.config.ID)
-			alarmCode := baseCode + relativeCode
-			message := GetRackAlarmMessage(relativeCode)
-			severity := GetRackAlarmSeverity(relativeCode)
+			alarmCode := baseCode + relativeCode + 1
+			message := GetRackAlarmMessage(alarmCode)
+			severity := GetRackAlarmSeverity(alarmCode)
 
 			if message == "Unknown alarm" {
 				continue
