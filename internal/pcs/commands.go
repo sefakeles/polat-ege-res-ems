@@ -117,8 +117,7 @@ func (s *Service) SetActivePowerCommand(power float32) error {
 	s.commandState.LastUpdated = time.Now()
 	s.mutex.Unlock()
 
-	s.log.Info("PCS active power command set to %.1f kW",
-		zap.Float32("power", power))
+	s.log.Info("PCS active power command set", zap.Float32("power", power))
 	return nil
 }
 
@@ -145,7 +144,6 @@ func (s *Service) SetReactivePowerCommand(power float32) error {
 	s.commandState.LastUpdated = time.Now()
 	s.mutex.Unlock()
 
-	s.log.Info("PCS reactive power command set to %.1f kVAr",
-		zap.Float32("power", power))
+	s.log.Info("PCS reactive power command set", zap.Float32("power", power))
 	return nil
 }
