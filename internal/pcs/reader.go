@@ -63,7 +63,7 @@ func (s *Service) readPCSData() error {
 			if err != nil {
 				return fmt.Errorf("failed to read registers: %w", err)
 			}
-			statusData = ParseStatusData(data, s.config.ID, timestamp)
+			statusData = parseStatusData(data, s.config.ID, timestamp)
 			return nil
 		}},
 		{"equipment", func() error {
@@ -71,7 +71,7 @@ func (s *Service) readPCSData() error {
 			if err != nil {
 				return fmt.Errorf("failed to read registers: %w", err)
 			}
-			equipmentData = ParseEquipmentData(data, s.config.ID, timestamp)
+			equipmentData = parseEquipmentData(data, s.config.ID, timestamp)
 			return nil
 		}},
 		{"environment", func() error {
@@ -79,7 +79,7 @@ func (s *Service) readPCSData() error {
 			if err != nil {
 				return fmt.Errorf("failed to read registers: %w", err)
 			}
-			environmentData = ParseEnvironmentData(data, s.config.ID, timestamp)
+			environmentData = parseEnvironmentData(data, s.config.ID, timestamp)
 			return nil
 		}},
 		{"dc_source", func() error {
@@ -87,7 +87,7 @@ func (s *Service) readPCSData() error {
 			if err != nil {
 				return fmt.Errorf("failed to read registers: %w", err)
 			}
-			dcSourceData = ParseDCSourceData(data, s.config.ID, timestamp)
+			dcSourceData = parseDCSourceData(data, s.config.ID, timestamp)
 			return nil
 		}},
 		{"grid", func() error {
@@ -95,7 +95,7 @@ func (s *Service) readPCSData() error {
 			if err != nil {
 				return fmt.Errorf("failed to read registers: %w", err)
 			}
-			gridData = ParseGridData(data, s.config.ID, timestamp)
+			gridData = parseGridData(data, s.config.ID, timestamp)
 			return nil
 		}},
 		{"counter", func() error {
@@ -103,7 +103,7 @@ func (s *Service) readPCSData() error {
 			if err != nil {
 				return fmt.Errorf("failed to read registers: %w", err)
 			}
-			counterData = ParseCounterData(data, s.config.ID, timestamp)
+			counterData = parseCounterData(data, s.config.ID, timestamp)
 			return nil
 		}},
 		{"faults", s.readFaults},

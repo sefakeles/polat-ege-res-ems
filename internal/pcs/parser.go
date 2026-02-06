@@ -7,8 +7,8 @@ import (
 	"powerkonnekt/ems/pkg/utils"
 )
 
-// ParseStatusData parses status data registers
-func ParseStatusData(data []byte, id int, timestamp time.Time) database.PCSStatusData {
+// parseStatusData parses status data registers
+func parseStatusData(data []byte, id int, timestamp time.Time) database.PCSStatusData {
 	if len(data) < StatusDataLength*2 {
 		return database.PCSStatusData{
 			Timestamp: timestamp,
@@ -23,8 +23,8 @@ func ParseStatusData(data []byte, id int, timestamp time.Time) database.PCSStatu
 	}
 }
 
-// ParseEquipmentData parses equipment data registers
-func ParseEquipmentData(data []byte, id int, timestamp time.Time) database.PCSEquipmentData {
+// parseEquipmentData parses equipment data registers
+func parseEquipmentData(data []byte, id int, timestamp time.Time) database.PCSEquipmentData {
 	if len(data) < EquipmentDataLength*2 {
 		return database.PCSEquipmentData{
 			Timestamp: timestamp,
@@ -46,8 +46,8 @@ func ParseEquipmentData(data []byte, id int, timestamp time.Time) database.PCSEq
 	}
 }
 
-// ParseEnvironmentData parses environment data registers
-func ParseEnvironmentData(data []byte, id int, timestamp time.Time) database.PCSEnvironmentData {
+// parseEnvironmentData parses environment data registers
+func parseEnvironmentData(data []byte, id int, timestamp time.Time) database.PCSEnvironmentData {
 	if len(data) < EnvironmentDataLength*2 {
 		return database.PCSEnvironmentData{
 			Timestamp: timestamp,
@@ -62,8 +62,8 @@ func ParseEnvironmentData(data []byte, id int, timestamp time.Time) database.PCS
 	}
 }
 
-// ParseDCSourceData parses DC source data registers
-func ParseDCSourceData(data []byte, id int, timestamp time.Time) database.PCSDCSourceData {
+// parseDCSourceData parses DC source data registers
+func parseDCSourceData(data []byte, id int, timestamp time.Time) database.PCSDCSourceData {
 	if len(data) < DCSourceDataLength*2 {
 		return database.PCSDCSourceData{
 			Timestamp: timestamp,
@@ -85,8 +85,8 @@ func ParseDCSourceData(data []byte, id int, timestamp time.Time) database.PCSDCS
 	}
 }
 
-// ParseGridData parses grid data registers
-func ParseGridData(data []byte, id int, timestamp time.Time) database.PCSGridData {
+// parseGridData parses grid data registers
+func parseGridData(data []byte, id int, timestamp time.Time) database.PCSGridData {
 	if len(data) < GridDataLength*2 {
 		return database.PCSGridData{
 			Timestamp: timestamp,
@@ -121,8 +121,8 @@ func ParseGridData(data []byte, id int, timestamp time.Time) database.PCSGridDat
 	}
 }
 
-// ParseCounterData parses counter data registers
-func ParseCounterData(data []byte, id int, timestamp time.Time) database.PCSCounterData {
+// parseCounterData parses counter data registers
+func parseCounterData(data []byte, id int, timestamp time.Time) database.PCSCounterData {
 	if len(data) < CounterDataLength*2 {
 		return database.PCSCounterData{
 			Timestamp: timestamp,
