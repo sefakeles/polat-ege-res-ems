@@ -16,7 +16,7 @@ func (s *Service) readBMSStatusData() error {
 		return fmt.Errorf("failed to read registers: %w", err)
 	}
 
-	bmsStatusData := ParseBMSStatusData(data, s.config.ID)
+	bmsStatusData := parseBMSStatusData(data, s.config.ID)
 
 	s.mutex.Lock()
 	s.lastBMSStatusData = bmsStatusData
@@ -32,7 +32,7 @@ func (s *Service) readBMSData() error {
 		return fmt.Errorf("failed to read registers: %w", err)
 	}
 
-	bmsData := ParseBMSData(data, s.config.ID)
+	bmsData := parseBMSData(data, s.config.ID)
 
 	s.mutex.Lock()
 	s.lastBMSData = bmsData
@@ -50,7 +50,7 @@ func (s *Service) readBMSRackStatusData(rackNo uint8) error {
 		return fmt.Errorf("failed to read registers: %w", err)
 	}
 
-	bmsRackStatusData := ParseBMSRackStatusData(data, s.config.ID, rackNo)
+	bmsRackStatusData := parseBMSRackStatusData(data, s.config.ID, rackNo)
 
 	s.mutex.Lock()
 	s.lastBMSRackStatusData[rackNo-1] = bmsRackStatusData
@@ -68,7 +68,7 @@ func (s *Service) readBMSRackData(rackNo uint8) error {
 		return fmt.Errorf("failed to read registers: %w", err)
 	}
 
-	bmsRackData := ParseBMSRackData(data, s.config.ID, rackNo)
+	bmsRackData := parseBMSRackData(data, s.config.ID, rackNo)
 
 	s.mutex.Lock()
 	s.lastBMSRackData[rackNo-1] = bmsRackData
@@ -164,7 +164,7 @@ func (s *Service) readCellVoltages(rackNo uint8) error {
 		}
 
 		// Parse raw bytes into structured cell data with rack and module info
-		cells := ParseCellVoltages(data, s.config.ID, startCell+1, rackNo)
+		cells := parseCellVoltages(data, s.config.ID, startCell+1, rackNo)
 
 		// Add this chunk's cells to our collection
 		allCells = append(allCells, cells...)
@@ -218,7 +218,7 @@ func (s *Service) readCellTemperatures(rackNo uint8) error {
 		}
 
 		// Parse raw bytes into structured sensor data with rack and module info
-		sensors := ParseCellTemperatures(data, s.config.ID, startSensor+1, rackNo)
+		sensors := parseCellTemperatures(data, s.config.ID, startSensor+1, rackNo)
 
 		// Add this chunk's sensors to our collection
 		allSensors = append(allSensors, sensors...)

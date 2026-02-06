@@ -7,8 +7,8 @@ import (
 	"powerkonnekt/ems/pkg/utils"
 )
 
-// ParseBMSStatusData converts raw MODBUS data to BMSStatusData structure
-func ParseBMSStatusData(data []byte, id int) database.BMSStatusData {
+// parseBMSStatusData converts raw MODBUS data to BMSStatusData structure
+func parseBMSStatusData(data []byte, id int) database.BMSStatusData {
 	if len(data) < BMSStatusDataLength*2 {
 		return database.BMSStatusData{Timestamp: time.Now(), ID: id}
 	}
@@ -25,8 +25,8 @@ func ParseBMSStatusData(data []byte, id int) database.BMSStatusData {
 	}
 }
 
-// ParseBMSData converts raw MODBUS data to BMSData structure
-func ParseBMSData(data []byte, id int) database.BMSData {
+// parseBMSData converts raw MODBUS data to BMSData structure
+func parseBMSData(data []byte, id int) database.BMSData {
 	if len(data) < BMSDataLength*2 {
 		return database.BMSData{Timestamp: time.Now(), ID: id}
 	}
@@ -59,8 +59,8 @@ func ParseBMSData(data []byte, id int) database.BMSData {
 	}
 }
 
-// ParseBMSRackStatusData converts raw MODBUS data to BMSRackStatusData structure
-func ParseBMSRackStatusData(data []byte, id int, rackNo uint8) database.BMSRackStatusData {
+// parseBMSRackStatusData converts raw MODBUS data to BMSRackStatusData structure
+func parseBMSRackStatusData(data []byte, id int, rackNo uint8) database.BMSRackStatusData {
 	if len(data) < BMSRackStatusDataLength*2 {
 		return database.BMSRackStatusData{
 			Timestamp: time.Now(),
@@ -82,8 +82,8 @@ func ParseBMSRackStatusData(data []byte, id int, rackNo uint8) database.BMSRackS
 	}
 }
 
-// ParseBMSRackData converts raw MODBUS data to BMSRackData structure
-func ParseBMSRackData(data []byte, id int, rackNo uint8) database.BMSRackData {
+// parseBMSRackData converts raw MODBUS data to BMSRackData structure
+func parseBMSRackData(data []byte, id int, rackNo uint8) database.BMSRackData {
 	if len(data) < BMSRackDataLength*2 {
 		return database.BMSRackData{
 			Timestamp: time.Now(),
@@ -129,8 +129,8 @@ func ParseBMSRackData(data []byte, id int, rackNo uint8) database.BMSRackData {
 	}
 }
 
-// ParseCellVoltages converts raw MODBUS data to cell voltage array
-func ParseCellVoltages(data []byte, id int, startCellNo uint16, rackNo uint8) []database.BMSCellVoltageData {
+// parseCellVoltages converts raw MODBUS data to cell voltage array
+func parseCellVoltages(data []byte, id int, startCellNo uint16, rackNo uint8) []database.BMSCellVoltageData {
 	if len(data) < 2 {
 		return nil
 	}
@@ -163,8 +163,8 @@ func ParseCellVoltages(data []byte, id int, startCellNo uint16, rackNo uint8) []
 	return cells
 }
 
-// ParseCellTemperatures converts raw MODBUS data to cell temperature array
-func ParseCellTemperatures(data []byte, id int, startSensorNo uint16, rackNo uint8) []database.BMSCellTemperatureData {
+// parseCellTemperatures converts raw MODBUS data to cell temperature array
+func parseCellTemperatures(data []byte, id int, startSensorNo uint16, rackNo uint8) []database.BMSCellTemperatureData {
 	if len(data) < 2 {
 		return nil
 	}
