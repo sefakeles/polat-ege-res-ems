@@ -7,8 +7,8 @@ import (
 	"powerkonnekt/ems/pkg/utils"
 )
 
-// ParsePLCData parses raw Modbus data to PLCData structure
-func ParsePLCData(data []byte, id int) database.PLCData {
+// parsePLCData parses raw Modbus data to PLCData structure
+func parsePLCData(data []byte, id int) database.PLCData {
 	if len(data) < StatusDataLength*2 {
 		return database.PLCData{
 			Timestamp: time.Now(),

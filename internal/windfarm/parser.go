@@ -7,9 +7,9 @@ import (
 	"powerkonnekt/ems/pkg/utils"
 )
 
-// ParseMeasuringData converts raw MODBUS data to WindFarmMeasuringData structure
+// parseMeasuringData converts raw MODBUS data to WindFarmMeasuringData structure
 // Expects data starting from register 700 (MeasuringDataStartAddr)
-func ParseMeasuringData(data []byte, id int) database.WindFarmMeasuringData {
+func parseMeasuringData(data []byte, id int) database.WindFarmMeasuringData {
 	if len(data) < MeasuringDataLength*2 {
 		return database.WindFarmMeasuringData{Timestamp: time.Now(), ID: id}
 	}
@@ -37,9 +37,9 @@ func ParseMeasuringData(data []byte, id int) database.WindFarmMeasuringData {
 	}
 }
 
-// ParseStatusData converts raw MODBUS data to WindFarmStatusData structure
+// parseStatusData converts raw MODBUS data to WindFarmStatusData structure
 // Expects data starting from register 649 (ReturnValuesStartAddr)
-func ParseStatusData(data []byte, id int) database.WindFarmStatusData {
+func parseStatusData(data []byte, id int) database.WindFarmStatusData {
 	if len(data) < ReturnValuesLength*2 {
 		return database.WindFarmStatusData{Timestamp: time.Now(), ID: id}
 	}
@@ -62,9 +62,9 @@ func ParseStatusData(data []byte, id int) database.WindFarmStatusData {
 	}
 }
 
-// ParseSetpointData converts raw MODBUS data to WindFarmSetpointData structure
+// parseSetpointData converts raw MODBUS data to WindFarmSetpointData structure
 // Expects data starting from register 649 (ReturnValuesStartAddr)
-func ParseSetpointData(data []byte, id int) database.WindFarmSetpointData {
+func parseSetpointData(data []byte, id int) database.WindFarmSetpointData {
 	if len(data) < ReturnValuesLength*2 {
 		return database.WindFarmSetpointData{Timestamp: time.Now(), ID: id}
 	}
@@ -92,9 +92,9 @@ func ParseSetpointData(data []byte, id int) database.WindFarmSetpointData {
 	}
 }
 
-// ParseWeatherData converts raw MODBUS data to WindFarmWeatherData structure
+// parseWeatherData converts raw MODBUS data to WindFarmWeatherData structure
 // Expects data starting from register 699 (MeasuringDataStartAddr)
-func ParseWeatherData(data []byte, id int) database.WindFarmWeatherData {
+func parseWeatherData(data []byte, id int) database.WindFarmWeatherData {
 	if len(data) < MeasuringDataLength*2 {
 		return database.WindFarmWeatherData{Timestamp: time.Now(), ID: id}
 	}
@@ -114,9 +114,9 @@ func ParseWeatherData(data []byte, id int) database.WindFarmWeatherData {
 	}
 }
 
-// ParseFCUMode extracts FCU mode from measuring data
+// parseFCUMode extracts FCU mode from measuring data
 // Expects data starting from register 699 (MeasuringDataStartAddr)
-func ParseFCUMode(data []byte) uint16 {
+func parseFCUMode(data []byte) uint16 {
 	if len(data) < MeasuringDataLength*2 {
 		return 0
 	}

@@ -95,7 +95,7 @@ func (s *Service) readPLCData() error {
 		return fmt.Errorf("failed to read PLC registers: %w", err)
 	}
 
-	plcData := ParsePLCData(data, s.config.ID)
+	plcData := parsePLCData(data, s.config.ID)
 
 	s.mutex.Lock()
 	s.lastPLCData = plcData

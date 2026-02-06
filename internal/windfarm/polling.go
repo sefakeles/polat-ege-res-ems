@@ -110,9 +110,9 @@ func (s *Service) readMeasuringData() error {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
-	s.lastMeasuringData = ParseMeasuringData(data, s.config.ID)
-	s.lastWeatherData = ParseWeatherData(data, s.config.ID)
-	s.lastStatusData.FCUMode = ParseFCUMode(data)
+	s.lastMeasuringData = parseMeasuringData(data, s.config.ID)
+	s.lastWeatherData = parseWeatherData(data, s.config.ID)
+	s.lastStatusData.FCUMode = parseFCUMode(data)
 
 	return nil
 }
@@ -129,11 +129,11 @@ func (s *Service) readReturnValues() error {
 
 	// Parse status data (preserving FCUMode from measuring data)
 	fcuMode := s.lastStatusData.FCUMode
-	s.lastStatusData = ParseStatusData(data, s.config.ID)
+	s.lastStatusData = parseStatusData(data, s.config.ID)
 	s.lastStatusData.FCUMode = fcuMode
 
 	// Parse setpoint data
-	s.lastSetpointData = ParseSetpointData(data, s.config.ID)
+	s.lastSetpointData = parseSetpointData(data, s.config.ID)
 
 	return nil
 }
