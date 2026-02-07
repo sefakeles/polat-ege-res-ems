@@ -103,7 +103,7 @@ func parseBMSRackData(data []byte, id int, rackNo uint8) database.BMSRackData {
 		ID:                   id,
 		Number:               rackNo,
 		Voltage:              utils.Scale(utils.FromBytes[uint16](data[0:2]), float32(0.1)),         // 1056 - Voltage outside (0.1V)
-		VoltageIn:            utils.Scale(utils.FromBytes[uint16](data[2:4]), float32(0.1)),         // 1057 - Voltage inside (0.1V)
+		VoltageInside:        utils.Scale(utils.FromBytes[uint16](data[2:4]), float32(0.1)),         // 1057 - Voltage inside (0.1V)
 		Current:              utils.Scale(utils.FromBytes[int16](data[4:6])-20000, float32(0.1)),    // 1058 - Current (0.1A, offset -20000)
 		SOC:                  utils.Scale(utils.FromBytes[uint16](data[6:8]), float32(0.1)),         // 1059 - SOC (0.1%)
 		SOH:                  utils.Scale(utils.FromBytes[uint16](data[8:10]), float32(0.1)),        // 1060 - SOH (0.1%)

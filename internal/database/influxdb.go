@@ -179,7 +179,7 @@ func (db *InfluxDB) WriteBMSRackData(data BMSRackData) error {
 		AddTag("id", fmt.Sprintf("%d", data.ID)).
 		AddTag("number", fmt.Sprintf("%d", data.Number)).
 		AddField("voltage", data.Voltage).
-		AddField("voltage_in", data.VoltageIn).
+		AddField("voltage_inside", data.VoltageInside).
 		AddField("current", data.Current).
 		AddField("soc", data.SOC).
 		AddField("soh", data.SOH).

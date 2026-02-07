@@ -61,7 +61,7 @@ type BMSRackData struct {
 	ID                   int       `json:"id"`
 	Number               uint8     `json:"number"`
 	Voltage              float32   `json:"voltage"`
-	VoltageIn            float32   `json:"voltage_in"`
+	VoltageInside        float32   `json:"voltage_inside"`
 	Current              float32   `json:"current"`
 	SOC                  float32   `json:"soc"`
 	SOH                  float32   `json:"soh"`
