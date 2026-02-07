@@ -134,10 +134,10 @@ func (s *Service) readCellVoltages(rackNo uint8) error {
 	// Pre-allocate slice for all cells in this rack
 	allCells := make([]database.BMSCellVoltageData, 0, totalCells)
 
-	// Calculate how many chunks we need to read all cells
+	// Calculate how many chunks we need to read all registers
 	chunks := CalculateReadChunks(totalCells, modbus.MaxRegistersPerRead)
 
-	// Read cells in chunks to avoid MODBUS limitations
+	// Read registers in chunks to avoid MODBUS limitations
 	for chunk := range chunks {
 		select {
 		case <-s.ctx.Done():
