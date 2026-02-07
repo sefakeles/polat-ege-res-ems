@@ -537,7 +537,17 @@ func (db *InfluxDB) WriteION7400Data(data AnalyzerData) error {
 		AddField("reactive_power_l2", data.ReactivePowerL2).
 		AddField("reactive_power_l3", data.ReactivePowerL3).
 		AddField("reactive_power_sum", data.ReactivePowerSum).
+		AddField("power_factor_l1", data.PowerFactorL1).
+		AddField("power_factor_l2", data.PowerFactorL2).
+		AddField("power_factor_l3", data.PowerFactorL3).
+		AddField("power_factor_avg", data.PowerFactorAvg).
 		AddField("frequency", data.Frequency).
+		AddField("active_energy_export", data.ActiveEnergyExport).
+		AddField("active_energy_import", data.ActiveEnergyImport).
+		AddField("reactive_energy_export", data.ReactiveEnergyExport).
+		AddField("reactive_energy_import", data.ReactiveEnergyImport).
+		AddField("apparent_energy_export", data.ApparentEnergyExport).
+		AddField("apparent_energy_import", data.ApparentEnergyImport).
 		SetTime(data.Timestamp)
 
 	db.writeAPI.WritePoint(point)

@@ -44,6 +44,38 @@ func parseBaseData(data []byte) database.AnalyzerData {
 	}
 }
 
+// parsePowerFactorData converts raw MODBUS data to AnalyzerData structure
+func parsePowerFactorData(data []byte) database.AnalyzerData {
+	if len(data) < PowerFactorDataLength*2 {
+		return database.AnalyzerData{Timestamp: time.Now()}
+	}
+
+	return database.AnalyzerData{
+		Timestamp:      time.Now(),
+		PowerFactorL1:  float32FromBytes(data, 0),  // 3143 - Power Factor A
+		PowerFactorL2:  float32FromBytes(data, 4),  // 3145 - Power Factor B
+		PowerFactorL3:  float32FromBytes(data, 8),  // 3147 - Power Factor C
+		PowerFactorAvg: float32FromBytes(data, 12), // 3149 - Power Factor Avg
+	}
+}
+
+// parseEnergyData converts raw MODBUS data to AnalyzerData structure for energy registers
+func parseEnergyData(data []byte) database.AnalyzerData {
+	if len(data) < EnergyDataLength*2 {
+		return database.AnalyzerData{Timestamp: time.Now()}
+	}
+
+	return database.AnalyzerData{
+		Timestamp:            time.Now(),
+		ActiveEnergyExport:   int64FromBytes(data, 0),  // 3203 - Active Energy Export (Wh)
+		ActiveEnergyImport:   int64FromBytes(data, 8),  // 3207 - Active Energy Import (Wh)
+		ReactiveEnergyExport: int64FromBytes(data, 32), // 3219 - Reactive Energy Export (VARh)
+		ReactiveEnergyImport: int64FromBytes(data, 40), // 3223 - Reactive Energy Import (VARh)
+		ApparentEnergyExport: int64FromBytes(data, 64), // 3235 - Apparent Energy Export (VAh)
+		ApparentEnergyImport: int64FromBytes(data, 72), // 3239 - Apparent Energy Import (VAh)
+	}
+}
+
 // float32FromBytes converts bytes to float32
 func float32FromBytes(data []byte, offset int) float32 {
 	if len(data) < offset+4 {
@@ -55,4 +87,14 @@ func float32FromBytes(data []byte, offset int) float32 {
 
 	// Convert uint32 bits to float32
 	return math.Float32frombits(bits)
+}
+
+// int64FromBytes converts bytes to int64
+func int64FromBytes(data []byte, offset int) int64 {
+	if len(data) < offset+8 {
+		return 0
+	}
+
+	// Convert 8 bytes to int64 using big-endian byte order
+	return int64(binary.BigEndian.Uint64(data[offset : offset+8]))
 }
