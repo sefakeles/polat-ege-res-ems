@@ -136,32 +136,26 @@ func parseBMSRackData(data []byte, id int, rackNo uint8) database.BMSRackData {
 }
 
 // parseCellVoltages converts raw MODBUS data to cell voltage array
-func parseCellVoltages(data []byte, id int, startCellNo uint16, rackNo uint8) []database.BMSCellVoltageData {
+func parseCellVoltages(data []byte, id int, rackNo uint8, startCellNo uint16) []database.BMSCellVoltageData {
 	if len(data) < 2 {
 		return nil
 	}
 
 	cellCount := len(data) / 2
 	cells := make([]database.BMSCellVoltageData, cellCount)
-
-	// Use the same timestamp for all cells in this batch
 	timestamp := time.Now()
 
 	for i := range cellCount {
+		cellNo := startCellNo + uint16(i)
+		moduleNo := uint8((cellNo-1)/CellsPerModule) + 1
 		voltage := utils.Scale(utils.FromBytes[uint16](data[i*2:(i+1)*2]), float32(0.001))
-
-		// Calculate current cell number (1-based)
-		currentCellNo := startCellNo + uint16(i)
-
-		// Calculate module number (1-based): cells 1-48 = module 1, 49-96 = module 2, etc.
-		moduleNo := uint8((currentCellNo-1)/CellsPerModule) + 1
 
 		cells[i] = database.BMSCellVoltageData{
 			Timestamp: timestamp,
 			ID:        id,
 			RackNo:    rackNo,
 			ModuleNo:  moduleNo,
-			CellNo:    currentCellNo,
+			CellNo:    cellNo,
 			Voltage:   voltage,
 		}
 	}
@@ -170,33 +164,21 @@ func parseCellVoltages(data []byte, id int, startCellNo uint16, rackNo uint8) []
 }
 
 // parseCellTemperatures converts raw MODBUS data to cell temperature array
-func parseCellTemperatures(data []byte, id int, startSensorNo uint16, rackNo uint8) []database.BMSCellTemperatureData {
-	if len(data) < 2 {
-		return nil
-	}
-
-	sensorCount := len(data) / 2
-	sensors := make([]database.BMSCellTemperatureData, sensorCount)
-
-	// Use the same timestamp for all sensors in this batch
+func parseCellTemperatures(data []byte, id int, rackNo uint8, startSensorNo uint16) []database.BMSCellTemperatureData {
+	sensors := make([]database.BMSCellTemperatureData, len(data))
 	timestamp := time.Now()
 
-	for i := range sensorCount {
-		// Parse temperature with offset: Unit:°C, offset: -40°C
-		temperature := utils.FromBytes[int16](data[i*2:(i+1)*2]) - 50
-
-		// Calculate current sensor number (1-based, 1-60 total)
-		currentSensorNo := startSensorNo + uint16(i)
-
-		// Calculate module number: sensors 1-12 = module 1, 13-24 = module 2, etc.
-		moduleNo := uint8((currentSensorNo-1)/TempSensorsPerModule) + 1
+	for i, tempByte := range data {
+		sensorNo := startSensorNo + uint16(i)
+		moduleNo := uint8((sensorNo-1)/TempSensorsPerModule) + 1
+		temperature := int16(tempByte) - 50
 
 		sensors[i] = database.BMSCellTemperatureData{
 			Timestamp:   timestamp,
 			ID:          id,
 			RackNo:      rackNo,
 			ModuleNo:    moduleNo,
-			SensorNo:    currentSensorNo,
+			SensorNo:    sensorNo,
 			Temperature: temperature,
 		}
 	}

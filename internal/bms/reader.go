@@ -145,26 +145,26 @@ func (s *Service) readCellVoltages(rackNo uint8) error {
 		default:
 		}
 
-		// Calculate which cells to read in this chunk
-		startCell := uint16(chunk * modbus.MaxRegistersPerRead)
-		cellsInChunk := modbus.MaxRegistersPerRead
+		// Calculate which registers to read in this chunk
+		startRegister := uint16(chunk * modbus.MaxRegistersPerRead)
+		registersInChunk := modbus.MaxRegistersPerRead
 
-		// Last chunk might have fewer cells
+		// Last chunk might have fewer registers
 		if chunk == chunks-1 {
-			cellsInChunk = totalCells - (chunk * modbus.MaxRegistersPerRead)
+			registersInChunk = totalCells - (chunk * modbus.MaxRegistersPerRead)
 		}
 
 		// Calculate MODBUS address for this chunk
-		chunkAddr := startAddr + startCell
+		chunkAddr := startAddr + startRegister
 
 		// Use ReadHoldingRegisters for cell voltage data
-		data, err := s.cellClient.ReadHoldingRegisters(s.ctx, chunkAddr, uint16(cellsInChunk))
+		data, err := s.cellClient.ReadHoldingRegisters(s.ctx, chunkAddr, uint16(registersInChunk))
 		if err != nil {
 			return fmt.Errorf("failed to read cell voltage chunk %d: %w", chunk, err)
 		}
 
 		// Parse raw bytes into structured cell data with rack and module info
-		cells := parseCellVoltages(data, s.config.ID, startCell+1, rackNo)
+		cells := parseCellVoltages(data, s.config.ID, rackNo, startRegister+1)
 
 		// Add this chunk's cells to our collection
 		allCells = append(allCells, cells...)
@@ -185,13 +185,16 @@ func (s *Service) readCellTemperatures(rackNo uint8) error {
 	// Calculate total sensors based on config
 	totalSensors := s.GetTotalTempSensorsPerRack()
 
+	// Calculate total registers needed (each register holds 2 sensors)
+	totalRegisters := (totalSensors + 1) / 2 // Round up for odd number of sensors
+
 	// Pre-allocate slice for all temperature sensors in this rack
 	allSensors := make([]database.BMSCellTemperatureData, 0, totalSensors)
 
-	// Calculate how many chunks we need to read all sensors
-	chunks := CalculateReadChunks(totalSensors, modbus.MaxRegistersPerRead)
+	// Calculate how many chunks we need to read all registers
+	chunks := CalculateReadChunks(totalRegisters, modbus.MaxRegistersPerRead)
 
-	// Read sensors in chunks to avoid MODBUS limitations
+	// Read registers in chunks to avoid MODBUS limitations
 	for chunk := range chunks {
 		select {
 		case <-s.ctx.Done():
@@ -199,26 +202,27 @@ func (s *Service) readCellTemperatures(rackNo uint8) error {
 		default:
 		}
 
-		// Calculate which sensors to read in this chunk
-		startSensor := uint16(chunk * modbus.MaxRegistersPerRead)
-		sensorsInChunk := modbus.MaxRegistersPerRead
+		// Calculate which registers to read in this chunk
+		startRegister := uint16(chunk * modbus.MaxRegistersPerRead)
+		registersInChunk := modbus.MaxRegistersPerRead
 
-		// Last chunk might have fewer sensors
+		// Last chunk might have fewer registers
 		if chunk == chunks-1 {
-			sensorsInChunk = totalSensors - (chunk * modbus.MaxRegistersPerRead)
+			registersInChunk = totalRegisters - (chunk * modbus.MaxRegistersPerRead)
 		}
 
 		// Calculate MODBUS address for this chunk
-		chunkAddr := startAddr + startSensor
+		chunkAddr := startAddr + startRegister
 
 		// Use ReadHoldingRegisters for cell temperature data
-		data, err := s.cellClient.ReadHoldingRegisters(s.ctx, chunkAddr, uint16(sensorsInChunk))
+		data, err := s.cellClient.ReadHoldingRegisters(s.ctx, chunkAddr, uint16(registersInChunk))
 		if err != nil {
 			return fmt.Errorf("failed to read cell temperature chunk %d: %w", chunk, err)
 		}
 
 		// Parse raw bytes into structured sensor data with rack and module info
-		sensors := parseCellTemperatures(data, s.config.ID, startSensor+1, rackNo)
+		// Each register contains 2 sensors, so first sensor number is (startRegister * 2) + 1
+		sensors := parseCellTemperatures(data, s.config.ID, rackNo, (startRegister*2)+1)
 
 		// Add this chunk's sensors to our collection
 		allSensors = append(allSensors, sensors...)
