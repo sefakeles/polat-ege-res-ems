@@ -10,7 +10,10 @@ import (
 // parseBMSStatusData converts raw MODBUS data to BMSStatusData structure
 func parseBMSStatusData(data []byte, id int) database.BMSStatusData {
 	if len(data) < BMSStatusDataLength*2 {
-		return database.BMSStatusData{Timestamp: time.Now(), ID: id}
+		return database.BMSStatusData{
+			Timestamp: time.Now(),
+			ID:        id,
+		}
 	}
 
 	return database.BMSStatusData{
@@ -28,7 +31,10 @@ func parseBMSStatusData(data []byte, id int) database.BMSStatusData {
 // parseBMSData converts raw MODBUS data to BMSData structure
 func parseBMSData(data []byte, id int) database.BMSData {
 	if len(data) < BMSDataLength*2 {
-		return database.BMSData{Timestamp: time.Now(), ID: id}
+		return database.BMSData{
+			Timestamp: time.Now(),
+			ID:        id,
+		}
 	}
 
 	return database.BMSData{
@@ -96,8 +102,8 @@ func parseBMSRackData(data []byte, id int, rackNo uint8) database.BMSRackData {
 		Timestamp:            time.Now(),
 		ID:                   id,
 		Number:               rackNo,
-		VoltageOut:           utils.Scale(utils.FromBytes[uint16](data[0:2]), float32(0.1)),         // 1056 - Voltage outside (0.1V)
-		Voltage:              utils.Scale(utils.FromBytes[uint16](data[2:4]), float32(0.1)),         // 1057 - Voltage inside (0.1V)
+		Voltage:              utils.Scale(utils.FromBytes[uint16](data[0:2]), float32(0.1)),         // 1056 - Voltage outside (0.1V)
+		VoltageIn:            utils.Scale(utils.FromBytes[uint16](data[2:4]), float32(0.1)),         // 1057 - Voltage inside (0.1V)
 		Current:              utils.Scale(utils.FromBytes[int16](data[4:6])-20000, float32(0.1)),    // 1058 - Current (0.1A, offset -20000)
 		SOC:                  utils.Scale(utils.FromBytes[uint16](data[6:8]), float32(0.1)),         // 1059 - SOC (0.1%)
 		SOH:                  utils.Scale(utils.FromBytes[uint16](data[8:10]), float32(0.1)),        // 1060 - SOH (0.1%)
@@ -112,17 +118,17 @@ func parseBMSRackData(data []byte, id int, rackNo uint8) database.BMSRackData {
 		MaxChargePower:       utils.Scale(utils.FromBytes[int16](data[26:28])-20000, float32(0.1)),  // 1069 - Max charge power (kW, offset -20000)
 		MaxDischargePower:    utils.Scale(utils.FromBytes[int16](data[28:30])-20000, float32(0.1)),  // 1070 - Max discharge power (kW, offset -20000)
 		Power:                utils.Scale(utils.FromBytes[int16](data[30:32])-20000, float32(0.1)),  // 1071 - Power (kW, offset -20000)
-		MaxVoltageModuleNo:   data[33],                                                              // 1072 - Max voltage module number (high byte)
 		MaxVoltageCellNo:     data[32],                                                              // 1072 - Max voltage cell number (low byte)
-		MinVoltageModuleNo:   data[35],                                                              // 1073 - Min voltage module number (high byte)
+		MaxVoltageModuleNo:   data[33],                                                              // 1072 - Max voltage module number (high byte)
 		MinVoltageCellNo:     data[34],                                                              // 1073 - Min voltage cell number (low byte)
-		MaxTempCellNo:        utils.FromBytes[uint16](data[36:38]),                                  // 1074 - Max temperature cell number
-		MinTempCellNo:        utils.FromBytes[uint16](data[38:40]),                                  // 1075 - Min temperature cell number
-		ChargeCapacity:       utils.Scale(utils.FromBytes[uint16](data[40:42]), float32(0.1)),       // 1076 - Charge capacity (kWh)
-		DischargeCapacity:    utils.Scale(utils.FromBytes[uint16](data[42:44]), float32(0.1)),       // 1077 - Discharge capacity (kWh)
-		MaxSelfDischargeRate: utils.Scale(utils.FromBytes[uint16](data[50:52]), float32(0.1)),       // 1081 - Max Cell Self Discharging rate (%)
-		MinSelfDischargeRate: utils.Scale(utils.FromBytes[uint16](data[64:66]), float32(0.1)),       // 1088 - Min Cell Self Discharging rate (%)
-		AvgSelfDischargeRate: utils.Scale(utils.FromBytes[uint16](data[66:68]), float32(0.1)),       // 1089 - Avg Cell Self Discharging rate (%)
+		MinVoltageModuleNo:   data[35],                                                              // 1073 - Min voltage module number (high byte)
+		MaxTempModuleNo:      utils.FromBytes[uint16](data[36:38]),                                  // 1074 - Max temperature module number
+		MinTempModuleNo:      utils.FromBytes[uint16](data[38:40]),                                  // 1075 - Min temperature module number
+		ChargeCapacity:       utils.Scale(utils.FromBytes[uint16](data[44:46]), float32(0.1)),       // 1078 - Charge capacity (kWh)
+		DischargeCapacity:    utils.Scale(utils.FromBytes[uint16](data[46:48]), float32(0.1)),       // 1079 - Discharge capacity (kWh)
+		MaxSelfDischargeRate: utils.Scale(utils.FromBytes[uint16](data[50:52]), float32(0.1)),       // 1081 - Max cell self-discharge rate (%)
+		MinSelfDischargeRate: utils.Scale(utils.FromBytes[uint16](data[64:66]), float32(0.1)),       // 1088 - Min cell self-discharge rate (%)
+		AvgSelfDischargeRate: utils.Scale(utils.FromBytes[uint16](data[66:68]), float32(0.1)),       // 1089 - Avg cell self-discharge rate (%)
 		TotalChargeEnergy:    utils.Scale(utils.FromBytesCDAB[uint32](data[104:108]), float32(0.1)), // 1108-1109 - Total charge energy (kWh)
 		TotalDischargeEnergy: utils.Scale(utils.FromBytesCDAB[uint32](data[108:112]), float32(0.1)), // 1110-1111 - Total discharge energy (kWh)
 		CycleCount:           utils.FromBytes[uint16](data[120:122]),                                // 1116 - Cycle count

@@ -178,8 +178,8 @@ func (db *InfluxDB) WriteBMSRackData(data BMSRackData) error {
 	point := influxdb2.NewPointWithMeasurement("bms_rack").
 		AddTag("id", fmt.Sprintf("%d", data.ID)).
 		AddTag("number", fmt.Sprintf("%d", data.Number)).
-		AddField("voltage_out", data.VoltageOut).
 		AddField("voltage", data.Voltage).
+		AddField("voltage_in", data.VoltageIn).
 		AddField("current", data.Current).
 		AddField("soc", data.SOC).
 		AddField("soh", data.SOH).
@@ -194,12 +194,12 @@ func (db *InfluxDB) WriteBMSRackData(data BMSRackData) error {
 		AddField("max_charge_power", data.MaxChargePower).
 		AddField("max_discharge_power", data.MaxDischargePower).
 		AddField("power", data.Power).
-		AddField("max_voltage_module_no", data.MaxVoltageModuleNo).
 		AddField("max_voltage_cell_no", data.MaxVoltageCellNo).
-		AddField("min_voltage_module_no", data.MinVoltageModuleNo).
+		AddField("max_voltage_module_no", data.MaxVoltageModuleNo).
 		AddField("min_voltage_cell_no", data.MinVoltageCellNo).
-		AddField("max_temp_cell_no", data.MaxTempCellNo).
-		AddField("min_temp_cell_no", data.MinTempCellNo).
+		AddField("min_voltage_module_no", data.MinVoltageModuleNo).
+		AddField("max_temp_module_no", data.MaxTempModuleNo).
+		AddField("min_temp_module_no", data.MinTempModuleNo).
 		AddField("charge_capacity", data.ChargeCapacity).
 		AddField("discharge_capacity", data.DischargeCapacity).
 		AddField("max_self_discharge_rate", data.MaxSelfDischargeRate).

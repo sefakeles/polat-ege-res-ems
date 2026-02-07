@@ -60,8 +60,8 @@ type BMSRackData struct {
 	Timestamp            time.Time `json:"timestamp"`
 	ID                   int       `json:"id"`
 	Number               uint8     `json:"number"`
-	VoltageOut           float32   `json:"voltage_out"`
 	Voltage              float32   `json:"voltage"`
+	VoltageIn            float32   `json:"voltage_in"`
 	Current              float32   `json:"current"`
 	SOC                  float32   `json:"soc"`
 	SOH                  float32   `json:"soh"`
@@ -76,12 +76,12 @@ type BMSRackData struct {
 	MaxChargePower       float32   `json:"max_charge_power"`
 	MaxDischargePower    float32   `json:"max_discharge_power"`
 	Power                float32   `json:"power"`
-	MaxVoltageModuleNo   uint8     `json:"max_voltage_module_no"`
 	MaxVoltageCellNo     uint8     `json:"max_voltage_cell_no"`
-	MinVoltageModuleNo   uint8     `json:"min_voltage_module_no"`
+	MaxVoltageModuleNo   uint8     `json:"max_voltage_module_no"`
 	MinVoltageCellNo     uint8     `json:"min_voltage_cell_no"`
-	MaxTempCellNo        uint16    `json:"max_temp_cell_no"`
-	MinTempCellNo        uint16    `json:"min_temp_cell_no"`
+	MinVoltageModuleNo   uint8     `json:"min_voltage_module_no"`
+	MaxTempModuleNo      uint16    `json:"max_temp_module_no"`
+	MinTempModuleNo      uint16    `json:"min_temp_module_no"`
 	ChargeCapacity       float32   `json:"charge_capacity"`
 	DischargeCapacity    float32   `json:"discharge_capacity"`
 	MaxSelfDischargeRate float32   `json:"max_self_discharge_rate"`
