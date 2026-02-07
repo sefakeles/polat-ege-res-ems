@@ -627,6 +627,137 @@ func (h *Handlers) BMSBreakerControl(c *gin.Context) {
 	})
 }
 
+// BMSInsulationControl controls BMS insulation detection
+func (h *Handlers) BMSInsulationControl(c *gin.Context) {
+	var request struct {
+		ID     int    `json:"id" binding:"required"`
+		Action string `json:"action" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	service, err := h.bmsManager.GetService(request.ID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+
+	var action uint16
+	switch request.Action {
+	case "ON":
+		action = bms.InsulationControlOn
+	case "OFF":
+		action = bms.InsulationControlOff
+	default:
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid action. Valid actions: ON, OFF"})
+		return
+	}
+
+	if err := service.ControlInsulationDetection(action); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	h.log.Info("BMS insulation detection control executed",
+		zap.String("action", request.Action),
+		zap.String("client_ip", c.ClientIP()))
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Insulation detection control executed",
+		"action":  request.Action,
+	})
+}
+
+// BMSRackDisable enables or disables a specific BMS rack
+func (h *Handlers) BMSRackDisable(c *gin.Context) {
+	var request struct {
+		ID      int   `json:"id" binding:"required"`
+		RackNo  uint8 `json:"rack_no" binding:"required,min=1,max=48"`
+		Disable *bool `json:"disable" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	service, err := h.bmsManager.GetService(request.ID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := service.ControlRackDisable(request.RackNo, *request.Disable); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	action := "enabled"
+	if *request.Disable {
+		action = "disabled"
+	}
+
+	h.log.Info("BMS rack disable control executed",
+		zap.Uint8("rack_no", request.RackNo),
+		zap.String("action", action),
+		zap.String("client_ip", c.ClientIP()))
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": fmt.Sprintf("Rack %d %s successfully", request.RackNo, action),
+		"rack_no": request.RackNo,
+		"disable": *request.Disable,
+	})
+}
+
+// BMSStepChargeControl controls BMS step-charge mode
+func (h *Handlers) BMSStepChargeControl(c *gin.Context) {
+	var request struct {
+		ID     int    `json:"id" binding:"required"`
+		Action string `json:"action" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	service, err := h.bmsManager.GetService(request.ID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+
+	var action uint16
+	switch request.Action {
+	case "DEFAULT":
+		action = bms.StepChargeControlDefault
+	case "DISABLE":
+		action = bms.StepChargeControlDisable
+	case "ENABLE":
+		action = bms.StepChargeControlEnable
+	default:
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid action. Valid actions: DEFAULT, DISABLE, ENABLE"})
+		return
+	}
+
+	if err := service.ControlStepCharge(action); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	h.log.Info("BMS step-charge control executed",
+		zap.String("action", request.Action),
+		zap.String("client_ip", c.ClientIP()))
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Step-charge control executed",
+		"action":  request.Action,
+	})
+}
+
 // GetPLCData returns PLC data
 func (h *Handlers) GetPLCData(c *gin.Context) {
 	plcID := c.Param("id")

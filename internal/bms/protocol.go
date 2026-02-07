@@ -31,9 +31,14 @@ const (
 	CellTempBaseAddr    = 1728
 
 	// Control
-	HeartbeatRegister      = 896
-	BreakerControlRegister = 897
-	SystemResetRegister    = 908
+	HeartbeatRegister         = 896
+	BreakerControlRegister    = 897
+	InsulationControlRegister = 907
+	FaultClearRegister        = 908
+	RackDisableRegister1      = 909
+	RackDisableRegister2      = 910
+	RackDisableRegister3      = 911
+	StepChargeControlRegister = 912
 
 	// Cell organization constants
 	CellsPerModule       = 52
@@ -54,6 +59,19 @@ const (
 	ControlOpen        = 2
 	ControlOn          = 2
 	ControlOff         = 3
+)
+
+// Insulation Control Commands
+const (
+	InsulationControlOn  = 1 // Turn on BMS insulation detection
+	InsulationControlOff = 2 // Turn off BMS insulation detection
+)
+
+// Step Charge Control Commands
+const (
+	StepChargeControlDefault = 0 // Default
+	StepChargeControlDisable = 1 // Disable step-charge
+	StepChargeControlEnable  = 2 // Enable step-charge
 )
 
 // High Voltage Status

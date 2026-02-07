@@ -51,6 +51,9 @@ func NewRouter(handlers *Handlers, logger *zap.Logger) *gin.Engine {
 			// Control endpoints
 			bmsGroup.POST("/reset", handlers.BMSReset)
 			bmsGroup.POST("/breaker", handlers.BMSBreakerControl)
+			bmsGroup.POST("/insulation", handlers.BMSInsulationControl)
+			bmsGroup.POST("/rack-disable", handlers.BMSRackDisable)
+			bmsGroup.POST("/step-charge", handlers.BMSStepChargeControl)
 		}
 
 		// PCS endpoints
